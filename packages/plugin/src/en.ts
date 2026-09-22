@@ -16,12 +16,7 @@ const en: Translations = {
 	asymmetricStorage: 'Asymmetric storage',
 	asymmetricStorageDescription: () =>
 		createFragment((frag) => {
-			frag.appendText('Use ');
-			frag.createEl('a', {
-				attr: { href: 'https://sync.consensia.cc/deep-dive/asymmetric-storage' },
-				text: 'asymmetric storage',
-			});
-			frag.appendText(' to substantially accelerate syncing.');
+			frag.appendText('Use asymmetric storage to substantially accelerate syncing.');
 		}),
 	asymmetricStorageMigration: (enable) =>
 		createFragment((frag) => {
@@ -74,7 +69,7 @@ const en: Translations = {
 	clear: 'Clear',
 	clearRecords: 'Clear records',
 	clearRecordsDescription:
-		'Sync Engine records sync states to resolve sync operations between local and remote files. This option allows you to clear records. Warning: this action is likely to cause changes in sync decisions.',
+		'Drive Bridge records sync states to resolve sync operations between local and remote files. This option allows you to clear records. Warning: this action is likely to cause changes in sync decisions.',
 	completed: 'Completed',
 	completedNoop: 'Already synced',
 	confirm: 'Confirm',
@@ -120,14 +115,7 @@ const en: Translations = {
 				'Files / folders matching these Glob patterns will not be synced. Please remember to add file extensions (E.g. ',
 			);
 			frag.createEl('code', { text: '.md' });
-			frag.appendText(') if you want to exclude files. Refer to ');
-			frag.createEl('a', {
-				attr: {
-					href: 'https://sync.consensia.cc/usage/settings#inclusion-and-exclusion-rules',
-				},
-				text: 'settings documentation',
-			});
-			frag.appendText(' for configuration guide.');
+			frag.appendText(') if you want to exclude files.');
 		}),
 	executing: 'Executing',
 	export: 'Export',
@@ -149,15 +137,8 @@ const en: Translations = {
 	inclusionRulesDescription: () =>
 		createFragment((frag) => {
 			frag.appendText(
-				'Files / folders matching exclusion rules but also matching these glob patterns will still be synced. Refer to ',
+				'Files / folders matching exclusion rules but also matching these glob patterns will still be synced.',
 			);
-			frag.createEl('a', {
-				attr: {
-					href: 'https://sync.consensia.cc/usage/settings#inclusion-and-exclusion-rules',
-				},
-				text: 'settings documentation',
-			});
-			frag.appendText(' for configuration guide.');
 		}),
 	keepLocal: 'Keep local',
 	keepRemote: 'Keep remote',
@@ -219,16 +200,7 @@ const en: Translations = {
 	selectAll: 'Select all',
 	settingTips: ({ labels, addLabel }) =>
 		createFragment((frag) => {
-			const paragraph = frag.createEl('p', {
-				text: 'Thanks for choosing Sync Engine! Access ',
-			});
-			paragraph.createEl('a', {
-				attr: { href: 'https://sync.consensia.cc/usage/settings' },
-				text: 'the documentation',
-			});
-			paragraph.appendText(
-				' for more detailed explanation of each setting. Labels on settings:',
-			);
+			frag.createEl('p', { text: 'Labels on settings:' });
 			const ul = frag.createEl('ul', 'list-none ps-0!');
 			for (const label of labels) {
 				const li = ul.createEl('li');

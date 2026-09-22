@@ -122,7 +122,7 @@ class AsymmetricStorageFs implements WrappedFs {
 			const parentAnchor = this.keyToAnchor.get(dirname(key));
 			if (!parentAnchor)
 				throw new Error(
-					"Parent anchor doesn't exist when generating child's. This is probably a bug of Sync Engine.",
+					"Parent anchor doesn't exist when generating child's. This is probably a bug of Drive Bridge.",
 				);
 			let source = `${parentAnchor}~${basename(key)}`;
 			do anchor = generateId(source);
@@ -224,7 +224,7 @@ class AsymmetricStorageFs implements WrappedFs {
 		this.bootstrapMaps();
 		const existing = this.keyToAnchor.get(folderKey);
 		if (existing) return existing;
-		throw new Error('Cannot find existing anchor, this is probably a bug of Sync Engine.');
+		throw new Error('Cannot find existing anchor, this is probably a bug of Drive Bridge.');
 	}
 
 	private bootstrapMaps() {

@@ -47,7 +47,7 @@ function notFoundError(key: string): Error {
 
 /**
  * Google Drive stores files by immutable id inside real folders, while
- * Sync Engine speaks path keys. Fs translates keys to ids
+ * Drive Bridge speaks path keys. Fs translates keys to ids
  * and caches the mapping.
  *
  * Limitation: cannot download a file with known key but not cached ID, this is
@@ -293,7 +293,7 @@ export default class GdriveFs implements RootFs {
 		return toFileStat(key, entry);
 	}
 
-	// When Sync Engine calls `exists()`, the only possibility is that something is unexpected, don't trust cache here
+	// When Drive Bridge calls `exists()`, the only possibility is that something is unexpected, don't trust cache here
 	async exists(key: string): Promise<boolean> {
 		return (await this.resolveIdFresh(key)) !== undefined;
 	}

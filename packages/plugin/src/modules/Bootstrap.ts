@@ -243,7 +243,7 @@ export default class Bootstrap {
 					getThatFs: () => {
 						if (!this.remoteFs)
 							throw new Error(
-								'RemoteFs not found for local optimization companion, this is probably a bug of Sync Engine.',
+								'RemoteFs not found for local optimization companion, this is probably a bug of Drive Bridge.',
 							);
 						return this.remoteFs;
 					},
@@ -311,7 +311,7 @@ export default class Bootstrap {
 					getThatFs: () => {
 						if (!this.localFs)
 							throw new Error(
-								'LocalFs not found for remote optimization companion, this is probably a bug of Sync Engine.',
+								'LocalFs not found for remote optimization companion, this is probably a bug of Drive Bridge.',
 							);
 						return this.localFs;
 					},
