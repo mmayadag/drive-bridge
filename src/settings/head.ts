@@ -1,0 +1,300 @@
+import type { Events, Settings } from '@';
+import { ExtraButtonComponent, Notice, PluginSettingTab, setIcon, setTooltip } from 'obsidian';
+import type { Dispatch } from '@/modules/event-bus';
+import type { Fragment, Snippet, Translate } from '@/modules/i18n';
+import type { LastSync } from '@/modules/observability';
+import type {
+	CheckConnectionResult,
+	ConflictResolverEntry,
+	DeciderEntry,
+	RemoteFsEntry,
+} from '@/modules/registrar';
+import type { CallableOrObjectTree } from '@/modules/setting';
+import type { DatabaseSync } from '@/shared/key-value-store';
+import type { General, MaybePromise } from '@/types';
+import { getMessage } from '@/shared/error';
+import formatDateTime from '@/utils/format-date';
+import type { AugmentedSettingDefinitionItem, LabelDefinition } from './utils';
+import { s } from './utils';
+
+const CHECK_CONNECTION_INTERVAL = 10_000;
+const GUIDE_URL = 'https://github.com/mmayadag/drive-bridge#readme';
+
+export type HeadSettingTranslations = {
+	backend: string;
+	backendDescription: string;
+	syncStrategy: string;
+	syncStrategyDescription: string;
+	help: string;
+	helpDescription: string;
+	open: string;
+	lastSync: string;
+	lastSyncNever: string;
+	lastSyncValue: Snippet<{ time: string; result: string }>;
+	completed: string;
+	completedNoop: string;
+	cancelled: string;
+	failed: string;
+	checkConnectionFailed: string;
+	checkConnectionSuccess: string;
+	checkConnection: string;
+	conflictResolveStrategy: string;
+	conflictResolveStrategyDescription: string;
+	settingTips: Fragment<{ labels: Array<LabelDefinition>; addLabel: typeof addLabel }>;
+};
+
+type CheckConnectionDB = DatabaseSync<General, { lastCheckedFs: string }>;
+
+export default function headSettings(
+	ctx: {
+		translate: Translate<HeadSettingTranslations>;
+		saveSettings: () => Promise<void>;
+		settings: Settings;
+		remoteFsRegistry: Map<string, RemoteFsEntry>;
+		deciderRegistry: Map<string, DeciderEntry>;
+		conflictResolverRegistry: Map<string, ConflictResolverEntry>;
+		getCheckConnection: () => () => MaybePromise<CheckConnectionResult>;
+		memoryDB: CheckConnectionDB;
+		matchLabel: () => LabelDefinition;
+		speedLabel: () => LabelDefinition;
+		dispatch: Dispatch<Events>;
+	},
+	getSettingTab: () => PluginSettingTab | undefined,
+): CallableOrObjectTree {
+	const {
+		translate,
+		saveSettings,
+		settings,
+		remoteFsRegistry,
+		deciderRegistry,
+		getCheckConnection,
+		memoryDB,
+		conflictResolverRegistry,
+		matchLabel,
+		speedLabel,
+		dispatch,
+	} = ctx;
+	return {
+		10: s(() => ({
+			desc: translate('settingTips', { addLabel, labels: [matchLabel(), speedLabel()] }),
+			name: 'dummy',
+			render: (setting) => {
+				setting.settingEl.addClass('drive-bridge-setting-tip');
+				queueMicrotask(() => {
+					const tab = getSettingTab();
+					if (!tab) return;
+					const recurseLabel = (items: Array<AugmentedSettingDefinitionItem>) => {
+						for (const item of items) {
+							if ('labels' in item && item.labels) {
+								const name = tab
+									.getElementForDefinition(item)
+									?.querySelector('.setting-item-name');
+								if (!name) return;
+								for (const label of item.labels) addLabel(name, label);
+							}
+							if ('items' in item) recurseLabel(item.items as never);
+						}
+					};
+					recurseLabel(tab.settingItems);
+				});
+			},
+			search: false,
+		})),
+		15: s(() => ({
+			desc: describeLastSync(settings.lastSync, translate),
+			name: translate('lastSync'),
+			render: (setting) => {
+				const { lastSync } = settings;
+				if (!lastSync) return;
+				const icon = setting.controlEl.createSpan({
+					cls:
+						lastSync.result === 'failed'
+							? 'drive-bridge-status-error'
+							: 'drive-bridge-status-ok',
+				});
+				setIcon(icon, lastSync.result === 'failed' ? 'x' : 'check');
+			},
+			search: false,
+		})),
+		20: s(() => ({
+			desc: translate('backendDescription'),
+			labels: [matchLabel()],
+			name: translate('backend'),
+			render: (setting) => {
+				let checks!: ReturnType<typeof setupCheckConnection>;
+				setting
+					.addExtraButton((button) => {
+						checks = setupCheckConnection({
+							button: button
+								.setTooltip(translate('checkConnection'))
+								.onClick(() => void checks.check(true)),
+							getCheckConnection,
+							log: (str: string) => dispatch('errorGeneral', str),
+							memoryDB,
+							settings,
+							translate,
+						});
+						void checks.check(false);
+					})
+					.addDropdown((dropdown) => {
+						for (const [key, { prettyName }] of remoteFsRegistry)
+							dropdown.addOption(key, prettyName());
+						dropdown.setValue(settings.remoteFs).onChange((value) => {
+							settings.remoteFs = value;
+							void checks.check();
+							void saveSettings();
+						});
+					});
+				return checks.cleanup;
+			},
+		})),
+		50: s(() => ({
+			control: {
+				key: 'decider',
+				options: Object.fromEntries(
+					[...deciderRegistry].map(([key, { prettyName }]) => [key, prettyName()]),
+				),
+				type: 'dropdown',
+			},
+			desc: translate('syncStrategyDescription'),
+			name: translate('syncStrategy'),
+		})),
+		60: s(() => ({
+			control: {
+				key: 'conflictResolver',
+				options: Object.fromEntries(
+					[...conflictResolverRegistry].map(([key, { prettyName }]) => [
+						key,
+						prettyName(),
+					]),
+				),
+				type: 'dropdown',
+			},
+			desc: translate('conflictResolveStrategyDescription'),
+			name: translate('conflictResolveStrategy'),
+		})),
+		70: s(() => ({
+			desc: translate('helpDescription'),
+			name: translate('help'),
+			render: (setting) => {
+				setting.addButton((button) =>
+					button.setButtonText(translate('open')).onClick(() => window.open(GUIDE_URL)),
+				);
+			},
+			search: false,
+		})),
+	};
+}
+
+function setupCheckConnection({
+	memoryDB,
+	getCheckConnection,
+	settings,
+	translate,
+	button,
+	log,
+}: {
+	memoryDB: CheckConnectionDB;
+	getCheckConnection: () => () => MaybePromise<CheckConnectionResult>;
+	settings: Settings;
+	translate: Translate<HeadSettingTranslations>;
+	button: ExtraButtonComponent;
+	log: (str: string) => void;
+}) {
+	let timeout: number | undefined;
+	const possibleClasses = [
+		'drive-bridge-status-ok',
+		'drive-bridge-status-error',
+		'drive-bridge-status-pending',
+		'drive-bridge-spin',
+	];
+	const setChecking = () => {
+		button.setIcon('loader-circle');
+		const ele = button.extraSettingsEl.firstElementChild;
+		if (!ele) return;
+		ele.removeClasses(possibleClasses);
+		ele.addClasses(['drive-bridge-spin', 'drive-bridge-status-pending']);
+	};
+	const setSuccess = () => {
+		button.setIcon('check');
+		const ele = button.extraSettingsEl.firstElementChild;
+		if (!ele) return;
+		ele.removeClasses(possibleClasses);
+		ele.addClass('drive-bridge-status-ok');
+	};
+	const setError = () => {
+		button.setIcon('cloud-off');
+		const ele = button.extraSettingsEl.firstElementChild;
+		if (!ele) return;
+		ele.removeClasses(possibleClasses);
+		ele.addClass('drive-bridge-status-error');
+	};
+	const scheduleCheckConnection = () =>
+		(timeout = window.setTimeout(() => void check(), CHECK_CONNECTION_INTERVAL));
+
+	const check = async (force = false) => {
+		if (memoryDB.getMeta('lastCheckedFs') === settings.remoteFs && !force) {
+			setSuccess();
+			return;
+		}
+		if (!settings.remoteFs) {
+			setError();
+			return;
+		}
+		const onFailure = (message: string) => {
+			setError();
+			log(`Check connection to \`${settings.remoteFs}\` failed: \`${message}\`.`);
+			if (force) new Notice(`${translate('checkConnectionFailed')}: ${message}`, 5000);
+			else scheduleCheckConnection();
+		};
+
+		try {
+			setChecking();
+			const result = await getCheckConnection()();
+			if (result.success) {
+				memoryDB.setMeta('lastCheckedFs', settings.remoteFs);
+				setSuccess();
+				if (force) new Notice(translate('checkConnectionSuccess'));
+			} else onFailure(result.reason);
+		} catch (error) {
+			onFailure(getMessage(error));
+		}
+	};
+
+	return { check, cleanup: () => window.clearTimeout(timeout) };
+}
+
+function addLabel(
+	element: Element,
+	{
+		text,
+		tooltip,
+		color = 'var(--interactive-accent)',
+		textColor = 'var(--text-on-accent)',
+	}: LabelDefinition,
+) {
+	const tag = element.createSpan({ cls: 'flair', text });
+	setTooltip(tag, tooltip);
+	tag.style.setProperty('--flair-color', textColor);
+	tag.style.setProperty('--flair-background', color);
+	return tag;
+}
+
+const RESULT_KEYS = {
+	cancelled: 'cancelled',
+	completed: 'completed',
+	failed: 'failed',
+	noop: 'completedNoop',
+} as const;
+
+export function describeLastSync(
+	lastSync: LastSync | undefined,
+	translate: Translate<HeadSettingTranslations>,
+) {
+	if (!lastSync) return translate('lastSyncNever');
+	const text = translate('lastSyncValue', {
+		result: translate(RESULT_KEYS[lastSync.result]),
+		time: formatDateTime(lastSync.at),
+	});
+	return lastSync.error ? `${text}: ${lastSync.error}` : text;
+}
