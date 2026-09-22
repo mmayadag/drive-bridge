@@ -3,7 +3,6 @@ import type { App, SecretStorage } from 'obsidian';
 import type { Ref } from 'synthkernel';
 import type { DatabaseSync } from 'uni-kv';
 import type { FileTreeTranslations } from '@/components/file-tree';
-import type { UntrustedModuleTranslations } from '@/components/UntrustedModuleModal';
 import type { BatchOptimizer, Fs, MemoryControlSharedState } from '@/fs';
 import type { ControlsSettingTranslations } from '@/settings/controls';
 import type { DevelopmentSettingTranslations } from '@/settings/development';
@@ -11,7 +10,6 @@ import type { FeaturesSettingTranslations } from '@/settings/features';
 import type { FilterSettingTranslations } from '@/settings/filter';
 import type { HeadSettingTranslations } from '@/settings/head';
 import type { MiscellaneousSettingTranslations } from '@/settings/miscellaneous';
-import type { ModulesTranslations } from '@/settings/module-management';
 import type { Stat, TogglableValue } from '@/types';
 import en from '@/en';
 import {
@@ -92,9 +90,7 @@ export default class Bootstrap {
 		FilterSettingTranslations &
 		HeadSettingTranslations &
 		MiscellaneousSettingTranslations &
-		UntrustedModuleTranslations &
-		FileTreeTranslations &
-		ModulesTranslations;
+		FileTreeTranslations;
 	declare readonly settings: {
 		maxMemoryConsumption: TogglableValue;
 		maxRequestConcurrency: TogglableValue;

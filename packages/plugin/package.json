@@ -35,10 +35,6 @@
 		"./dev": {
 			"types": "./dist/dev.spec.d.ts",
 			"default": "./dist/dev.js"
-		},
-		"./tsdown-plugin": {
-			"types": "./dist/tsdown-plugin.spec.d.ts",
-			"default": "./dist/tsdown-plugin.js"
 		}
 	},
 	"publishConfig": {
@@ -65,7 +61,6 @@
 		"synthkernel": "./synthkernel.tgz",
 		"uni-kv": "../../uni-kv.tgz",
 		"unocss": "^66.10.0",
-		"unplugin-solid": "^2.0.0",
-		"verkit": "^0.4.0"
+		"unplugin-solid": "^2.0.0"
 	}
 }

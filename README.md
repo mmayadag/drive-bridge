@@ -43,3 +43,7 @@ Drive safe :)
 ## License
 
 [MIT](LICENSE)
+
+## Author
+
+Murat Mayadağ

@@ -4,16 +4,13 @@
 	"private": true,
 	"license": "MIT",
 	"workspaces": [
-		"./packages/*",
-		"./docs"
+		"./packages/*"
 	],
 	"type": "module",
 	"scripts": {
 		"postinstall": "turbo run dev -F @hesprs/sync-engine-sdk",
 		"dev:plugin": "cd packages/plugin && bun dev:plugin",
 		"build:plugin": "cd packages/plugin && bun build:plugin",
-		"dev:docs": "cd docs && bun dev:docs",
-		"build:docs": "cd docs && bun build:docs",
 		"dev": "turbo run dev",
 		"compile": "turbo run compile",
 		"ver": "bun scripts/version-bump.ts",
@@ -22,7 +19,6 @@
 		"tests": "turbo run tests"
 	},
 	"devDependencies": {
-		"@hesprs/harness": "./harness.tgz",
 		"@obsidian-typings/obsidian-public-latest": "^6.36.0",
 		"@tsdown/css": "^0.23.0",
 		"@types/bun": "^1.4.2",

@@ -24,12 +24,21 @@ const pluginConfig = defineConfig({
 		postcss: { plugins: [UnoCSS(), postcssMergeRules()] },
 		transformer: 'postcss',
 	},
-	define: { 'Bun.env.VERSION': JSON.stringify(man.version) },
+	define: {
+		'Bun.env.VERSION': JSON.stringify(man.version),
+		// No client credentials are compiled into the release.
+		'process.env.CLIENT_ID': JSON.stringify(''),
+		'process.env.CLIENT_SECRET': JSON.stringify(''),
+	},
 	dts: false,
 	entry: { main: 'src/index.ts' },
 	format: 'cjs',
 	inputOptions: {
 		resolve: {
+			// Bundled modules import the SDK; point them at this source so only one copy ships.
+			alias: {
+				'@hesprs/sync-engine-sdk': `${import.meta.dirname}/src/sdk/index.ts`,
+			},
 			aliasFields: [['browser']],
 			conditionNames: ['browser'],
 			mainFields: ['browser', 'module', 'main'],
@@ -50,7 +59,6 @@ const sdkConfig = defineConfig({
 	entry: {
 		dev: 'src/sdk/dev.ts',
 		index: 'src/sdk/index.ts',
-		'tsdown-plugin': 'src/sdk/tsdown-plugin.ts',
 	},
 	unbundle: !dtsPass,
 });

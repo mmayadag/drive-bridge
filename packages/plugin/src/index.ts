@@ -5,8 +5,8 @@ import { Plugin } from 'obsidian';
 import { createContext } from 'synthkernel';
 import type { AddRibbonIcon } from '@/modules/Observability';
 import Bootstrap from '@/modules/Bootstrap';
+import BundledModules from '@/modules/BundledModules';
 import EventBus from '@/modules/EventBus';
-import Extensibility, { OFFICIAL_SOURCE } from '@/modules/Extensibility';
 import I18n from '@/modules/I18n';
 import Observability from '@/modules/Observability';
 import ProgressModal from '@/modules/ProgressModal';
@@ -20,7 +20,7 @@ const internalModules = [
 	EventBus,
 	I18n,
 	Storage,
-	Extensibility,
+	BundledModules,
 	Setting,
 	Registrar,
 	Sync,
@@ -48,7 +48,7 @@ export type Events = MergeSingleKey<InternalModules, 'events'>;
 export type Settings = MergeSingleKey<InternalModules, 'settings'>;
 export type Translations = MergeSingleKey<InternalModules, 'i18n'>;
 
-export default class SyncEngine extends Plugin {
+export default class DriveBridge extends Plugin {
 	context?: Context;
 	readonly allModules = new Set(internalModules);
 	declare settings: Settings;
@@ -78,18 +78,15 @@ export default class SyncEngine extends Plugin {
 				'~$*.pptx',
 				'~$*.xls',
 				'~$*.xlsx',
-				`${this.app.vault.configDir}/plugins/drive-bridge/modules`,
 				'.trash',
 				this.app.vault.configDir,
 			].map((expr) => ({ caseSensitive: false, expr })),
-			exportLogsDirectory: 'Sync Engine Logs/',
+			exportLogsDirectory: 'Drive Bridge Logs/',
 			inclusionRules: [],
 			maxFileSize: { enabled: false, value: 31_457_280 },
 			maxMemoryConsumption: { enabled: true, value: 100 * 1024 ** 2 },
 			maxRequestConcurrency: { enabled: true, value: 50 },
 			minRequestInterval: { enabled: false, value: 0 },
-			moduleAutoUpdate: true,
-			moduleSources: [OFFICIAL_SOURCE],
 			modules: {},
 			noticeStatusOnMobile: true,
 			realtimeSync: { enabled: false, value: 5000 },
@@ -117,7 +114,7 @@ export default class SyncEngine extends Plugin {
 			preMerge,
 		}).__assign__({ settings });
 		this.settings = this.context.settings;
-		await this.context.loadAllModules();
+		this.context.loadAllModules();
 		for (const module of this.allModules) {
 			const instance = this.context.__getModule__(module);
 			if ('start' in instance) instance.start();

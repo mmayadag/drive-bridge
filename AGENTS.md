@@ -16,15 +16,12 @@ This is the monorepo for Drive Bridge, an Obsidian plugin that syncs vault files
 - **Tsdown** for building
 - **Oxlint and Oxfmt** for linting and formatting
 - **Solid.js** and **TailwindCSS** (via UnoCSS) for UI
-- **VitePress** for documentation website
 - custom package **SynthKernel** for dependency injection
 - custom package **Uni-KV** for IndexedDB and in-memory database.
 
 ## Commands
 
 - `bun dev:plugin`: build plugin without cleaning dist
-- `bun dev:docs`: start docs dev server
-- `bun build:docs`: build docs website
 - `bun fix`: format and fix fixable lint errors (always run before `bun check`).
 - `bun check`: check types, lint and format (no file change).
 - `bun dev`: building without clearing dist.
@@ -37,13 +34,9 @@ This is the monorepo for Drive Bridge, an Obsidian plugin that syncs vault files
 ## Packages
 
 - Plugin & module SDK: `packages/plugin/`, package name `@hesprs/sync-engine-sdk`, `dev` builds SDK.
-- WebDAV module: `packages/webdav/`, package name `webdav`.
-- S3 module: `packages/s3/`, package name `s3`.
 - Google Drive module: `packages/gdrive/`, package name `gdrive`.
-- Encryption module: `packages/encryption/`, package name `encryption`.
 - Shared utils: `packages/shared/`, package name `@repo/shared`.
-- Documentation site: `docs/`, package name `docs`.
-- I18n modules: `packages/i18n/`, package name `i18n`.
+- Upstream documentation site: `docs/`. Not a workspace and not built; kept until we decide what to do with it.
 - Smart merge module: `packages/smart-merge/`, package name `smart-merge`.
 
 ## Security
@@ -61,7 +54,7 @@ This is the monorepo for Drive Bridge, an Obsidian plugin that syncs vault files
 - All Obsidian API mocks go `packages/shared/test/obsidian-mock.ts`.
 - Use inline Tailwind CSS for common styling, only use semantic CSS for animations and complex compositions. (Documentation website doesn't use TailwindCSS, you need to edit `docs/.vitepress/theme/styles.css`)
 - When any function or class needs to use `Context` as argument, prefer structural typing instead of direct `Context`.
-- Excluding main plugin, shared utils and documentation site, all packages are Drive Bridge modules, they use the SDK and follow unified module structure.
+- `gdrive` and `smart-merge` are modules bundled into `main.js` by `packages/plugin/src/modules/BundledModules.ts`. To add a module, import it there; there is no runtime module loading.
 - `null` forbidden, use `undefined` consistently.
 - Lint warnings must be cleared, except time-bounded ones (TODO with date, deprecated API for compat)
 - SDK types (`**/*.d.ts` in `packages/plugin/dist/`) are committed to satisfy Obsidian automated linting. Never edit, delete, restore, clean, or otherwise alter these files, even when builds or checks create uncommitted changes. Leave their existing worktree state unchanged.

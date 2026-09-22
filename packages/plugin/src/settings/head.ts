@@ -1,9 +1,8 @@
-import type { Context, Events, Settings } from '@';
+import type { Events, Settings } from '@';
 import type { DatabaseSync } from 'uni-kv';
 import { getMessage } from '@repo/shared/error';
 import { ExtraButtonComponent, Notice, PluginSettingTab, setTooltip } from 'obsidian';
-import type { ModuleCtor } from '@/modules/Extensibility';
-import type { Fragment, Snippet, Translate } from '@/modules/I18n';
+import type { Fragment, Translate } from '@/modules/I18n';
 import type {
 	CheckConnectionResult,
 	ConflictResolverEntry,
@@ -14,16 +13,11 @@ import type { CallableOrObjectTree } from '@/modules/Setting';
 import type { Dispatch } from '@/sdk';
 import type { General, MaybePromise } from '@/types';
 import type { AugmentedSettingDefinitionItem, LabelDefinition } from './utils';
-import ModuleManagement from './module-management';
 import { s } from './utils';
 
 const CHECK_CONNECTION_INTERVAL = 10_000;
 
 export type HeadSettingTranslations = {
-	moduleAutoUpdate: string;
-	moduleAutoUpdateDescription: string;
-	moduleManagement: string;
-	moduleManagementDescription: string;
 	backend: string;
 	backendDescription: string;
 	syncStrategy: string;
@@ -33,7 +27,6 @@ export type HeadSettingTranslations = {
 	checkConnection: string;
 	conflictResolveStrategy: string;
 	conflictResolveStrategyDescription: string;
-	xEnabled: Snippet<number>;
 	settingTips: Fragment<{ labels: Array<LabelDefinition>; addLabel: typeof addLabel }>;
 };
 
@@ -49,7 +42,6 @@ export default function headSettings(
 		conflictResolverRegistry: Map<string, ConflictResolverEntry>;
 		getCheckConnection: () => () => MaybePromise<CheckConnectionResult>;
 		memoryDB: CheckConnectionDB;
-		loadedModules: Map<string, ModuleCtor>;
 		matchLabel: () => LabelDefinition;
 		speedLabel: () => LabelDefinition;
 		dispatch: Dispatch<Events>;
@@ -57,7 +49,6 @@ export default function headSettings(
 	getSettingTab: () => PluginSettingTab | undefined,
 ): CallableOrObjectTree {
 	const {
-		loadedModules,
 		translate,
 		saveSettings,
 		settings,
@@ -127,18 +118,6 @@ export default function headSettings(
 					});
 				return checks.cleanup;
 			},
-		})),
-		30: s(() => ({
-			desc: translate('moduleManagementDescription'),
-			displayValue: translate('xEnabled', loadedModules.size),
-			name: translate('moduleManagement'),
-			page: () => new ModuleManagement(ctx as Context),
-			type: 'page',
-		})),
-		40: s(() => ({
-			control: { key: 'moduleAutoUpdate', type: 'toggle' },
-			desc: translate('moduleAutoUpdateDescription'),
-			name: translate('moduleAutoUpdate'),
 		})),
 		50: s(() => ({
 			control: {

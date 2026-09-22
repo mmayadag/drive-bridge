@@ -12,8 +12,6 @@
 	],
 	"type": "module",
 	"scripts": {
-		"dev": "MODE=dev bun --bun tsdown",
-		"compile": "bun --bun tsdown",
 		"fix": "oxlint --silent --fix && oxfmt",
 		"check": "tsc && oxlint && oxfmt --check",
 		"tests": "bun --preload=./test/mocks.ts test"

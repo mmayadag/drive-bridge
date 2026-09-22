@@ -1,12 +1,11 @@
 import type { Settings } from '@';
 import type { SettingGroupItem } from 'obsidian';
-import type { DatabaseSync } from 'uni-kv';
-import { normalizeBaseDir, normalizeUrl } from '@repo/shared/path';
+import { normalizeBaseDir } from '@repo/shared/path';
 import { Notice } from 'obsidian';
-import type { Snippet, Translate } from '@/modules/I18n';
+import type { Translate } from '@/modules/I18n';
 import type { CallableOrObjectTree } from '@/modules/Setting';
-import type { General, MaybePromise } from '@/types';
-import { generateEditableList, reactivelyValidate, s } from './utils';
+import type { MaybePromise } from '@/types';
+import { s } from './utils';
 
 export type DevelopmentSettingTranslations = {
 	development: string;
@@ -18,13 +17,7 @@ export type DevelopmentSettingTranslations = {
 	exportLogsDescription: string;
 	exportLogsDirectoryPlaceholder: string;
 	exportLogsToFile: string;
-	moduleSources: string;
-	moduleSourcesDescription: string;
 	edit: string;
-	xConfigured: Snippet<number>;
-	addSource: string;
-	noSourceConfigured: string;
-	moduleSourcePlaceholder: string;
 };
 
 export default function developmentSettings({
@@ -33,16 +26,12 @@ export default function developmentSettings({
 	deleteRecordStore,
 	settings,
 	saveSettings,
-	memoryDB,
-	rerenderSettingTab,
 }: {
 	translate: Translate<DevelopmentSettingTranslations>;
 	deleteRecordStore: (namespace?: string) => MaybePromise<void>;
 	exportLogs: () => Promise<void>;
 	settings: Settings;
 	saveSettings: () => Promise<void>;
-	memoryDB: DatabaseSync<General>;
-	rerenderSettingTab: () => void;
 }): CallableOrObjectTree {
 	return {
 		5000: s(
@@ -90,62 +79,6 @@ export default function developmentSettings({
 							});
 					},
 				})),
-				3000: s(
-					(self) => ({
-						desc: translate('moduleSourcesDescription'),
-						displayValue: () => translate('xConfigured', settings.moduleSources.length),
-						items: Object.values(self).map((node) => node(node)),
-						name: translate('moduleSources'),
-						type: 'page',
-					}),
-					{
-						1000: s(() =>
-							generateEditableList({
-								defaultValue: '',
-								identifier: 'moduleSources',
-								items: settings.moduleSources,
-								memoryDB,
-								render: (setting, item, save) => {
-									setting.addText((text) => {
-										text.setPlaceholder(
-											translate('moduleSourcePlaceholder'),
-										).setValue(item.value);
-										reactivelyValidate<string>({
-											immediate: true,
-											onSave: (value) => {
-												item.value = value;
-												save();
-											},
-											parse: (value) => {
-												try {
-													item.value = value;
-													const url = normalizeUrl(value);
-													item.valid = true;
-													return url;
-												} catch {
-													if (!item.valid) return;
-													item.valid = false;
-													save();
-												}
-											},
-											text,
-										});
-										if (item.new) {
-											item.new = false;
-											text.inputEl.focus();
-										}
-									});
-								},
-								rerenderSettingTab,
-								saveSettings,
-								translations: {
-									add: translate('addSource'),
-									empty: translate('noSourceConfigured'),
-								},
-							}),
-						),
-					},
-				),
 			},
 		),
 	};

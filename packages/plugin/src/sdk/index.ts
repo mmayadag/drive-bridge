@@ -69,7 +69,6 @@ export type {
 export type { CallableOrObjectTree, SettingEntry } from '@/modules/Setting';
 export type { LabelDefinition } from '@/settings/utils';
 export type { RecordStore } from '@/modules/Storage';
-export type { ModuleMeta, AugmentedModuleMeta } from '@/modules/Extensibility';
 export type { SyncTerminateReason, SyncOptions, RemoteLister } from '@/modules/Sync';
 export type { ExistingMemoryDB } from '@/modules/Bootstrap';
 export type * from '@/fs/interface';

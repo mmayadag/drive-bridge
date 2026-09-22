@@ -1,4 +1,3 @@
-import type { GdriveSettings } from '@';
 import type {
 	CallableOrObjectTree,
 	Dispatch,
@@ -14,6 +13,7 @@ import { s } from '@hesprs/sync-engine-sdk';
 import { getMessage } from '@repo/shared/error';
 import { normalizeBaseDir } from '@repo/shared/path';
 import { Modal, Notice, Setting } from 'obsidian';
+import type { GdriveSettings } from '.';
 import type { TokenManager } from './gdrive/auth';
 import { pollDeviceToken, revokeToken, startDeviceAuthorization } from './gdrive/auth';
 

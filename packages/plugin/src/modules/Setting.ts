@@ -41,10 +41,7 @@ export default class Setting {
 			registerSetting: (entry: SettingEntry) => () => boolean;
 		},
 	) {
-		this.cleanupCallbacks.push(
-			ctx.on('moduleLoaded', this.rerenderSettingTab),
-			ctx.on('moduleUnloaded', this.rerenderSettingTab),
-		);
+		this.cleanupCallbacks.push(ctx.on('moduleLoaded', this.rerenderSettingTab));
 	}
 
 	readonly start = () => {

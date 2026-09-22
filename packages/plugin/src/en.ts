@@ -13,7 +13,6 @@ const en: Translations = {
 	addInclusionRule: 'Add inclusion rule',
 	addRecord: 'Add record',
 	addSecretHeader: 'Add secret header',
-	addSource: 'Add source',
 	asymmetricStorage: 'Asymmetric storage',
 	asymmetricStorageDescription: () =>
 		createFragment((frag) => {
@@ -78,7 +77,6 @@ const en: Translations = {
 		'Sync Engine records sync states to resolve sync operations between local and remote files. This option allows you to clear records. Warning: this action is likely to cause changes in sync decisions.',
 	completed: 'Completed',
 	completedNoop: 'Already synced',
-	configure: 'Configure',
 	confirm: 'Confirm',
 	confirmDeleteDescription: (count) =>
 		`Please confirm the ${count} local ${pItem(count)} that will be deleted; unselected items will be re-uploaded.`,
@@ -110,22 +108,11 @@ const en: Translations = {
 	customHeaders: 'Custom headers',
 	customHeadersDescription:
 		'Add custom headers to be included with each request, they can either be stored in plaintext or in Obsidian keychain.',
-	delete: 'Delete',
-	deleteModule: 'Delete module',
-	description: 'Description',
-	descriptionDescription: 'Set the description text to be displayed in the module card.',
-	descriptionPlaceholder: 'This module is ...',
 	development: 'Development',
 	diffMatchPatch: 'Merge',
-	disableModule: 'Disable module',
 	done: 'Done',
 	download: 'Download',
-	downloadModule: 'Download module',
 	edit: 'Edit',
-	editModuleInformation: 'Edit module information',
-	enable: 'Enable',
-	enableDescription: 'Set whether to load this module.',
-	enableModule: 'Enable module',
 	exclusionRules: 'Exclusion rules',
 	exclusionRulesDescription: () =>
 		createFragment((frag) => {
@@ -151,28 +138,12 @@ const en: Translations = {
 	exportLogsToFile: 'Export logs to file',
 	failed: 'Failed',
 	failedTasksDescription: (count) => `${pcOperations(count)} failed during sync:`,
-	failedToDownloadModule: (name) => `Failed to download module "${name}"`,
-	failedToFetchSource: (url) => `Failed to fetch source from "${url}"`,
-	failedToLoadModule: (name) => `Failed to load module "${name}"`,
 	features: 'Features',
 	filterPlaceholder: 'E.g. temp.md, .trash/**/*',
 	filterRules: 'Filter rules',
 	headerKeyPlaceholder: 'Header key',
 	headerValuePlaceholder: 'Header value',
 	hide: 'Hide',
-	icon: 'Icon',
-	iconDescription: () =>
-		createFragment((frag) => {
-			frag.appendText(
-				'Set the icon to be displayed in the module card, a full list of icons can be found in ',
-			);
-			frag.createEl('a', {
-				attr: { href: 'https://lucide.dev/icons/' },
-				text: 'Lucide Icons catalog',
-			});
-			frag.appendText('.');
-		}),
-	iconPlaceholder: 'Enter icon code (e.g. puzzle)',
 	idle: 'Idle',
 	inclusionRules: 'Inclusion rules',
 	inclusionRulesDescription: () =>
@@ -188,21 +159,9 @@ const en: Translations = {
 			});
 			frag.appendText(' for configuration guide.');
 		}),
-	installModuleFromFile: 'Install module from file',
-	installed: 'Installed',
-	integrityVerification: 'Integrity verification',
-	integrityVerificationDescription: () =>
-		createFragment((frag) => {
-			frag.appendText('Verify the hash each time the module is loaded, ');
-			frag.createEl('strong', {
-				text: 'protecting you from malicious module replacement attacks',
-			});
-			frag.appendText('.');
-		}),
 	keepLocal: 'Keep local',
 	keepRemote: 'Keep remote',
 	latestSurvive: 'Latest survives',
-	loadingModules: 'Loading modules…',
 	match: 'Match',
 	matchLabelDescription: 'This setting must be kept the same on all devices.',
 	maxFileSize: 'Max file size',
@@ -231,44 +190,14 @@ const en: Translations = {
 	mirrorLocal: 'Mirror local',
 	mirrorRemote: 'Mirror remote',
 	miscellaneous: 'Miscellaneous',
-	moduleAutoUpdate: 'Auto-update modules',
-	moduleAutoUpdateDescription: 'Automatically update installed modules from module sources.',
-	moduleExtensionWarning: () =>
-		createFragment((frag) => {
-			frag.appendText('Invalid module: the file needs to have ');
-			frag.createEl('code', { text: '.js' });
-			frag.appendText(' or ');
-			frag.createEl('code', { text: '.mjs' });
-			frag.appendText(' extension.');
-		}),
-	moduleManagement: 'Module management',
-	moduleManagementDescription:
-		'Manage modules in a dedicated page. You can install, uninstall, update, enable, disable, and edit modules.',
-	moduleSourcePlaceholder: 'https://example.com/modules.json',
-	moduleSources: 'Module sources',
-	moduleSourcesDescription:
-		'Edit module sources from which the module catalog is obtained. In this way you can install third-party Sync Engine modules.',
 	moveLocal: 'Move local',
 	moveRemote: 'Move remote',
-	name: 'Name',
-	nameDescription: 'Set the name to be displayed in the module card.',
-	namePlaceholder: 'Enter module display name',
 	noHeaderConfigured: 'No header configured.',
-	noInstalledModulesFound: 'No installed modules found.',
-	noMatchingModulesFound: 'No matching modules found.',
-	noModulesAvailable: 'No modules available.',
 	noRuleConfigured: 'No rule configured.',
-	noSourceConfigured: 'No source configured.',
 	none: 'None',
 	noticeStatusOnMobile: 'Notice sync status on mobile',
 	noticeStatusOnMobileDescription:
 		'Display a notice on mobile devices when synchronization is in progress. Replaces the status bar on desktop.',
-	official: 'Official',
-	openReadme: "Open the module's README page.",
-	readmePage: 'README page',
-	readmePageDescription:
-		'Set the optional README page of the module, leaving empty means no README.',
-	readmePagePlaceholder: 'https://example.com/my-module',
 	realtimeSync: 'Realtime sync',
 	realtimeSyncDescription:
 		'Trigger syncs automatically as soon as files are modified. Alter the delay between a file being modified and the sync being triggered in the field.',
@@ -283,12 +212,10 @@ const en: Translations = {
 	removeRemote: 'Remove remote',
 	renameAndKeepBoth: 'Rename and keep both',
 	resolveConflict: 'Resolve conflict',
-	save: 'Save',
 	scheduledSync: 'Scheduled sync',
 	scheduledSyncDescription:
 		'Periodically trigger synchronizations over specified intervals. Alter the interval in the field.',
 	scheduledSyncPlaceholder: 'Enter interval (e.g. 10min, 0.5h)',
-	searchModules: 'Search modules',
 	selectAll: 'Select all',
 	settingTips: ({ labels, addLabel }) =>
 		createFragment((frag) => {
@@ -310,11 +237,8 @@ const en: Translations = {
 				li.appendText(` ${flair.ariaLabel}`);
 			}
 		}),
-	showInstalledOnly: 'Show installed only',
 	showProgress: 'Show progress',
 	skip: 'Skip',
-	someModulesHidden:
-		'Some modules are hidden since Sync Engine plugin is outdated, update to explore the full module catalog.',
 	speed: 'Speed',
 	speedLabelDescription: 'Properly configuring this setting could improve sync speed.',
 	startMigration: 'Start migration',
@@ -330,57 +254,9 @@ const en: Translations = {
 	syncStrategyDescription:
 		'Select the synchronization strategy to resolve file changes. More strategies can be found in modules.',
 	toggleWithoutMigration: 'Toggle without migration',
-	untrustedModule: 'Untrusted module',
-	untrustedModuleDescription: ({ fileName, size, path, mtime, ctime }) =>
-		createFragment((frag) => {
-			const p1 = frag.createEl('p');
-			p1.appendText('Sync Engine detected an installed module named ');
-			p1.createEl('code', { text: fileName });
-			p1.appendText(', which is never registered in Sync Engine in this vault. ');
-			p1.createEl('strong', {
-				text: 'Please review following information before proceeding:',
-			});
-			const ul = frag
-				.createDiv(
-					'rounded-lg border border-[--background-modifier-border] bg-[--background-secondary] px-2',
-				)
-				.createEl('ul');
-			const li1 = ul.createEl('li');
-			li1.appendText('File name: ');
-			li1.createEl('code', { text: fileName });
-			const li2 = ul.createEl('li');
-			li2.appendText('File path: ');
-			li2.createEl('code', { text: path });
-			const li3 = ul.createEl('li');
-			li3.appendText('Size: ');
-			li3.createEl('code', { text: size });
-			const li4 = ul.createEl('li');
-			li4.appendText('Created at: ');
-			li4.createEl('code', { text: ctime });
-			const li5 = ul.createEl('li');
-			li5.appendText('Modified at: ');
-			li5.createEl('code', { text: mtime });
-			const p2 = frag.createEl('p');
-			p2.createEl('strong', { text: 'Please avoid enabling modules from unknown sources.' });
-			p2.appendText(
-				'Directly deleting it if you don\'t know where does it come from; you can choose "Configure" and enable it if it is under your control. For an explanation of this warning, see ',
-			);
-			p2.createEl('a', {
-				attr: { href: 'https://sync.consensia.cc/deep-dive/extensibility' },
-				text: 'documentation page',
-			});
-			p2.appendText('.');
-		}),
-	update: 'Update',
-	updateAvailable: 'Update available',
-	updateDescription:
-		'Set whether the module can receive updates. Alter the source to fetch updates from in the field; empty source means no updates.',
-	updateModule: 'Update module',
-	updatePlaceholder: 'https://example.com/modules.json',
 	upload: 'Upload',
 	walkingRemote: 'Discovering remote files',
 	xConfigured: (count) => `${count} configured`,
-	xEnabled: (count) => `${count} enabled`,
 	xSelected: (count) => `(${count} selected)`,
 };
 

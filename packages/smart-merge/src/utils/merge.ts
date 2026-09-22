@@ -1,4 +1,4 @@
-import { diffMerge } from '@/diff3';
+import { diffMerge } from '../diff3';
 import { documentSplitter } from './splitters';
 
 export type MergeSegment = {

@@ -99,7 +99,6 @@ export default class EventBus {
 				isIdle(true);
 			}),
 			on('moduleLoaded', (name) => putGeneralLog(`Module \`${name}\` loaded.`)),
-			on('moduleUnloaded', (name) => putGeneralLog(`Module \`${name}\` unloaded.`)),
 		);
 	}
 

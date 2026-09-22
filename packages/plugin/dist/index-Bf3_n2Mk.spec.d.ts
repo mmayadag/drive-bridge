@@ -519,111 +519,6 @@ type FileTreeTranslations = {
   xSelected: Snippet<number>;
 };
 //#endregion
-//#region src/modules/Extensibility.d.ts
-type ModuleInstance = {
-  moduleSettings: object;
-  dispose?: () => void;
-  start?: () => void;
-};
-type ModuleCtor = new (ctx: object) => ModuleInstance;
-type ModuleMeta = {
-  id: string;
-  name: string;
-  version: string;
-  description: string;
-  main: string;
-  icon?: string;
-  minPluginVersion?: string;
-  readme?: string;
-  integrity: string;
-};
-type AugmentedModuleMeta = ModuleMeta & {
-  enabled: boolean;
-  source: string;
-  icon: string;
-};
-declare class Extensibility {
-  private readonly ctx;
-  private readonly moduleDir;
-  private readonly sourceCache;
-  private readonly discoveredModules;
-  private readonly loadedModules;
-  private readonly moduleStore;
-  private autoUpdateTimeout?;
-  readonly settings: {
-    moduleSources: Array<string>;
-    moduleAutoUpdate: boolean;
-    modules: Record<string, object>;
-  };
-  readonly i18n: {
-    failedToLoadModule: Snippet<string>;
-    failedToDownloadModule: Snippet<string>;
-    failedToFetchSource: Snippet<string>;
-  };
-  readonly events: {
-    moduleLoaded: string;
-    moduleUnloaded: string;
-  };
-  constructor(ctx: {
-    app: App;
-    __addModule__: Context['__addModule__'];
-    __getModule__: Context['__getModule__'];
-    dispatch: Dispatch<Events>;
-    translate: Translate<Translations>;
-    allModules: Set<General$1>;
-    isIdle: Ref<boolean>;
-    saveSettings: () => Promise<void>;
-    indexedDB: DatabaseAsync<Record<string, AugmentedModuleMeta>>;
-  });
-  readonly start: () => void;
-  private readonly createOperationFactory;
-  private readonly loadAllModules;
-  private readonly loadModule;
-  private readonly unloadModule;
-  private readonly installModule;
-  private readonly downloadModule;
-  private readonly deleteModule;
-  private readonly fetchSources;
-  private readonly updateModules;
-  private readonly updateModuleMeta;
-  private readonly enableModule;
-  private readonly disableModule;
-  private readonly getModulePath;
-  private readonly parseModulePath;
-  readonly dispose: () => void;
-  readonly root: {
-    deleteModule: (id: string) => Promise<void>;
-    disableModule: (id: string) => void;
-    discoveredModules: Map<string, AugmentedModuleMeta>;
-    downloadModule: (meta: AugmentedModuleMeta, waitIdle?: boolean) => Promise<void>;
-    enableModule: (id: string) => Promise<void>;
-    fetchSources: (manual?: boolean) => Promise<AugmentedModuleMeta[]>;
-    installModule: (meta: AugmentedModuleMeta, module: string) => Promise<void>;
-    loadAllModules: () => Promise<void>;
-    loadModule: (meta: AugmentedModuleMeta, start?: boolean, module?: string) => Promise<void>;
-    loadedModules: Map<string, ModuleCtor>;
-    pluginOutdated: boolean;
-    unloadModule: (id: string) => void;
-    updateModuleMeta: (meta: AugmentedModuleMeta) => Promise<void>;
-    updateModules: () => Promise<void>;
-  };
-}
-//#endregion
-//#region src/components/UntrustedModuleModal.d.ts
-type FileInfo = {
-  path: string;
-  size: string;
-  mtime: string;
-  ctime: string;
-  fileName: string;
-};
-type UntrustedModuleTranslations = {
-  untrustedModule: string;
-  untrustedModuleDescription: Fragment<FileInfo>;
-  delete: string;
-  configure: string;
-};
-//#endregion
 //#region src/modules/Setting.d.ts
 type SettingTree = {
   (self: SettingTree): SettingDefinitionItem;
@@ -753,13 +648,7 @@ type DevelopmentSettingTranslations = {
   exportLogsDescription: string;
   exportLogsDirectoryPlaceholder: string;
   exportLogsToFile: string;
-  moduleSources: string;
-  moduleSourcesDescription: string;
   edit: string;
-  xConfigured: Snippet<number>;
-  addSource: string;
-  noSourceConfigured: string;
-  moduleSourcePlaceholder: string;
 };
 //#endregion
 //#region src/components/MigrationModal.d.ts
@@ -847,10 +736,6 @@ type SelectFromContext<O extends object> = Context extends O ? O : never;
 //#endregion
 //#region src/settings/head.d.ts
 type HeadSettingTranslations = {
-  moduleAutoUpdate: string;
-  moduleAutoUpdateDescription: string;
-  moduleManagement: string;
-  moduleManagementDescription: string;
   backend: string;
   backendDescription: string;
   syncStrategy: string;
@@ -860,7 +745,6 @@ type HeadSettingTranslations = {
   checkConnection: string;
   conflictResolveStrategy: string;
   conflictResolveStrategyDescription: string;
-  xEnabled: Snippet<number>;
   settingTips: Fragment<{
     labels: Array<LabelDefinition>;
     addLabel: typeof addLabel;
@@ -892,60 +776,6 @@ type MiscellaneousSettingTranslations = {
   addSecretHeader: string;
   avoidAutoSyncWhenOffline: string;
   avoidAutoSyncWhenOfflineDescription: string;
-};
-//#endregion
-//#region src/components/module-management/index.d.ts
-type ModuleManagementTranslations = {
-  disableModule: string;
-  downloadModule: string;
-  enableModule: string;
-  installed: string;
-  loadingModules: string;
-  noInstalledModulesFound: string;
-  noMatchingModulesFound: string;
-  noModulesAvailable: string;
-  updateAvailable: string;
-  updateModule: string;
-  deleteModule: string;
-  editModuleInformation: string;
-  official: string;
-  someModulesHidden: string;
-  openReadme: string;
-};
-//#endregion
-//#region src/components/ModuleEditorModal.d.ts
-type ModuleEditorTranslations = {
-  editModuleInformation: string;
-  enable: string;
-  enableDescription: string;
-  name: string;
-  namePlaceholder: string;
-  nameDescription: string;
-  description: string;
-  descriptionDescription: string;
-  descriptionPlaceholder: string;
-  icon: string;
-  iconDescription: Fragment;
-  iconPlaceholder: string;
-  update: string;
-  updateDescription: string;
-  updatePlaceholder: string;
-  integrityVerification: string;
-  integrityVerificationDescription: Fragment;
-  save: string;
-  cancel: string;
-  readmePage: string;
-  readmePageDescription: string;
-  readmePagePlaceholder: string;
-};
-//#endregion
-//#region src/settings/module-management.d.ts
-type ModulesTranslations = ModuleEditorTranslations & ModuleManagementTranslations & {
-  searchModules: string;
-  moduleManagement: string;
-  showInstalledOnly: string;
-  installModuleFromFile: string;
-  moduleExtensionWarning: Fragment;
 };
 //#endregion
 //#region src/modules/Bootstrap.d.ts
@@ -981,7 +811,7 @@ declare class Bootstrap {
     keepRemote: string;
     renameAndKeepBoth: string;
     skip: string;
-  } & ControlsSettingTranslations & DevelopmentSettingTranslations & FeaturesSettingTranslations & FilterSettingTranslations & HeadSettingTranslations & MiscellaneousSettingTranslations & UntrustedModuleTranslations & FileTreeTranslations & ModulesTranslations;
+  } & ControlsSettingTranslations & DevelopmentSettingTranslations & FeaturesSettingTranslations & FilterSettingTranslations & HeadSettingTranslations & MiscellaneousSettingTranslations & FileTreeTranslations;
   readonly settings: {
     maxMemoryConsumption: TogglableValue;
     maxRequestConcurrency: TogglableValue;
@@ -1014,6 +844,37 @@ declare class Bootstrap {
   });
   readonly start: () => void;
   readonly dispose: () => void;
+}
+//#endregion
+//#region src/modules/BundledModules.d.ts
+type ModuleInstance = {
+  moduleSettings: object;
+  dispose?: () => void;
+  start?: () => void;
+};
+type ModuleCtor = new (ctx: object) => ModuleInstance;
+declare class BundledModules {
+  private readonly ctx;
+  private readonly loadedModules;
+  readonly settings: {
+    modules: Record<string, object>;
+  };
+  readonly events: {
+    moduleLoaded: string;
+  };
+  constructor(ctx: {
+    __addModule__: Context['__addModule__'];
+    __getModule__: Context['__getModule__'];
+    dispatch: Dispatch<Events>;
+    allModules: Set<General$1>;
+    saveSettings: () => Promise<void>;
+  });
+  private readonly loadAllModules;
+  readonly dispose: () => void;
+  readonly root: {
+    loadAllModules: () => void;
+    loadedModules: Map<string, ModuleCtor>;
+  };
 }
 //#endregion
 //#region src/modules/ProgressModal.d.ts
@@ -1123,7 +984,7 @@ declare class Scheduler {
 }
 //#endregion
 //#region src/index.d.ts
-declare const internalModules: readonly [typeof EventBus, typeof I18n, typeof Storage, typeof Extensibility, typeof Setting$1, typeof Registrar, typeof Sync, typeof Observability, typeof Scheduler, typeof ProgressModal, typeof Bootstrap];
+declare const internalModules: readonly [typeof EventBus, typeof I18n, typeof Storage, typeof BundledModules, typeof Setting$1, typeof Registrar, typeof Sync, typeof Observability, typeof Scheduler, typeof ProgressModal, typeof Bootstrap];
 type InternalModules = typeof internalModules;
 type MergeKeys = 'settings' | 'root' | 'events' | 'i18n';
 type Context = Context$1<InternalModules, MergeKeys, {
@@ -1392,4 +1253,4 @@ type VaultRequest = <T extends VaultRequestParam = {
 }>(key: string, params?: T) => Promise<VaultRequestResponseMap[T['method']]>;
 type TrashOption = 'local' | 'system' | 'permanent';
 //#endregion
-export { RemoveRecord as $, setNeedMigration as A, FileStat as At, ObsidianLanguageCode as B, digOriginal as C, MoveAtom as Ct, readWithSize as D, RootFs as Dt, pipe as E, OutputAtom as Et, CallableOrObjectTree as F, RecordStatsMap as Ft, On as G, Translate as H, SettingEntry as I, Stat$1 as It, DeciderInput as J, CreateLocalDir as K, AugmentedModuleMeta as L, StatsMap as Lt, generateEditableList as M, MaybePromise as Mt, reactivelyValidate as N, Progress as Nt, writeWithValue as O, WrappedFs as Ot, s as P, RecordStat as Pt, RemoveRemote as Q, ModuleMeta as R, Binary as Rt, SelectFromContext as S, MkdirAtom as St, concurrency as T, OptimizerOutput as Tt, TranslationResource as U, Snippet as V, Dispatch as W, Upload as X, TaskFactory as Y, ResolveConflict as Z, Context as _, CustomAtom as _t, FsWrapperEntry as a, AddRecord as at, Translations as b, InputAtom as bt, RemoteFsEntry as c, ConflictResolverPayload as ct, RequestParam as d, DatabaseAsync as dt, RemoveLocal as et, RequestResponse as f, DatabaseSync as ft, SyncTerminateReason as g, BatchOptimizer as gt, SyncOptions as h, StoreSync as ht, DeciderEntry as i, CreateRemoteDir as it, LabelDefinition as j, FolderStat as jt, prefixWrapper as k, WriteAtom as kt, RemoteRequestMiddlewareEntry as l, TaskNames as lt, RemoteLister as m, StoreOperations as mt, CheckConnectionResult as n, MoveLocal as nt, LocalRequestMiddlewareEntry as o, BaseTask as ot, TriggerEntry as p, StoreAsync as pt, Decider as q, ConflictResolverEntry as r, Download as rt, OptimizerEntry as s, ConflictResolver as st, VaultRequest as t, MoveRemote as tt, Request as u, RecordStore as ut, Events as v, DeleteAtom as vt, chunkSize as w, OptimizerInput as wt, ExistingMemoryDB as x, ListReporter as xt, Settings as y, Fs as yt, Fragment as z };
+export { MoveRemote as $, setNeedMigration as A, MaybePromise as At, Translate as B, digOriginal as C, OptimizerOutput as Ct, readWithSize as D, WriteAtom as Dt, pipe as E, WrappedFs as Et, CallableOrObjectTree as F, StatsMap as Ft, Decider as G, Dispatch as H, SettingEntry as I, Binary as It, Upload as J, DeciderInput as K, Fragment as L, generateEditableList as M, RecordStat as Mt, reactivelyValidate as N, RecordStatsMap as Nt, writeWithValue as O, FileStat as Ot, s as P, Stat$1 as Pt, RemoveLocal as Q, ObsidianLanguageCode as R, SelectFromContext as S, OptimizerInput as St, concurrency as T, RootFs as Tt, On as U, TranslationResource as V, CreateLocalDir as W, RemoveRemote as X, ResolveConflict as Y, RemoveRecord as Z, Context as _, Fs as _t, FsWrapperEntry as a, ConflictResolver as at, Translations as b, MkdirAtom as bt, RemoteFsEntry as c, RecordStore as ct, RequestParam as d, StoreAsync as dt, MoveLocal as et, RequestResponse as f, StoreOperations as ft, SyncTerminateReason as g, DeleteAtom as gt, SyncOptions as h, CustomAtom as ht, DeciderEntry as i, BaseTask as it, LabelDefinition as j, Progress as jt, prefixWrapper as k, FolderStat as kt, RemoteRequestMiddlewareEntry as l, DatabaseAsync as lt, RemoteLister as m, BatchOptimizer as mt, CheckConnectionResult as n, CreateRemoteDir as nt, LocalRequestMiddlewareEntry as o, ConflictResolverPayload as ot, TriggerEntry as p, StoreSync as pt, TaskFactory as q, ConflictResolverEntry as r, AddRecord as rt, OptimizerEntry as s, TaskNames as st, VaultRequest as t, Download as tt, Request as u, DatabaseSync as ut, Events as v, InputAtom as vt, chunkSize as w, OutputAtom as wt, ExistingMemoryDB as x, MoveAtom as xt, Settings as y, ListReporter as yt, Snippet as z };
