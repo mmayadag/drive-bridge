@@ -48,6 +48,13 @@ test('parses a bare refresh token and rclone output', () => {
 	const rclone = JSON.stringify({ access_token: 'a', expiry: 'x', refresh_token: '1//r' });
 	expect(parseRefreshToken(rclone)).toBe('1//r');
 	expect(parseRefreshToken(`token = ${rclone}`)).toBe('1//r');
+	// Recent rclone prints base64url of {"token": "<token JSON as a string>"}.
+	const wrapped = btoa(JSON.stringify({ token: rclone }))
+		.replaceAll('+', '-')
+		.replaceAll('/', '_')
+		.replaceAll('=', '');
+	expect(parseRefreshToken(wrapped)).toBe('1//r');
+	expect(parseRefreshToken('eyJub3QganNvbg')).toBeUndefined();
 	expect(parseRefreshToken('{"access_token":"a"}')).toBeUndefined();
 	expect(parseRefreshToken('not a token')).toBeUndefined();
 	expect(parseRefreshToken('')).toBeUndefined();

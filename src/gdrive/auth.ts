@@ -40,20 +40,44 @@ function describeAuthError(data: TokenError, status: number): string {
 	return data.error_description ?? data.error ?? `HTTP ${status}`;
 }
 
+function parseJson(text: string): unknown {
+	try {
+		return JSON.parse(text);
+	} catch {
+		return undefined;
+	}
+}
+
+function decodeBase64Url(text: string): string | undefined {
+	try {
+		return atob(text.replaceAll('-', '+').replaceAll('_', '/'));
+	} catch {
+		return undefined;
+	}
+}
+
+function refreshTokenFromJson(value: unknown): string | undefined {
+	if (!value || typeof value !== 'object') return undefined;
+	const { refresh_token, token } = value as { refresh_token?: unknown; token?: unknown };
+	if (typeof refresh_token === 'string' && refresh_token) return refresh_token;
+	// Recent rclone versions wrap the token JSON as a string under `token`.
+	if (typeof token === 'string') return refreshTokenFromJson(parseJson(token));
+	return undefined;
+}
+
 /**
  * Accepts a bare refresh token or what `rclone authorize` prints: a JSON token object,
- * optionally still prefixed with `token =` from rclone.conf.
+ * optionally prefixed with `token =` from rclone.conf, or the base64 block that recent
+ * rclone versions print instead (it starts with `eyJ`, which is `{"` encoded).
  */
 export function parseRefreshToken(input: string): string | undefined {
 	const text = input.trim().replace(/^token\s*=\s*/u, '');
 	if (!text) return undefined;
-	if (text.startsWith('{'))
-		try {
-			const { refresh_token } = JSON.parse(text) as { refresh_token?: unknown };
-			return typeof refresh_token === 'string' && refresh_token ? refresh_token : undefined;
-		} catch {
-			return undefined;
-		}
+	if (text.startsWith('{')) return refreshTokenFromJson(parseJson(text));
+	if (text.startsWith('eyJ')) {
+		const decoded = decodeBase64Url(text);
+		return decoded ? refreshTokenFromJson(parseJson(decoded)) : undefined;
+	}
 	return /^[\w./~+-]+$/u.test(text) ? text : undefined;
 }
 

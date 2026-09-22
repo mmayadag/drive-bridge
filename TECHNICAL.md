@@ -43,9 +43,11 @@ rclone authorize "drive" "<client ID>" "<client secret>"
 2. Google warns that the app is not verified. Press **Advanced → Go to
    <app name> (unsafe)**. This is your own client, so the warning is expected.
 3. Approve access to Google Drive.
-4. Back in the terminal, rclone prints a JSON block between
+4. Back in the terminal, rclone prints the token between
    `Paste the following into your remote machine --->` and `<---End paste`.
-   Copy the JSON, from `{` to `}`.
+   Recent rclone versions print a long string starting with `eyJ`; older ones
+   print a JSON object. Copy exactly what is between the two markers. Drive
+   Bridge accepts either form.
 
 `"drive"` without further options asks for the full `drive` scope, which is
 what Drive Bridge needs. The same token also works for the backup server's
@@ -63,8 +65,8 @@ In Obsidian, install Drive Bridge (see the README), then open
 2. **OAuth client ID**: paste the client ID.
 3. **OAuth client secret**: paste the client secret. It is stored in the
    device's secure storage, not in synced files.
-4. **Connect account**: paste the JSON from step 3 (or only its
-   `refresh_token` value) and press **Connect**.
+4. **Connect account**: paste the token from step 3 (the `eyJ…` string, the
+   JSON, or only its `refresh_token` value) and press **Connect**.
 5. **Base directory**: the Drive folder for this vault. It defaults to the
    vault name and is created on the first sync. Every device syncing the same
    vault must use the same folder.
