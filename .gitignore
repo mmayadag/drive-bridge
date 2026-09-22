@@ -1,0 +1,14 @@
+plans
+test-files
+.ignore
+.obsidian
+.trash
+.obsidianignore
+Drive Bridge Logs
+.vscode
+**/dist
+**/.turbo
+**/node_modules
+**/cache
+**/.env
+release-notes.md

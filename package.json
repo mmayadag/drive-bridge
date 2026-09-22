@@ -1,0 +1,35 @@
+{
+	"name": "drive-bridge",
+	"version": "0.1.0",
+	"private": true,
+	"license": "MIT",
+	"author": {
+		"name": "Murat Mayadağ",
+		"url": "https://github.com/mmayadag"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/mmayadag/drive-bridge.git"
+	},
+	"type": "module",
+	"scripts": {
+		"dev": "bun scripts/build.ts --watch",
+		"build": "bun scripts/build.ts",
+		"check": "tsc && oxlint && oxfmt --check",
+		"fix": "oxlint --silent --fix && oxfmt",
+		"tests": "bun --preload=./test/support/setup.ts test",
+		"ver": "bun scripts/version-bump.ts"
+	},
+	"devDependencies": {
+		"@obsidian-typings/obsidian-public-latest": "^6.37.0",
+		"@types/bun": "^1.4.2",
+		"esbuild": "^0.28.2",
+		"fake-indexeddb": "^6.2.5",
+		"obsidian": "^1.13.1",
+		"oxfmt": "^0.70.0",
+		"oxlint": "^1.85.0",
+		"oxlint-tsgolint": "^7.0.2002",
+		"typescript": "^7.0.2"
+	},
+	"packageManager": "bun@1.4.2"
+}
