@@ -66,6 +66,6 @@
 		"uni-kv": "../../uni-kv.tgz",
 		"unocss": "^66.10.0",
 		"unplugin-solid": "^2.0.0",
-		"verkit": "^0.4.0"
+		"verkit": "^0.5.0"
 	}
 }
