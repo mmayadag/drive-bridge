@@ -80,6 +80,9 @@ export default function headSettings(
 		requestSync,
 		isIdle,
 	} = ctx;
+	// Keys are render priorities and read in numeric order.
+	// Sorted as strings, which is what the rule below does, 4900 precedes 50.
+	// oxlint-disable-next-line sort-keys
 	return {
 		15: s(() => ({
 			desc: describeLastSync(settings.lastSync, translate),

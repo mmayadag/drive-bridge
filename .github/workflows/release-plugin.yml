@@ -10,6 +10,11 @@ permissions:
   id-token: write
   attestations: write
 
+# One release job per tag: two runs for the same tag would race to create it.
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
 jobs:
   release-plugin:
     runs-on: ubuntu-slim
@@ -71,10 +76,22 @@ jobs:
             prerelease_flag="--prerelease"
           fi
 
-          gh release create "$tag" \
-            --title="$tag" \
-            --notes-file=release-notes.md \
-            $prerelease_flag \
-            dist/main.js\
-            dist/manifest.json\
-            dist/styles.css
+          assets="dist/main.js dist/manifest.json dist/styles.css"
+
+          # A release for this tag can already exist (a re-run, or a release cut
+          # by hand). Fill it in rather than failing.
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release edit "$tag" \
+              --title="$tag" \
+              --notes-file=release-notes.md \
+              --prerelease="$IS_PRERELEASE"
+            # shellcheck disable=SC2086
+            gh release upload "$tag" $assets --clobber
+          else
+            # shellcheck disable=SC2086
+            gh release create "$tag" \
+              --title="$tag" \
+              --notes-file=release-notes.md \
+              $prerelease_flag \
+              $assets
+          fi
