@@ -4,8 +4,8 @@ This is the repository for Drive Bridge, an Obsidian plugin that syncs vault fil
 
 ## Context
 
-- When exploring the repo, you must read related pages in `docs/src/pages/en/`, especially inside the `deep-dive/` folder: this is the fastest way to understand the engineering sophistication.
-- This repo is also an Obsidian vault used for testing. The config folder is at `.obsidian`, and plugin dist folder is symlinked to `.obsidian/plugins/drive-bridge`. The folder also contains plugin settings in `data.json` and module binaries.
+- Read `TECHNICAL.md` first: it covers setup, the security model and sync behavior.
+- This repo can double as an Obsidian test vault: `.obsidian/` (gitignored) with `dist/` symlinked to `.obsidian/plugins/drive-bridge`, whose `data.json` holds the plugin settings.
 - `./test-files` are and are the only files used for local sync testing. You can do anything inside the folder without caring about changes or losses.
 
 ## Techstack
@@ -37,7 +37,6 @@ This is the repository for Drive Bridge, an Obsidian plugin that syncs vault fil
 - `src/shared/`: shared utilities: module context, reactive values, key-value store, paths.
 - `src/sdk/`: the API surface modules use (`@/sdk`).
 - `test/`: tests, mirroring `src/`. `test/mocks.ts` is preloaded and mocks `obsidian`.
-- `docs/`: upstream documentation site. Not built, linted or formatted; kept until we decide what to do with it.
 
 ## Security
 
@@ -57,18 +56,3 @@ This is the repository for Drive Bridge, an Obsidian plugin that syncs vault fil
 - `gdrive` and `smart-merge` are modules bundled into `main.js` by `src/modules/BundledModules.ts`. To add a module, import it there; there is no runtime module loading.
 - `null` forbidden, use `undefined` consistently.
 - Lint warnings must be cleared, except time-bounded ones (TODO with date, deprecated API for compat)
-
-## Documentation
-
-- The primary documentation locates in `docs/src/pages/en/` has three sections in three folders: `usage/`, `development/`, and `deep-dive/`:
-  - `usage/`: designed for non-technical users, avoid dev jargons
-  - `development/`: SDK API reference and practical module development setups only
-  - `deep-dive/`: plugin internals
-- Prefer inter-page links when other pages have relevant content, duplication content cross-page is forbidden.
-- Link format: Link to title anchors when possible, strict relative links, no `.md` extension.
-- Only add inter-links when the content is truly relevant, you must not link distant pages just for link count.
-- `usage/` and `deep-dive/` can interlink, `development/` can link to `usage/` and `deep-dive/`, but `usage/` and `deep-dive/` should avoid linking into `development/`.
-- Don't be overly verbose.
-- Official module specs should be self-contained in each page in `deep-dive/modules/`. They can link external pages but external pages should not link official modules, except in dedicated pages in `usage/`.
-- Avoid large blocks of code in `usage/` and `deep-dive/`, code should be the major content in `development/`
-- Documentation titles use title case.
