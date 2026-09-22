@@ -5,7 +5,7 @@
 	"minAppVersion": "1.13.0",
 	"authorUrl": "https://github.com/mmayadag",
 	"fundingUrl": "https://buymeacoffee.com/muratmayadag",
-	"description": "Two-way Google Drive sync that also picks up files other apps put in the folder. Keeps both versions on conflict or merges them, confirms deletions, uses your own OAuth client, and downloads no code at runtime.",
+	"description": "Two-way Google Drive sync that also picks up files other apps put in the folder. Keeps both versions on conflict, confirms deletions, uses your own OAuth client, and downloads no code at runtime.",
 	"author": "Murat Mayadağ",
 	"isDesktopOnly": false
 }
