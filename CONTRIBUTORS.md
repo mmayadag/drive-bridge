@@ -28,6 +28,6 @@ all MIT licensed:
 
 - `src/smart-merge/diff3/`: the three-way merge, with notices for Tony
   Garnock-Jones, LShift Ltd., Axosoft (GitKraken) and others.
-- [LICENSE](LICENSE) carries the notices that cover the rest.
+- [NOTICE](NOTICE) carries the notice that covers the rest.
 
 Keep those notices in place when you change those files.

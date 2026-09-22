@@ -299,9 +299,10 @@ input[type='text'].drive-bridge-invalid-input {
 }
 
 /* Settings */
-.drive-bridge-toggle-active {
-	background-color: var(--interactive-accent) !important;
-	color: var(--text-on-accent) !important;
+.setting-item .clickable-icon.drive-bridge-toggle-active,
+.setting-item .clickable-icon.drive-bridge-toggle-active:hover {
+	background-color: var(--interactive-accent);
+	color: var(--text-on-accent);
 }
 
 .drive-bridge-warning-text {

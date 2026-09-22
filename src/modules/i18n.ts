@@ -17,13 +17,13 @@ export type Translate<O extends TranslationResource> = <K extends keyof O>(
 export default class I18n {
 	// One language for now. Adding more means merging another resource here and
 	// Choosing between them, which nothing needs yet.
-	readonly i18n = {};
+	readonly i18n: TranslationResource = {};
 
 	private readonly registerTranslations = (resource: TranslationResource) =>
 		void Object.assign(this.i18n, resource);
 
 	private readonly translate = ((key: string, arg: unknown) => {
-		const value = (this.i18n as TranslationResource)[key];
+		const value = this.i18n[key];
 		if (typeof value === 'string') return value;
 		return value(arg);
 	}) as Translate<TranslationResource>;

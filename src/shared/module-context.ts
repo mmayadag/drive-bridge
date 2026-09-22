@@ -1,15 +1,22 @@
 // Dependency container that wires the plugin's modules into one shared context.
 
+import type { General } from '@/types';
+
 type Empty = Record<never, never>;
 
-// oxlint-disable-next-line typescript/no-explicit-any
-type General = any;
 type GeneralConstructor = new (...args: Array<General>) => General;
 type ModuleConstructor<C extends object> = new (context: C) => General;
 type GeneralModuleInput = ReadonlyArray<GeneralConstructor> | ReadonlyArray<object>;
 
-// oxlint-disable-next-line typescript/no-unsafe-function-type
-type NonPlain = Function | Date | RegExp | Array<General> | Map<General, General> | Set<General>;
+type AnyFunction = (...args: Array<General>) => General;
+type NonPlain =
+	| AnyFunction
+	| GeneralConstructor
+	| Date
+	| RegExp
+	| Array<General>
+	| Map<General, General>
+	| Set<General>;
 type IsPlainObject<T> = T extends object ? (T extends NonPlain ? false : true) : false;
 type ShallowMerge<A, B> =
 	IsPlainObject<A> extends true ? (IsPlainObject<B> extends true ? Omit<A, keyof B> & B : B) : B;

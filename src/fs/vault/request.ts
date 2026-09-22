@@ -116,6 +116,9 @@ export default function createVaultRequest(app: App): VaultRequest {
 					finalize: () => {
 						if (newPath) return adapter.remove(newPath).catch(() => {});
 					},
+					// `url` is this vault's own file behind an app:// resource path, not a
+					// Network address: requestUrl cannot range-read it, and there is no
+					// Adapter API for reading part of a file.
 					requestRange: async (start, end) =>
 						(
 							await fetch(url, {
@@ -126,7 +129,9 @@ export default function createVaultRequest(app: App): VaultRequest {
 					size: params.size,
 				}) as never;
 			}
-			// Reads a local vault file through its resource URL; fetch can stream, requestUrl cannot.
+			// Same here: a local vault file through its app:// resource path. fetch can
+			// Hand back a stream, requestUrl only a whole buffer, and streaming is what
+			// Keeps a large file from being held in memory in one piece.
 			const response = await fetch(url);
 			if (!response.body) throw new Error('Streaming vault file is not supported!');
 			return response.body as never;
