@@ -33,7 +33,7 @@ This is the monorepo for Drive Bridge, an Obsidian plugin that syncs vault files
 
 ## Packages
 
-- Plugin & module SDK: `packages/plugin/`, package name `@hesprs/sync-engine-sdk`, `dev` builds SDK.
+- Plugin & module SDK: `packages/plugin/`, package name `@drive-bridge/sdk`, `dev` builds SDK.
 - Google Drive module: `packages/gdrive/`, package name `gdrive`.
 - Shared utils: `packages/shared/`, package name `@repo/shared`.
 - Upstream documentation site: `docs/`. Not a workspace and not built; kept until we decide what to do with it.

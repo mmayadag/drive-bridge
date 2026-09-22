@@ -11,9 +11,9 @@ import type {
 	Translate,
 	Translations,
 	TranslationResource,
-} from '@hesprs/sync-engine-sdk';
+} from '@drive-bridge/sdk';
 import type { App } from 'obsidian';
-import { digOriginal, prefixWrapper } from '@hesprs/sync-engine-sdk';
+import { digOriginal, prefixWrapper } from '@drive-bridge/sdk';
 import type { GdriveDB } from './gdrive/fs';
 import type { GdriveTranslations } from './setting';
 import { TokenManager, bearerMiddleware } from './gdrive/auth';

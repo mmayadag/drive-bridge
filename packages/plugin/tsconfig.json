@@ -7,7 +7,7 @@
 			"@": ["./src"],
 			"@/*": ["./src/*"],
 			"$/*": ["./test/*"],
-			"@hesprs/sync-engine-sdk": ["./src/sdk/index.ts"]
+			"@drive-bridge/sdk": ["./src/sdk/index.ts"]
 		}
 	},
 	"include": ["src/**/*.ts", "src/**/*.tsx", "test/**/*.ts", "tsdown.config.ts", "uno.config.ts"]

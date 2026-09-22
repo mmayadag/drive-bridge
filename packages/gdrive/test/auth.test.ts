@@ -1,6 +1,6 @@
-import type { RequestParam } from '@hesprs/sync-engine-sdk';
+import type { RequestParam } from '@drive-bridge/sdk';
 import type { SecretStorage } from 'obsidian';
-import { testKit } from '@hesprs/sync-engine-sdk/dev';
+import { testKit } from '@drive-bridge/sdk/dev';
 import ObsidianMock from '@repo/shared/obsidian-mock';
 import { expect, mock, test } from 'bun:test';
 

@@ -43,7 +43,7 @@ export function s(
 }
 
 function setWarningIfNotExist(): void {
-	const name = '--sync-engine-warning';
+	const name = '--drive-bridge-warning';
 	if (activeDocument.body.style.getPropertyValue(name)) return;
 	const dummy = createDiv();
 	setIcon(dummy, 'triangle-alert');
@@ -72,7 +72,7 @@ export function reactivelyValidate<T>({
 }) {
 	setWarningIfNotExist();
 	let validValue: T | undefined;
-	const invalid = 'sync-engine-invalid-input';
+	const invalid = 'drive-bridge-invalid-input';
 	const handleInput = (value: string) => {
 		validValue = parse(value);
 		if (validValue === undefined) text.inputEl.addClass(invalid);
@@ -105,7 +105,7 @@ export function renderTogglableValue({
 }): (setting: Setting) => void {
 	return (setting) => {
 		setting
-			.setClass('sync-engine-togglable-value')
+			.setClass('drive-bridge-togglable-value')
 			.addText((text) => {
 				text.setPlaceholder(placeholder).setValue(formatType(field.value, type));
 				reactivelyValidate<number>({
@@ -204,7 +204,7 @@ export function generateEditableList<T>({
 		items: list.map((item) => ({
 			name: '',
 			render: (setting) => {
-				setting.settingEl.addClass('sync-engine-editable-list');
+				setting.settingEl.addClass('drive-bridge-editable-list');
 				setting.settingEl.querySelector('.setting-item-control')?.addClass('w-100%!');
 				return render(setting, item, saveEdit);
 			},

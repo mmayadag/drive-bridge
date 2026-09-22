@@ -1,24 +1,12 @@
 {
-	"name": "@hesprs/sync-engine-sdk",
+	"name": "@drive-bridge/sdk",
 	"version": "0.1.0",
-	"description": "Official SDK for developing modules targeting Sync Engine, the extensible Obsidian syncing plugin.",
-	"keywords": [
-		"obsidian-plugin",
-		"sdk",
-		"synchronization"
-	],
-	"homepage": "https://sync.consensia.cc",
-	"bugs": {
-		"url": "https://github.com/hesprs/sync-engine/issues"
-	},
+	"private": true,
+	"description": "Drive Bridge core and the SDK its bundled modules build on.",
 	"license": "MIT",
-	"author": {
-		"name": "Hēsperus",
-		"email": "hesprs@yandex.com"
-	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/hesprs/sync-engine.git"
+		"url": "git+https://github.com/mmayadag/drive-bridge.git"
 	},
 	"files": [
 		"./dist"
@@ -36,10 +24,6 @@
 			"types": "./dist/dev.spec.d.ts",
 			"default": "./dist/dev.js"
 		}
-	},
-	"publishConfig": {
-		"access": "public",
-		"provenance": true
 	},
 	"scripts": {
 		"dev:plugin": "MODE=dev BUILD=plugin bun --bun tsdown",

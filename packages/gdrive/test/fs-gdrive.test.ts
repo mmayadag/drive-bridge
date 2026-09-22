@@ -1,5 +1,5 @@
-import type { Binary, MaybePromise, RequestParam, RequestResponse } from '@hesprs/sync-engine-sdk';
-import { testKit } from '@hesprs/sync-engine-sdk/dev';
+import type { Binary, MaybePromise, RequestParam, RequestResponse } from '@drive-bridge/sdk';
+import { testKit } from '@drive-bridge/sdk/dev';
 import { beforeEach, expect, test } from 'bun:test';
 import { openMemoryDB } from 'uni-kv';
 import type { GdriveDB } from '@/gdrive/fs';
@@ -58,7 +58,7 @@ test('writes and reads a file through Drive multipart upload', async () => {
 	expect(calls[0]?.headers?.['Content-Type']).toContain('multipart/related');
 	const body = new TextDecoder().decode(calls[0]?.body as Binary);
 	expect(body).toContain('"name":"note.md"');
-	expect(body).toMatch(/hello\r\n--sync-engine-[0-9a-f-]+--$/u);
+	expect(body).toMatch(/hello\r\n--drive-bridge-[0-9a-f-]+--$/u);
 });
 
 test('creates folders, lists visible descendants, and honors excluded subtrees', async () => {

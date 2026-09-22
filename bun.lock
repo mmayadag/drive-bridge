@@ -21,13 +21,13 @@
       "name": "gdrive",
       "version": "0.0.1",
       "devDependencies": {
-        "@hesprs/sync-engine-sdk": "workspace:*",
+        "@drive-bridge/sdk": "workspace:*",
         "@repo/shared": "workspace:*",
         "uni-kv": "../../uni-kv.tgz",
       },
     },
     "packages/plugin": {
-      "name": "@hesprs/sync-engine-sdk",
+      "name": "@drive-bridge/sdk",
       "version": "0.1.0",
       "dependencies": {
         "obsidian": "^1.13.1",
@@ -51,7 +51,7 @@
       "name": "smart-merge",
       "version": "0.0.1",
       "devDependencies": {
-        "@hesprs/sync-engine-sdk": "workspace:*",
+        "@drive-bridge/sdk": "workspace:*",
         "@repo/shared": "workspace:*",
         "uni-kv": "../../uni-kv.tgz",
       },
@@ -100,7 +100,7 @@
 
     "@codemirror/view": ["@codemirror/view@6.38.6", "", { "dependencies": { "@codemirror/state": "^6.5.0", "crelt": "^1.0.6", "style-mod": "^4.1.0", "w3c-keyname": "^2.2.4" } }, "sha512-qiS0z1bKs5WOvHIAC0Cybmv4AJSkAXgX5aD6Mqd2epSLlVJsQl8NG23jCVouIgkh4All/mrbdsf2UOLFnJw0tw=="],
 
-    "@hesprs/sync-engine-sdk": ["@hesprs/sync-engine-sdk@workspace:packages/plugin"],
+    "@drive-bridge/sdk": ["@drive-bridge/sdk@workspace:packages/plugin"],
 
     "@iconify/types": ["@iconify/types@2.0.0", "", {}, "sha512-+wluvCrRhXrhyOmRDJ3q8mux9JkKy5SJ/v8ol2tu4FVjyYvtEzkc/3pK15ET6RKg4b4w4BmTk1+gsCUhf21Ykg=="],
 

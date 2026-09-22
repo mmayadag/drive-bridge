@@ -1,4 +1,4 @@
-import type { FileStat, RequestResponse } from '@hesprs/sync-engine-sdk';
+import type { FileStat, RequestResponse } from '@drive-bridge/sdk';
 
 export const DRIVE_API = 'https://www.googleapis.com/drive/v3';
 export const DRIVE_UPLOAD_API = 'https://www.googleapis.com/upload/drive/v3';

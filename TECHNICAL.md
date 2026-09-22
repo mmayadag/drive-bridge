@@ -72,7 +72,7 @@ bun fix                # auto-fix lint and format
 
 | Path                   | Contents                               |
 | ---------------------- | -------------------------------------- |
-| `packages/plugin`      | Plugin core: sync engine, settings, UI |
+| `packages/plugin`      | Plugin core: sync logic, settings, UI  |
 | `packages/gdrive`      | Google Drive backend                   |
 | `packages/smart-merge` | Three-way text merge                   |
 | `packages/shared`      | Shared utilities                       |

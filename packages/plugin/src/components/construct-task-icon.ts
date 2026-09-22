@@ -12,7 +12,7 @@ export default function constructTaskIcon(
 	const { icon: mainIcon, color: mainColor } = getMain(name, isDir);
 	setIcon(element, mainIcon);
 	const main = getIcon(element);
-	main.addClass('sync-engine-cropped-icon');
+	main.addClass('drive-bridge-cropped-icon');
 	main.setAttr('stroke', mainColor);
 	const auxiliaryIconColor = getAuxiliary(name);
 	if (!auxiliaryIconColor) return element;

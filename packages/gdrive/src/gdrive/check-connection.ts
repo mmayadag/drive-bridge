@@ -1,4 +1,4 @@
-import type { CheckConnectionResult, Request } from '@hesprs/sync-engine-sdk';
+import type { CheckConnectionResult, Request } from '@drive-bridge/sdk';
 import { getMessage } from '@repo/shared/error';
 import { DRIVE_API, buildUrl, parseDriveError } from './api';
 

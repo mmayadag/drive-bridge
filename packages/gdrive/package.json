@@ -3,17 +3,6 @@
 	"version": "0.0.1",
 	"private": true,
 	"license": "MIT",
-	"contributors": [
-		{
-			"name": "Aaron",
-			"github": "Quzzar"
-		},
-		{
-			"name": "Hēsperus",
-			"email": "hesprs@yandex.com",
-			"github": "hesprs"
-		}
-	],
 	"type": "module",
 	"scripts": {
 		"fix": "oxlint --silent --fix && oxfmt",
@@ -21,7 +10,7 @@
 		"tests": "bun --preload=./test/mocks test"
 	},
 	"devDependencies": {
-		"@hesprs/sync-engine-sdk": "workspace:*",
+		"@drive-bridge/sdk": "workspace:*",
 		"@repo/shared": "workspace:*",
 		"uni-kv": "../../uni-kv.tgz"
 	}

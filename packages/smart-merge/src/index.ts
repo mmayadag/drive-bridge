@@ -9,7 +9,7 @@ import type {
 	StoreAsync,
 	TranslationResource,
 	Translate,
-} from '@hesprs/sync-engine-sdk';
+} from '@drive-bridge/sdk';
 import type { SmartMergeTranslations } from './i18n';
 import type { SmartMergeSettings } from './setting';
 import { en, zh, zhTW, ru } from './i18n';

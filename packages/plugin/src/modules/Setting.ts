@@ -98,7 +98,7 @@ class SettingTab extends PluginSettingTab {
 	}
 
 	getSettingDefinitions() {
-		this.containerEl.addClass('sync-engine-setting');
+		this.containerEl.addClass('drive-bridge-setting');
 		const sorted: Record<number, CallableOrObjectTree> = {};
 		for (const { priority, apply } of this.settingRegistry) sorted[priority] = apply;
 		const tree = (self: SettingTree) => Object.values(self).map((node) => node(node));

@@ -7,9 +7,9 @@ import type {
 	Translate,
 	Translations,
 	Events,
-} from '@hesprs/sync-engine-sdk';
+} from '@drive-bridge/sdk';
 import type { App, SettingGroupItem } from 'obsidian';
-import { s } from '@hesprs/sync-engine-sdk';
+import { s } from '@drive-bridge/sdk';
 import { getMessage } from '@repo/shared/error';
 import { normalizeBaseDir } from '@repo/shared/path';
 import { Modal, Notice, Setting } from 'obsidian';

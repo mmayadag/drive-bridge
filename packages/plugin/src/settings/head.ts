@@ -66,7 +66,7 @@ export default function headSettings(
 			desc: translate('settingTips', { addLabel, labels: [matchLabel(), speedLabel()] }),
 			name: 'dummy',
 			render: (setting) => {
-				setting.settingEl.addClass('sync-engine-setting-tip');
+				setting.settingEl.addClass('drive-bridge-setting-tip');
 				queueMicrotask(() => {
 					const tab = getSettingTab();
 					if (!tab) return;

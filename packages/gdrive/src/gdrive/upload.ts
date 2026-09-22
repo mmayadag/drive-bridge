@@ -1,4 +1,4 @@
-import type { Binary, Request, RequestResponse } from '@hesprs/sync-engine-sdk';
+import type { Binary, Request, RequestResponse } from '@drive-bridge/sdk';
 import { concatBinary, textToUint8Array } from '@repo/shared/binary';
 import type { DriveFile } from './api';
 import { getHeader, parseDriveError } from './api';
@@ -95,7 +95,7 @@ async function putChunk(
 }
 
 // Multipart upload sends metadata and content in a single request; no session needed.
-const createBoundary = () => `sync-engine-${crypto.randomUUID()}`;
+const createBoundary = () => `drive-bridge-${crypto.randomUUID()}`;
 export async function singleUpload(options: MultipartOptions, value: Binary): Promise<DriveFile> {
 	const boundary = createBoundary();
 	const body = concatBinary(

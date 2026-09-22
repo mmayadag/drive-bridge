@@ -1,4 +1,4 @@
-import type { Request } from '@hesprs/sync-engine-sdk';
+import type { Request } from '@drive-bridge/sdk';
 import { getStatus } from '@repo/shared/error';
 import { Platform, requestUrl, SecretStorage } from 'obsidian';
 import {
@@ -120,9 +120,7 @@ export async function pollDeviceToken(options: {
 				url: OAUTH_TOKEN_URL,
 			});
 		} catch (error) {
-			// Android suspends network access while the app is in background with UnknownHostException error:
-			// https://github.com/hesprs/sync-engine/issues/258
-			// https://medium.com/@mmarashan/the-unnoticed-limitation-of-android-15-53bf9ac8ae76
+			// Android suspends network access while the app is in background with UnknownHostException error.
 			if (Platform.isAndroidApp && String(error).includes('UnknownHostException')) continue;
 			throw error;
 		}

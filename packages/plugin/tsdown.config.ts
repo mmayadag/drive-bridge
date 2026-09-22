@@ -37,7 +37,7 @@ const pluginConfig = defineConfig({
 		resolve: {
 			// Bundled modules import the SDK; point them at this source so only one copy ships.
 			alias: {
-				'@hesprs/sync-engine-sdk': `${import.meta.dirname}/src/sdk/index.ts`,
+				'@drive-bridge/sdk': `${import.meta.dirname}/src/sdk/index.ts`,
 			},
 			aliasFields: [['browser']],
 			conditionNames: ['browser'],

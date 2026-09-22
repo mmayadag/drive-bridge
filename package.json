@@ -8,7 +8,7 @@
 	],
 	"type": "module",
 	"scripts": {
-		"postinstall": "turbo run dev -F @hesprs/sync-engine-sdk",
+		"postinstall": "turbo run dev -F @drive-bridge/sdk",
 		"dev:plugin": "cd packages/plugin && bun dev:plugin",
 		"build:plugin": "cd packages/plugin && bun build:plugin",
 		"dev": "turbo run dev",

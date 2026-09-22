@@ -41,8 +41,7 @@ export default class VaultFs implements RootFs {
 	}
 
 	async write(key: string, value: Binary): Promise<string> {
-		// https://github.com/hesprs/sync-engine/issues/178
-		// https://forum.obsidian.md/t/on-android-vault-create-intermittently-fails-to-write-file-content/102935
+		// On Android, vault.create can intermittently write an empty file, so verify and retry.
 		let uid: string | undefined;
 		let trial = 0;
 		do {
@@ -104,7 +103,6 @@ export default class VaultFs implements RootFs {
 		let completed = 1;
 		let total = 1;
 		const visit = async (dir: string) => {
-			// https://github.com/hesprs/sync-engine/issues/222
 			const { files, folders } = await this.request(dir, { cached: false, method: 'LIST' });
 			completed++;
 			total += files.length + folders.length;

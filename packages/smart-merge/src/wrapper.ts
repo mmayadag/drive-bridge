@@ -1,4 +1,4 @@
-import type { Binary, FileStat, Fs, StoreAsync } from '@hesprs/sync-engine-sdk';
+import type { Binary, FileStat, Fs, StoreAsync } from '@drive-bridge/sdk';
 import { uint8ArrayToText } from '@repo/shared/binary';
 import isMergeablePath from './utils/is-mergeable-path';
 

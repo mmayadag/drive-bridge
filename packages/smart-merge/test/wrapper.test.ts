@@ -1,5 +1,5 @@
-import type { StoreAsync } from '@hesprs/sync-engine-sdk';
-import { testKit } from '@hesprs/sync-engine-sdk/dev';
+import type { StoreAsync } from '@drive-bridge/sdk';
+import { testKit } from '@drive-bridge/sdk/dev';
 import { beforeEach, expect, test } from 'bun:test';
 import { openMemoryDB } from 'uni-kv';
 import smartMergeBaseTextWrapper from '@/wrapper';

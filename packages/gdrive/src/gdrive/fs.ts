@@ -9,8 +9,8 @@ import type {
 	RootFs,
 	Stat,
 	StoreSync,
-} from '@hesprs/sync-engine-sdk';
-import { chunkSize, concurrency } from '@hesprs/sync-engine-sdk';
+} from '@drive-bridge/sdk';
+import { chunkSize, concurrency } from '@drive-bridge/sdk';
 import { textToUint8Array } from '@repo/shared/binary';
 import { getStatus } from '@repo/shared/error';
 import { basename, dirname, isFolder } from '@repo/shared/path';

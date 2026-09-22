@@ -1,5 +1,5 @@
-import type { ConflictResolver, DatabaseAsync, FileStat, Fs } from '@hesprs/sync-engine-sdk';
-import { pipe } from '@hesprs/sync-engine-sdk';
+import type { ConflictResolver, DatabaseAsync, FileStat, Fs } from '@drive-bridge/sdk';
+import { pipe } from '@drive-bridge/sdk';
 import { textToUint8Array, uint8ArrayToText } from '@repo/shared/binary';
 import type { MergeOptions } from './utils/merge';
 import merge from './utils/merge';
