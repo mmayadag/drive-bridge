@@ -46,6 +46,8 @@ export type Context = KernelContext<
 export type Events = MergeSingleKey<InternalModules, 'events'>;
 export type Settings = MergeSingleKey<InternalModules, 'settings'>;
 export type Translations = MergeSingleKey<InternalModules, 'i18n'>;
+/** Lets a module declare the slice of the context it needs, checked against the real context. */
+export type SelectFromContext<O extends object> = Context extends O ? O : never;
 
 export default class DriveBridge extends Plugin {
 	context?: Context;

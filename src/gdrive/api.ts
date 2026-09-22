@@ -1,4 +1,5 @@
-import type { FileStat, RequestResponse } from '@/sdk';
+import type { RequestResponse } from '@/modules/Registrar';
+import type { FileStat } from '@/types';
 
 export const DRIVE_API = 'https://www.googleapis.com/drive/v3';
 export const DRIVE_UPLOAD_API = 'https://www.googleapis.com/upload/drive/v3';

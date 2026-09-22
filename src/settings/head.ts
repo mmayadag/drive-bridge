@@ -1,5 +1,6 @@
 import type { Events, Settings } from '@';
 import { ExtraButtonComponent, Notice, PluginSettingTab, setTooltip } from 'obsidian';
+import type { Dispatch } from '@/modules/EventBus';
 import type { Fragment, Translate } from '@/modules/I18n';
 import type {
 	CheckConnectionResult,
@@ -8,7 +9,6 @@ import type {
 	RemoteFsEntry,
 } from '@/modules/Registrar';
 import type { CallableOrObjectTree } from '@/modules/Setting';
-import type { Dispatch } from '@/sdk';
 import type { DatabaseSync } from '@/shared/key-value-store';
 import type { General, MaybePromise } from '@/types';
 import { getMessage } from '@/shared/error';

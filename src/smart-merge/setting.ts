@@ -1,6 +1,7 @@
 import type { SettingGroupItem, TextComponent } from 'obsidian';
-import type { CallableOrObjectTree, Translate } from '@/sdk';
-import { s } from '@/sdk';
+import type { Translate } from '@/modules/I18n';
+import type { CallableOrObjectTree } from '@/modules/Setting';
+import { s } from '@/settings/utils';
 import type { SmartMergeTranslations } from './i18n';
 import type { MergeOptions } from './utils/merge';
 

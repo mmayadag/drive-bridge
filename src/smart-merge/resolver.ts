@@ -1,6 +1,9 @@
-import type { ConflictResolver, DatabaseAsync, FileStat, Fs } from '@/sdk';
-import { pipe } from '@/sdk';
+import type { Fs } from '@/fs/interface';
+import type { DatabaseAsync } from '@/shared/key-value-store';
+import type { ConflictResolver } from '@/sync';
+import type { FileStat } from '@/types';
 import { textToUint8Array, uint8ArrayToText } from '@/shared/binary';
+import { pipe } from '@/utils/pipe';
 import type { MergeOptions } from './utils/merge';
 import merge from './utils/merge';
 

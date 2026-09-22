@@ -1,8 +1,10 @@
+import testKit from '$/test-kit';
 import { beforeEach, expect, test } from 'bun:test';
-import type { DatabaseAsync, RecordStat, RecordStore } from '@/sdk';
+import type { RecordStore } from '@/modules/Storage';
+import type { DatabaseAsync } from '@/shared/key-value-store';
 import type { SmartMergeDatabase } from '@/smart-merge/index';
 import type { MergeOptions } from '@/smart-merge/utils/merge';
-import { testKit } from '@/sdk/dev';
+import type { RecordStat } from '@/types';
 import { uint8ArrayToText } from '@/shared/binary';
 import { openMemoryDB } from '@/shared/key-value-store';
 import smartMergeResolver from '@/smart-merge/resolver';

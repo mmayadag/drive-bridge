@@ -1,4 +1,4 @@
-import type { CheckConnectionResult, Request } from '@/sdk';
+import type { CheckConnectionResult, Request } from '@/modules/Registrar';
 import { getMessage } from '@/shared/error';
 import { DRIVE_API, buildUrl, parseDriveError } from './api';
 

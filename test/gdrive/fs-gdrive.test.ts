@@ -1,9 +1,10 @@
+import testKit from '$/test-kit';
 import { beforeEach, expect, test } from 'bun:test';
 import type { GdriveDB } from '@/gdrive/fs';
-import type { Binary, MaybePromise, RequestParam, RequestResponse } from '@/sdk';
+import type { RequestParam, RequestResponse } from '@/modules/Registrar';
+import type { Binary, MaybePromise } from '@/types';
 import { DRIVE_API, DRIVE_UPLOAD_API, FOLDER_MIME } from '@/gdrive/api';
 import GdriveFs from '@/gdrive/fs';
-import { testKit } from '@/sdk/dev';
 import { openMemoryDB } from '@/shared/key-value-store';
 
 const { bytes, file, request } = testKit;

@@ -35,7 +35,6 @@ This is the repository for Drive Bridge, an Obsidian plugin that syncs vault fil
 - `src/gdrive/`: Google Drive backend module.
 - `src/smart-merge/`: three-way merge module.
 - `src/shared/`: shared utilities: module context, reactive values, key-value store, paths.
-- `src/sdk/`: the API surface modules use (`@/sdk`).
 - `test/`: tests, mirroring `src/`. `test/mocks.ts` is preloaded and mocks `obsidian`.
 
 ## Security

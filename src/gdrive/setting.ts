@@ -1,15 +1,11 @@
+import type { Events } from '@';
 import type { SettingGroupItem } from 'obsidian';
 import { Notice } from 'obsidian';
-import type {
-	CallableOrObjectTree,
-	Dispatch,
-	Fragment,
-	LabelDefinition,
-	Snippet,
-	Translate,
-	Events,
-} from '@/sdk';
-import { s } from '@/sdk';
+import type { Dispatch } from '@/modules/EventBus';
+import type { Fragment, Snippet, Translate } from '@/modules/I18n';
+import type { CallableOrObjectTree } from '@/modules/Setting';
+import type { LabelDefinition } from '@/settings/utils';
+import { s } from '@/settings/utils';
 import { getMessage } from '@/shared/error';
 import { normalizeBaseDir } from '@/shared/path';
 import type { GdriveSettings } from '.';

@@ -1,20 +1,12 @@
-import type {
-	Binary,
-	DatabaseSync,
-	FileStat,
-	ListReporter,
-	Request,
-	RequestParam,
-	RequestResponse,
-	RootFs,
-	Stat,
-	StoreSync,
-} from '@/sdk';
-import { chunkSize, concurrency } from '@/sdk';
+import type { ListReporter, RootFs } from '@/fs/interface';
+import type { Request, RequestParam, RequestResponse } from '@/modules/Registrar';
+import type { DatabaseSync, StoreSync } from '@/shared/key-value-store';
+import type { Binary, FileStat, Stat } from '@/types';
 import { textToUint8Array } from '@/shared/binary';
 import { getStatus } from '@/shared/error';
 import { basename, dirname, isFolder } from '@/shared/path';
 import createRangeReadStream from '@/shared/read-stream';
+import { chunkSize, concurrency } from '@/utils/pipe';
 import type { DriveFile, DriveFileList } from './api';
 import {
 	DRIVE_API,

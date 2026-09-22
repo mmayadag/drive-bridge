@@ -1,4 +1,6 @@
-import type { Binary, FileStat, Fs, StoreAsync } from '@/sdk';
+import type { Fs } from '@/fs/interface';
+import type { StoreAsync } from '@/shared/key-value-store';
+import type { Binary, FileStat } from '@/types';
 import { uint8ArrayToText } from '@/shared/binary';
 import isMergeablePath from './utils/is-mergeable-path';
 
