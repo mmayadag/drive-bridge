@@ -11,3 +11,4 @@ Drive Bridge Logs
 **/node_modules
 **/cache
 **/.env
+release-notes.md
