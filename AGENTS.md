@@ -10,7 +10,7 @@ This is the repository for Drive Bridge, an Obsidian plugin that syncs vault fil
 
 ## Techstack
 
-- **TypeScript 6** as programming language
+- **TypeScript 7** (native compiler) as programming language
 - **Bun** as its package manager and task runner
 - **esbuild** for building (`scripts/build.ts`)
 - **Oxlint and Oxfmt** for linting and formatting
