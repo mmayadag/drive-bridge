@@ -11,6 +11,7 @@ import type {
 } from '@/modules/registrar';
 import type { CallableOrObjectTree } from '@/modules/setting';
 import type { DatabaseSync } from '@/shared/key-value-store';
+import type { Ref } from '@/shared/reactive';
 import type { General, MaybePromise } from '@/types';
 import { getMessage } from '@/shared/error';
 import formatDateTime from '@/utils/format-date';
@@ -40,6 +41,7 @@ export type HeadSettingTranslations = {
 	checkConnection: string;
 	conflictResolveStrategy: string;
 	conflictResolveStrategyDescription: string;
+	startSync: string;
 	settingTips: Fragment<{ labels: Array<LabelDefinition>; addLabel: typeof addLabel }>;
 };
 
@@ -58,6 +60,8 @@ export default function headSettings(
 		matchLabel: () => LabelDefinition;
 		speedLabel: () => LabelDefinition;
 		dispatch: Dispatch<Events>;
+		requestSync: (trigger: string) => unknown;
+		isIdle: Ref<boolean>;
 	},
 	getSettingTab: () => PluginSettingTab | undefined,
 ): CallableOrObjectTree {
@@ -73,46 +77,38 @@ export default function headSettings(
 		matchLabel,
 		speedLabel,
 		dispatch,
+		requestSync,
+		isIdle,
 	} = ctx;
 	return {
-		10: s(() => ({
-			desc: translate('settingTips', { addLabel, labels: [matchLabel(), speedLabel()] }),
-			name: 'dummy',
-			render: (setting) => {
-				setting.settingEl.addClass('drive-bridge-setting-tip');
-				queueMicrotask(() => {
-					const tab = getSettingTab();
-					if (!tab) return;
-					const recurseLabel = (items: Array<AugmentedSettingDefinitionItem>) => {
-						for (const item of items) {
-							if ('labels' in item && item.labels) {
-								const name = tab
-									.getElementForDefinition(item)
-									?.querySelector('.setting-item-name');
-								if (!name) return;
-								for (const label of item.labels) addLabel(name, label);
-							}
-							if ('items' in item) recurseLabel(item.items as never);
-						}
-					};
-					recurseLabel(tab.settingItems);
-				});
-			},
-			search: false,
-		})),
 		15: s(() => ({
 			desc: describeLastSync(settings.lastSync, translate),
 			name: translate('lastSync'),
 			render: (setting) => {
 				const { lastSync } = settings;
-				if (!lastSync) return;
-				const icon = setting.controlEl.createSpan({
-					cls:
-						lastSync.result === 'failed'
-							? 'drive-bridge-status-error'
-							: 'drive-bridge-status-ok',
+				if (lastSync) {
+					const icon = setting.controlEl.createSpan({
+						cls:
+							lastSync.result === 'failed'
+								? 'drive-bridge-status-error'
+								: 'drive-bridge-status-ok',
+					});
+					setIcon(icon, lastSync.result === 'failed' ? 'x' : 'check');
+				}
+				let unsubscribe = () => {};
+				setting.addButton((button) => {
+					button
+						.setButtonText(translate('startSync'))
+						.setCta()
+						.onClick(() => {
+							if (isIdle()) requestSync('manual');
+						});
+					// Greyed out while a sync runs, so the button matches the ribbon icon.
+					unsubscribe = isIdle.subscribe((idle) => button.setDisabled(!idle), {
+						immediate: true,
+					});
 				});
-				setIcon(icon, lastSync.result === 'failed' ? 'x' : 'check');
+				return () => unsubscribe();
 			},
 			search: false,
 		})),
@@ -180,6 +176,33 @@ export default function headSettings(
 				setting.addButton((button) =>
 					button.setButtonText(translate('open')).onClick(() => window.open(GUIDE_URL)),
 				);
+			},
+			search: false,
+		})),
+		// The legend for the Match and Speed labels. It sits just above Development
+		// Because the labels it explains are scattered through the groups above.
+		4900: s(() => ({
+			desc: translate('settingTips', { addLabel, labels: [matchLabel(), speedLabel()] }),
+			name: 'dummy',
+			render: (setting) => {
+				setting.settingEl.addClass('drive-bridge-setting-tip');
+				queueMicrotask(() => {
+					const tab = getSettingTab();
+					if (!tab) return;
+					const recurseLabel = (items: Array<AugmentedSettingDefinitionItem>) => {
+						for (const item of items) {
+							if ('labels' in item && item.labels) {
+								const name = tab
+									.getElementForDefinition(item)
+									?.querySelector('.setting-item-name');
+								if (!name) return;
+								for (const label of item.labels) addLabel(name, label);
+							}
+							if ('items' in item) recurseLabel(item.items as never);
+						}
+					};
+					recurseLabel(tab.settingItems);
+				});
 			},
 			search: false,
 		})),

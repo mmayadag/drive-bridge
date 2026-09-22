@@ -177,8 +177,8 @@ export default function gdriveSetting(
 					name: translate('connectAccount'),
 					render: (setting) => {
 						let input = '';
-						// The token is long, so this row puts the field and the button on
-						// Their own line under the description instead of squeezing both
+						// The token is long. This row gives the field and the button a line
+						// Of their own under the description, instead of squeezing both
 						// Into the control column.
 						setting.settingEl.addClass('drive-bridge-stacked-setting');
 						setting

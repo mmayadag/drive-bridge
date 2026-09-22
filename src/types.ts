@@ -1,8 +1,7 @@
-// The one deliberate `any` in the plugin: the generic plumbing (module context,
+// The one deliberate `any` in the plugin. The generic plumbing (module context,
 // Translations, task factories) needs a type that stays assignable in both
 // Directions, which `unknown` is not. Nothing reads a value at this type.
 // oxlint-disable-next-line typescript/no-explicit-any
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type General = any;
 export type { Binary } from '@/shared/binary';
 
