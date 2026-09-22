@@ -247,6 +247,67 @@ Folders follow the same idea. A deleted folder is only removed on the other
 side if nothing inside it changed since the last sync; otherwise it is
 recreated.
 
+### Sync strategies
+
+The sync strategy decides which operations a sync plans. It is a per-device
+setting, stored in the plugin's own settings and never uploaded, so two
+devices can disagree. In normal use every device should stay on
+_Bidirectional_.
+
+| Strategy          | What a sync does                                                                                                                                                              | Deletes                                                                                       | When to use it                                                                        |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| **Bidirectional** | Compares vault, Drive and the record of the last sync, then moves each file in whichever direction changed. Changes on both sides go to the conflict resolve strategy.        | Both ways. A file deleted on one side and unchanged on the other is deleted on the other too. | Always, unless you are repairing something.                                           |
+| **Mirror local**  | Makes Drive an exact copy of the vault. Every file is uploaded; anything on Drive that is not in the vault is deleted. Nothing is ever downloaded and no conflict can happen. | Remote only, and without asking.                                                              | Once, to push a known-good vault over a damaged Drive folder. Switch back afterwards. |
+| **Mirror remote** | Makes the vault an exact copy of Drive. Every file is downloaded; anything in the vault that is not on Drive is deleted. Nothing is ever uploaded and no conflict can happen. | Local only, and without asking.                                                               | Once, to restore a device from Drive. Switch back afterwards.                         |
+
+Both mirrors still go through the usual safety nets: a manual sync lists every
+operation first while _Confirm operations in manual sync_ is on, and vault
+deletions are confirmed in automatic syncs while _Confirm deletions during
+auto-sync_ is on. Deletions on the Drive side are never confirmed, which is
+true of _Bidirectional_ as well. Drive deletions land in Drive's trash while
+_Delete to trash_ is on, and vault deletions follow Obsidian's own trash
+setting (system trash, the vault's `.trash` folder, or permanent).
+
+Pick the source side carefully: _Mirror remote_ on a device whose vault is the
+only good copy overwrites that copy with whatever Drive happens to hold.
+
+A mirror run is not free: it compares sizes and recorded ids first, so files
+that already match are only recorded, not transferred again.
+
+### Conflict resolve strategies
+
+A conflict is one specific situation: both the vault copy and the Drive copy
+changed since the last sync, so neither can be called the newer state of the
+same edit. Only _Bidirectional_ produces conflicts. The strategy is also
+per-device, so if two devices resolve the same conflict differently the vault
+ends up with whatever each device decided.
+
+| Strategy                 | What happens to your two versions                                                                                                                                           | Anything lost?                                        |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| **Rename and keep both** | If the bytes are identical, nothing happens. Otherwise the version with the newer modified time keeps the name and the other is saved as `note.conflict.md`, on both sides. | No.                                                   |
+| **Smart merge**          | Three-way merge of the two versions against the copy from the last sync. Non-overlapping edits are combined; overlapping ones are kept side by side and marked in the text. | No, but the merged file needs a read-through.         |
+| **Latest survives**      | The version with the newer modified time is copied over the other one.                                                                                                      | Yes, the older version, without a prompt.             |
+| **Keep local**           | The vault version is uploaded over the Drive version.                                                                                                                       | Yes, the Drive version.                               |
+| **Keep remote**          | The Drive version is downloaded over the vault version.                                                                                                                     | Yes, the vault version.                               |
+| **Skip**                 | Nothing. The file is left alone on both sides and no record is written, so the next sync sees the same conflict again.                                                      | No, but the two sides stay out of sync until you act. |
+
+Notes that matter in practice:
+
+- Modified times come from two different machines. A device with a wrong clock
+  can make an old edit look newer, which is why _Latest survives_ is not the
+  default.
+- **Smart merge** only works on `.md` and `.markdown` files and only with a
+  base to merge against. It keeps a copy of every synced markdown file while
+  it is the selected strategy, so it has no base for files synced before you
+  turned it on, and for those it falls back to _Rename and keep both_. Binary
+  files always fall back too.
+- Smart merge writes the overlapping parts wrapped in `<mark>` tags, which
+  render as highlights in Obsidian. The tags are configurable under
+  _Miscellaneous_.
+- _Skip_ is the safe choice while you investigate: it never writes, but the
+  conflict is reported on every sync until the strategy changes or one side
+  stops differing.
+
 ## Settings
 
 Defaults are what a fresh install uses. _Recommended_ is for a vault that
@@ -255,12 +316,12 @@ folder); for a vault only you edit, the defaults are fine except where noted.
 
 ### General
 
-| Setting                   | Default              | Recommended          | What it does                                                                                                                                                                                                                                                                                                                |
-| ------------------------- | -------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Last sync                 | none                 | none                 | Read-only: when this device last synced and how it ended.                                                                                                                                                                                                                                                                   |
-| Storage backend           | none                 | Google Drive         | The only backend.                                                                                                                                                                                                                                                                                                           |
-| Sync strategy             | Bidirectional        | Bidirectional        | _Mirror local_ / _Mirror remote_ make one side an exact copy of the other and delete the rest. Use them only to recover from a broken state.                                                                                                                                                                                |
-| Conflict resolve strategy | Rename and keep both | Rename and keep both | When both sides changed: the newer version keeps the name, the other becomes `name.conflict.md` on both sides. _Smart merge_ merges text line by line and marks overlapping edits; without a known base it also keeps both. _Latest survives_, _Keep local_ and _Keep remote_ discard one version silently none avoid them. |
+| Setting                   | Default              | Recommended          | What it does                                                                                                                                                                                                                  |
+| ------------------------- | -------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Last sync                 | none                 | none                 | Read-only: when this device last synced and how it ended.                                                                                                                                                                     |
+| Storage backend           | none                 | Google Drive         | The only backend.                                                                                                                                                                                                             |
+| Sync strategy             | Bidirectional        | Bidirectional        | Which direction files move in. _Mirror local_ / _Mirror remote_ make one side an exact copy of the other and delete the rest, so keep them for repairs. See [Sync strategies](#sync-strategies).                              |
+| Conflict resolve strategy | Rename and keep both | Rename and keep both | What happens when both sides changed the same file. The default keeps both versions; _Latest survives_, _Keep local_ and _Keep remote_ silently discard one. See [Conflict resolve strategies](#conflict-resolve-strategies). |
 
 ### Google Drive
 
@@ -336,11 +397,9 @@ trust; the payload carries the vault name, not its contents.
 
 ## Sync behavior
 
-- **Conflicts:** both versions are kept by default (`renameAndKeepBoth`).
-  Optional smart merge does a three-way merge for text when a common base is
-  known and falls back to keeping both.
-  Smart merge needs a base, so it only keeps a copy of each synced text file
-  while it is the selected strategy, and merges only files synced since then.
+- **Conflicts:** both versions are kept by default (`renameAndKeepBoth`); the
+  alternatives are described under
+  [Conflict resolve strategies](#conflict-resolve-strategies).
 - **Deletes:** remote deletions require confirmation during automatic sync
   (`confirmDeleteInAutoSync`).
 - **Layout:** one vault maps to one Drive folder (`baseDirectory`). Listing is
