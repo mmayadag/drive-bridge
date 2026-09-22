@@ -17,7 +17,7 @@ void mock.module('obsidian', () => ({
 }));
 
 const { TokenManager } = await import('@/gdrive/auth');
-const { connectWithToken } = await import('@/gdrive/connect');
+const { connectWithToken, findMissingInput } = await import('@/gdrive/connect');
 
 const FULL_DRIVE = 'https://www.googleapis.com/auth/drive';
 const REFRESH_ID = 'drive-bridge-gdrive-refresh-token';
@@ -88,4 +88,17 @@ test('keeps no token when the first connection fails', async () => {
 	const result = await connectWithToken(tokens, '1//new-token');
 	expect(result.status).toBe('failed');
 	expect(secrets.has(REFRESH_ID)).toBe(false);
+});
+
+test('Connect asks for the first field that is still empty', () => {
+	const full = { clientId: 'id', clientSecret: 'secret', token: '1//token' };
+
+	expect(findMissingInput(full)).toBeUndefined();
+	expect(findMissingInput({ ...full, clientId: '' })).toBe('clientId');
+	// Whitespace is not an answer.
+	expect(findMissingInput({ ...full, clientId: '   ' })).toBe('clientId');
+	expect(findMissingInput({ ...full, clientSecret: '' })).toBe('clientSecret');
+	expect(findMissingInput({ ...full, token: '\n' })).toBe('token');
+	// The top-most empty field wins, so the user is sent up, not down.
+	expect(findMissingInput({ clientId: '', clientSecret: '', token: '' })).toBe('clientId');
 });

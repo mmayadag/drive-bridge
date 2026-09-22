@@ -11,7 +11,7 @@ import { normalizeBaseDir } from '@/shared/path';
 import type { GdriveSettings } from '.';
 import type { TokenManager } from './auth';
 import type { FolderPickerTranslations } from './folder-picker';
-import { connectWithToken } from './connect';
+import { connectWithToken, findMissingInput } from './connect';
 import FolderPickerModal from './folder-picker';
 
 export type GdriveTranslations = FolderPickerTranslations & {
@@ -36,6 +36,9 @@ export type GdriveTranslations = FolderPickerTranslations & {
 	clientSecret: string;
 	clientSecretDescription: string;
 	connectFirst: string;
+	enterClientId: string;
+	enterClientSecret: string;
+	enterRefreshToken: string;
 	invalidRefreshToken: string;
 	limitedScope: string;
 	refreshTokenPlaceholder: string;
@@ -62,7 +65,42 @@ export default function gdriveSetting(
 	settings: GdriveSettings,
 	tokenManager: TokenManager,
 ): CallableOrObjectTree {
+	// The three fields Connect needs. Kept here so Connect can point at whichever
+	// One is still empty instead of spending a round trip to Google to find out.
+	let clientIdField: TextComponent | undefined;
+	let clientSecretField: TextComponent | undefined;
+	let tokenField: TextComponent | undefined;
+
+	const INVALID = 'drive-bridge-invalid-input';
+
+	const markValid = (text: TextComponent) => {
+		text.onChange(() => text.inputEl.removeClass(INVALID));
+		return text;
+	};
+
+	const demand = (field: TextComponent | undefined, message: string) => {
+		new Notice(message);
+		field?.inputEl.addClass(INVALID);
+		field?.inputEl.focus();
+	};
+
+	// Reads what is on screen: the fields save on blur, and a click on Connect
+	// Blurs first, but a keyboard activation may not.
+	const entered = (field: TextComponent | undefined, stored: string) =>
+		(field ? field.getValue() : stored).trim();
+
 	const connect = async (input: string) => {
+		const credentials = tokenManager.getCredentials();
+		const missing = findMissingInput({
+			clientId: entered(clientIdField, credentials.clientId),
+			clientSecret: entered(clientSecretField, credentials.clientSecret),
+			token: input,
+		});
+		if (missing === 'clientId') return demand(clientIdField, translate('enterClientId'));
+		if (missing === 'clientSecret')
+			return demand(clientSecretField, translate('enterClientSecret'));
+		if (missing === 'token') return demand(tokenField, translate('enterRefreshToken'));
+
 		const result = await connectWithToken(tokenManager, input);
 		if (result.status === 'connected') {
 			settings.userId = result.account.userId;
@@ -77,7 +115,7 @@ export default function gdriveSetting(
 			return;
 		}
 		if (result.status === 'badToken') {
-			new Notice(translate('invalidRefreshToken'));
+			demand(tokenField, translate('invalidRefreshToken'));
 			return;
 		}
 		const reason = result.status === 'limitedScope' ? translate('limitedScope') : result.reason;
@@ -104,6 +142,7 @@ export default function gdriveSetting(
 					name: translate('clientId'),
 					render: (setting) => {
 						setting.addText((text) => {
+							clientIdField = markValid(text);
 							text.setValue(settings.clientId).inputEl.addEventListener(
 								'blur',
 								() => {
@@ -122,6 +161,7 @@ export default function gdriveSetting(
 					name: translate('clientSecret'),
 					render: (setting) => {
 						setting.addText((text) => {
+							clientSecretField = markValid(text);
 							text.inputEl.type = 'password';
 							text.setValue(tokenManager.getCredentials().clientSecret);
 							text.inputEl.addEventListener('blur', () => {
@@ -137,8 +177,13 @@ export default function gdriveSetting(
 					name: translate('connectAccount'),
 					render: (setting) => {
 						let input = '';
+						// The token is long, so this row puts the field and the button on
+						// Their own line under the description instead of squeezing both
+						// Into the control column.
+						setting.settingEl.addClass('drive-bridge-stacked-setting');
 						setting
 							.addText((text) => {
+								tokenField = markValid(text);
 								text.inputEl.type = 'password';
 								text.setPlaceholder(translate('refreshTokenPlaceholder')).onChange(
 									(value) => (input = value),

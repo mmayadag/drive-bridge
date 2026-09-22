@@ -42,3 +42,20 @@ export async function connectWithToken(
 		return { reason: getMessage(error), status: 'failed' };
 	}
 }
+
+export type MissingInput = 'clientId' | 'clientSecret' | 'token';
+
+/**
+ * The first field Connect still needs, in the order the settings show them, so
+ * the user is sent to the top-most empty one rather than to Google.
+ */
+export function findMissingInput(values: {
+	clientId: string;
+	clientSecret: string;
+	token: string;
+}): MissingInput | undefined {
+	if (!values.clientId.trim()) return 'clientId';
+	if (!values.clientSecret.trim()) return 'clientSecret';
+	if (!values.token.trim()) return 'token';
+	return undefined;
+}

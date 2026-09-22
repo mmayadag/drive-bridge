@@ -54,7 +54,8 @@
 	}
 }
 
-input[type='text'].drive-bridge-invalid-input {
+input[type='text'].drive-bridge-invalid-input,
+input[type='password'].drive-bridge-invalid-input {
 	border-color: var(--text-warning);
 	--background-modifier-border-focus: var(--text-warning);
 	background-image: var(--drive-bridge-warning);
@@ -70,6 +71,21 @@ input[type='text'].drive-bridge-invalid-input {
 .is-mobile .drive-bridge-setting input[type='text'] {
 	width: 150px;
 	flex: 1;
+}
+
+.setting-item.drive-bridge-stacked-setting {
+	display: block;
+}
+
+.setting-item.drive-bridge-stacked-setting .setting-item-control {
+	width: 100%;
+	margin-top: var(--size-4-2);
+	justify-content: flex-start;
+}
+
+.setting-item.drive-bridge-stacked-setting .setting-item-control input {
+	flex: 1;
+	min-width: 0;
 }
 
 .drive-bridge-prominent {
