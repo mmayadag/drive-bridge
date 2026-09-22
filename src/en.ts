@@ -58,7 +58,7 @@ const en: Translations = {
 		"Silently skip non-manual sync runs when there's no internet connection.",
 	awaitingConfirmation: 'Awaiting confirmation',
 	backend: 'Storage backend',
-	backendDescription: 'Select the cloud service to use. Backends are provided by modules.',
+	backendDescription: 'Select the cloud service to use.',
 	bidirectional: 'Bidirectional',
 	cancel: 'Cancel',
 	cancelled: 'Cancelled',
@@ -96,7 +96,7 @@ const en: Translations = {
 		'Show pending operations and execute after confirmation (does not affect auto-sync).',
 	conflictResolveStrategy: 'Conflict resolve strategy',
 	conflictResolveStrategyDescription:
-		'Select how to resolve the conflict when both remote and local have been modified since last sync. More strategies can be found in modules.',
+		'Select how to resolve the conflict when both remote and local have been modified since last sync.',
 	controls: 'Controls',
 	createLocalDir: 'Create local folder',
 	createRemoteDir: 'Create remote folder',
@@ -222,8 +222,7 @@ const en: Translations = {
 	stopSync: 'Stop sync',
 	syncProgress: 'Sync progress',
 	syncStrategy: 'Sync strategy',
-	syncStrategyDescription:
-		'Select the synchronization strategy to resolve file changes. More strategies can be found in modules.',
+	syncStrategyDescription: 'Select the synchronization strategy to resolve file changes.',
 	toggleWithoutMigration: 'Toggle without migration',
 	upload: 'Upload',
 	walkingRemote: 'Discovering remote files',

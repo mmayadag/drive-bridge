@@ -56,9 +56,9 @@ test('resolver should merge when base text exists', async () => {
 	});
 });
 
-test('resolver should fall back when base text is missing', async () => {
-	const local = fs({ control: { read: () => bytes('local wins') } });
-	const remote = fs();
+test('resolver keeps both versions when base text is missing', async () => {
+	const local = fs({ control: { read: () => bytes('local version') } });
+	const remote = fs({ control: { read: () => bytes('remote version') } });
 	const resolver = smartMergeResolver(mergeOptions, db, () => 'namespace');
 
 	await resolver({
@@ -70,12 +70,11 @@ test('resolver should fall back when base text is missing', async () => {
 		remoteFs: remote.fs,
 	});
 
-	expect(uint8ArrayToText(remote.calls.write[0]?.[1])).toBe('local wins');
-	expect(await record.get('note.md')).toStrictEqual({
-		isDir: false,
-		local: 'local-current',
-		remote: 'write-uid',
-	});
+	// The newer local text becomes note.md everywhere; the remote text survives as a copy.
+	expect(remote.calls.move).toStrictEqual([['note.md', 'note.conflict.md']]);
+	expect(uint8ArrayToText(remote.calls.write[0]?.[1])).toBe('local version');
+	expect(local.calls.write[0]?.[0]).toBe('note.conflict.md');
+	expect(uint8ArrayToText(local.calls.write[0]?.[1])).toBe('remote version');
 });
 
 test('resolver should stream remote fallback for large newer remote files', async () => {

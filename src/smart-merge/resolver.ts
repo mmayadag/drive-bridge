@@ -3,7 +3,7 @@ import type { DatabaseAsync } from '@/shared/key-value-store';
 import type { ConflictResolver } from '@/sync';
 import type { FileStat } from '@/types';
 import { textToUint8Array, uint8ArrayToText } from '@/shared/binary';
-import { pipe } from '@/utils/pipe';
+import renameAndKeepBothResolver from '@/sync/conflict-resolve/rename-and-keep-both';
 import type { MergeOptions } from './utils/merge';
 import merge from './utils/merge';
 
@@ -15,7 +15,8 @@ export default function smartMergeResolver(
 	db: DatabaseAsync<SmartMergeStoreSchema, SmartMergeStoreMeta>,
 	getNamespace: (localFs?: Fs, remoteFs?: Fs) => string,
 ): ConflictResolver {
-	return async ({ local, remote, key, localFs, remoteFs, record }) => {
+	return async (payload) => {
+		const { local, remote, key, localFs, remoteFs, record } = payload;
 		const store = db.getStore(`base-text-${getNamespace(localFs, remoteFs)}`);
 		const [localBuffer, remoteBuffer, baseText] = await Promise.all([
 			localFs.read(key, local),
@@ -51,14 +52,8 @@ export default function smartMergeResolver(
 			return;
 		}
 
-		if (local.mtime > remote.mtime) {
-			const uid = await pipe({ from: localFs, key, stat: local, to: remoteFs });
-			if (!uid) return;
-			await record.set(key, { isDir: false, local: local.uid, remote: uid });
-		} else {
-			const uid = await pipe({ from: remoteFs, key, stat: remote, to: localFs });
-			if (!uid) return;
-			await record.set(key, { isDir: false, local: uid, remote: remote.uid });
-		}
+		// Without a common base there is nothing to merge against.
+		// Keep both versions rather than letting the newer one overwrite the other.
+		await renameAndKeepBothResolver(payload);
 	};
 }

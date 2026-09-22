@@ -12,8 +12,9 @@ First version of Drive Bridge.
   mobile.
 - Sees every file in the folder, including files other apps put there (full
   `drive` scope).
-- Conflicting text edits are merged with a three-way merge when possible;
-  otherwise both versions are kept.
+- Conflicting edits keep both versions (`name.conflict.md`). Optional smart
+  merge does a three-way text merge and also keeps both when it cannot.
+- Asymmetric storage is off by default so Drive holds a normal folder tree.
 - Remote deletions ask for confirmation during automatic sync.
 - Startup, scheduled and on-change sync; review tasks before they run.
 

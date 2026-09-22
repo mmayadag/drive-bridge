@@ -109,8 +109,10 @@ Google account dedicated to your vault, not your personal one.
 | No credentials in the release | You bring your own OAuth client; nothing is compiled in.                                        |
 | Secrets off disk              | Client secret and refresh token live in Obsidian's secret storage, not in `data.json`.          |
 
-`data.json` holds settings and the client ID, no secrets. Still keep it and the
-workspace files out of any sync or git:
+`data.json` holds settings and the client ID, no secrets. The default
+exclusion rules skip the whole config folder (`.obsidian/`), so plugin
+settings and the device-specific workspace files never sync. If you keep the
+vault in git or another sync tool as well, exclude them there too:
 
 ```
 .obsidian/plugins/drive-bridge/data.json
@@ -118,13 +120,78 @@ workspace files out of any sync or git:
 .obsidian/workspace-mobile.json
 ```
 
-The workspace files are device-specific; syncing them makes devices overwrite
-each other's layout.
+## Settings
+
+Defaults are what a fresh install uses. _Recommended_ is for a vault that
+other apps also write to (for example an AI assistant writing into an inbox
+folder); for a vault only you edit, the defaults are fine except where noted.
+
+### General
+
+| Setting                   | Default              | Recommended          | What it does                                                                                                                                                                                                                                                                                                             |
+| ------------------------- | -------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Storage backend           | —                    | Google Drive         | The only backend.                                                                                                                                                                                                                                                                                                        |
+| Sync strategy             | Bidirectional        | Bidirectional        | _Mirror local_ / _Mirror remote_ make one side an exact copy of the other and delete the rest. Use them only to recover from a broken state.                                                                                                                                                                             |
+| Conflict resolve strategy | Rename and keep both | Rename and keep both | When both sides changed: the newer version keeps the name, the other becomes `name.conflict.md` on both sides. _Smart merge_ merges text line by line and marks overlapping edits; without a known base it also keeps both. _Latest survives_, _Keep local_ and _Keep remote_ discard one version silently — avoid them. |
+
+### Google Drive
+
+| Setting             | Default    | Recommended          | What it does                                                                                                  |
+| ------------------- | ---------- | -------------------- | ------------------------------------------------------------------------------------------------------------- |
+| OAuth client ID     | —          | your client          | See [Setup](#setup). Saved in plugin settings.                                                                |
+| OAuth client secret | —          | your client          | Saved in the device's secure storage.                                                                         |
+| Connect account     | —          | token from rclone    | Verified before saving.                                                                                       |
+| Base directory      | vault name | same on every device | Drive folder that holds the vault, e.g. `Hubx/Vault/`. Every device syncing this vault must use the same one. |
+| Delete to trash     | on         | on                   | Deletions go to Drive's trash (kept 30 days) instead of being permanent.                                      |
+
+### Features
+
+| Setting                 | Default     | Recommended               | What it does                                                                                                                                                                                                |
+| ----------------------- | ----------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Realtime sync           | off, 5 s    | desktop: on · mobile: off | Syncs shortly after you edit a file.                                                                                                                                                                        |
+| Realtime sync fast mode | on          | on                        | Realtime syncs reuse the last remote listing instead of scanning Drive, so they only push your own changes. Remote changes arrive with the next startup, scheduled or manual sync.                          |
+| Startup sync            | off, 5 s    | on                        | Syncs once after Obsidian starts.                                                                                                                                                                           |
+| Scheduled sync          | off, 15 min | on, 5–15 min              | Periodic full sync; this is what picks up files other apps add to Drive.                                                                                                                                    |
+| Asymmetric storage      | off         | **off**                   | Stores the vault in Drive as a flat list of prefixed file names instead of real folders. Faster, but other apps and backups see unreadable names and files they add in subfolders are ignored. Keep it off. |
+
+### Controls
+
+| Setting                 | Default    | Recommended | What it does                                                              |
+| ----------------------- | ---------- | ----------- | ------------------------------------------------------------------------- |
+| Max file size           | off, 30 MB | off         | Skips files above the limit.                                              |
+| Max request concurrency | on, 50     | on, 50      | Parallel requests. Lower it (e.g. 10) if you see Drive rate-limit errors. |
+| Min request interval    | off        | off         | Minimum pause between requests.                                           |
+| Max memory consumption  | on, 100 MB | on, 100 MB  | Caps memory used for file contents during a sync; lower on old phones.    |
+
+### Filter rules
+
+| Setting         | Default                                                                              | Recommended | What it does                                       |
+| --------------- | ------------------------------------------------------------------------------------ | ----------- | -------------------------------------------------- |
+| Exclusion rules | VCS folders, `node_modules`, OS junk files, Office lock files, `.trash`, `.obsidian` | defaults    | Glob patterns that are never synced.               |
+| Inclusion rules | none                                                                                 | none        | Patterns synced even if an exclusion rule matches. |
+
+### Miscellaneous
+
+| Setting                            | Default | Recommended | What it does                                                                                                                                                                    |
+| ---------------------------------- | ------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Custom headers                     | none    | none        | Extra HTTP headers; not needed for Google Drive.                                                                                                                                |
+| Notice sync status on mobile       | on      | on          | Shows progress as a notice on mobile.                                                                                                                                           |
+| Avoid auto sync when offline       | on      | on          | Skips automatic syncs without a connection.                                                                                                                                     |
+| Confirm operations in manual sync  | on      | on          | Lists the planned changes before a manual sync runs.                                                                                                                            |
+| Confirm deletions during auto-sync | on      | **on**      | Before an automatic sync deletes local files (because they were deleted in Drive), asks first; you can re-upload instead. This is the guard against another app deleting notes. |
+
+### Development
+
+| Setting             | What it does                                                                                                                          |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Clear records       | Forgets what was synced before. The next sync treats every file present on both sides as a conflict or a new file. Only for recovery. |
+| Export logs to file | Writes the sync log into the vault for troubleshooting.                                                                               |
 
 ## Sync behavior
 
-- **Conflicts:** three-way merge for text when a common base is known;
-  otherwise both versions are kept (`renameAndKeepBoth`).
+- **Conflicts:** both versions are kept by default (`renameAndKeepBoth`).
+  Optional smart merge does a three-way merge for text when a common base is
+  known and falls back to keeping both.
 - **Deletes:** remote deletions require confirmation during automatic sync
   (`confirmDeleteInAutoSync`).
 - **Layout:** one vault maps to one Drive folder (`baseDirectory`). Listing is
