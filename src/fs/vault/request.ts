@@ -116,9 +116,10 @@ export default function createVaultRequest(app: App): VaultRequest {
 					finalize: () => {
 						if (newPath) return adapter.remove(newPath).catch(() => {});
 					},
-					// `url` is this vault's own file behind an app:// resource path, not a
-					// Network address: requestUrl cannot range-read it, and there is no
-					// Adapter API for reading part of a file.
+					// Reads part of this vault's own file behind its app:// resource path.
+					// No network is involved.
+					// Obsidian has no adapter call for reading a byte range.
+					// Nor can requestUrl address an app:// path at all.
 					requestRange: async (start, end) =>
 						(
 							await fetch(url, {
@@ -129,9 +130,11 @@ export default function createVaultRequest(app: App): VaultRequest {
 					size: params.size,
 				}) as never;
 			}
-			// Same here: a local vault file through its app:// resource path. fetch can
-			// Hand back a stream, requestUrl only a whole buffer, and streaming is what
-			// Keeps a large file from being held in memory in one piece.
+			// Same here: a local vault file behind its app:// resource path.
+			// Streaming is the point.
+			// Only fetch hands back a stream.
+			// Using requestUrl would pull in the whole file at once.
+			// That is exactly what streaming exists to avoid on a large attachment.
 			const response = await fetch(url);
 			if (!response.body) throw new Error('Streaming vault file is not supported!');
 			return response.body as never;
