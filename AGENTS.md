@@ -1,11 +1,11 @@
-# Sync Engine
+# Drive Bridge
 
-This is the monorepo for an extensible Obsidian syncing plugin to sync vault files between Obsidian and various backends. The plugin itself and modules are in `packages/`.
+This is the monorepo for Drive Bridge, an Obsidian plugin that syncs vault files with Google Drive. The plugin itself and its modules are in `packages/`. User-facing overview is in `README.md`, technical notes in `TECHNICAL.md`.
 
 ## Context
 
 - When exploring the repo, you must read related pages in `docs/src/pages/en/`, especially inside the `deep-dive/` folder: this is the fastest way to understand the engineering sophistication.
-- This repo is also an Obsidian vault used for testing. The config folder is at `.obsidian`, and plugin dist folder is symlinked to `.obsidian/plugins/sync-engine`. The folder also contains plugin settings in `data.json` and module binaries.
+- This repo is also an Obsidian vault used for testing. The config folder is at `.obsidian`, and plugin dist folder is symlinked to `.obsidian/plugins/drive-bridge`. The folder also contains plugin settings in `data.json` and module binaries.
 - `./test-files` are and are the only files used for local sync testing. You can do anything inside the folder without caring about changes or losses.
 
 ## Techstack
@@ -46,6 +46,13 @@ This is the monorepo for an extensible Obsidian syncing plugin to sync vault fil
 - I18n modules: `packages/i18n/`, package name `i18n`.
 - Smart merge module: `packages/smart-merge/`, package name `smart-merge`.
 
+## Security
+
+- No remote code: never add code that downloads, evaluates or imports JavaScript at runtime. Everything the plugin runs must be bundled from this repo.
+- Network calls go only to Google (`googleapis.com`, `oauth2.googleapis.com`). Do not add other endpoints, telemetry or analytics.
+- Do not add a dependency without asking first. Prefer platform APIs (Obsidian, Web APIs) or a small local implementation.
+- Never commit credentials. Client ID and secret come from settings; the refresh token lives in secret storage.
+
 ## Conventions
 
 - For mobile compatibility, Node.js API prohibited in plugin and modules.
@@ -54,7 +61,7 @@ This is the monorepo for an extensible Obsidian syncing plugin to sync vault fil
 - All Obsidian API mocks go `packages/shared/test/obsidian-mock.ts`.
 - Use inline Tailwind CSS for common styling, only use semantic CSS for animations and complex compositions. (Documentation website doesn't use TailwindCSS, you need to edit `docs/.vitepress/theme/styles.css`)
 - When any function or class needs to use `Context` as argument, prefer structural typing instead of direct `Context`.
-- Excluding main plugin, shared utils and documentation site, all packages are Sync Engine modules, they use the SDK and follow unified module structure.
+- Excluding main plugin, shared utils and documentation site, all packages are Drive Bridge modules, they use the SDK and follow unified module structure.
 - `null` forbidden, use `undefined` consistently.
 - Lint warnings must be cleared, except time-bounded ones (TODO with date, deprecated API for compat)
 - SDK types (`**/*.d.ts` in `packages/plugin/dist/`) are committed to satisfy Obsidian automated linting. Never edit, delete, restore, clean, or otherwise alter these files, even when builds or checks create uncommitted changes. Leave their existing worktree state unchanged.
@@ -64,7 +71,7 @@ This is the monorepo for an extensible Obsidian syncing plugin to sync vault fil
 - The primary documentation locates in `docs/src/pages/en/` has three sections in three folders: `usage/`, `development/`, and `deep-dive/`:
   - `usage/`: designed for non-technical users, avoid dev jargons
   - `development/`: SDK API reference and practical module development setups only
-  - `deep-dive/`: Sync Engine internals
+  - `deep-dive/`: plugin internals
 - Prefer inter-page links when other pages have relevant content, duplication content cross-page is forbidden.
 - Link format: Link to title anchors when possible, strict relative links, no `.md` extension.
 - Only add inter-links when the content is truly relevant, you must not link distant pages just for link count.
