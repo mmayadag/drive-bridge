@@ -120,6 +120,83 @@ vault in git or another sync tool as well, exclude them there too:
 .obsidian/workspace-mobile.json
 ```
 
+## How it works
+
+### Pieces
+
+```mermaid
+flowchart LR
+    subgraph Device["Obsidian (each device)"]
+        Vault[("Vault files")]
+        VaultFs["Local file system<br/>(vault adapter)"]
+        Engine["Sync engine<br/>list · decide · run tasks"]
+        DriveFs["Google Drive file system<br/>(paths ↔ Drive file ids)"]
+        MW["Request pipeline<br/>bearer token · retry · rate limit"]
+        IDB[("IndexedDB<br/>sync records per account<br/>merge base texts")]
+        Secret[("Secret storage<br/>client secret · refresh token")]
+        Data[("data.json<br/>settings · client ID")]
+    end
+    Drive[("Google Drive<br/>base directory")]
+    Other["Other apps<br/>(AI assistant, backup server)"]
+
+    Vault <--> VaultFs <--> Engine <--> DriveFs --> MW --> Drive
+    Engine <--> IDB
+    MW -.-> Secret
+    Other <--> Drive
+```
+
+The engine only ever talks to two file systems: the vault and the Drive
+folder. Everything else is a wrapper around one of them (cancellation, memory
+limits, the base-directory prefix, smart merge's base-text capture) or around
+the HTTP request (access token, retry, rate limit). The **records** in
+IndexedDB remember what each file looked like on both sides after the last
+successful sync; they are what turns "the file differs" into "this side
+changed".
+
+### One sync
+
+```mermaid
+flowchart TD
+    T["Trigger<br/>manual · realtime · startup · scheduled"] --> L
+    L["List vault and Drive in parallel<br/>apply inclusion / exclusion rules"] --> R
+    R["Load records from IndexedDB"] --> D
+    D["Decide per path<br/>(table below)"] --> M
+    M["Detect moves<br/>delete + create of the same file → move"] --> C
+    C{"Confirm?"}
+    C -->|"manual sync"| C1["Review all planned changes"]
+    C -->|"automatic sync with local deletions"| C2["Confirm deletions<br/>or re-upload instead"]
+    C -->|"otherwise"| X
+    C1 --> X
+    C2 --> X
+    X["Run tasks in parallel<br/>upload · download · mkdir · move · remove · resolve conflict"] --> U
+    U["Each finished task updates its record"] --> S
+    S["Report: completed · failed · cancelled"]
+```
+
+Sync requests that arrive while a sync is running are queued and merged into
+one run with the options of the strongest trigger (manual, then startup, then
+scheduled, then realtime). Realtime syncs in fast mode skip the Drive scan
+and reuse the last listing, so remote changes arrive with the next full sync.
+A failed task leaves its record untouched, so the next sync retries it.
+
+### Deciding a file
+
+"Changed" means different from the record, i.e. from the last sync.
+
+| Record | Vault | Drive | Action                                                                                     |
+| ------ | ----- | ----- | ------------------------------------------------------------------------------------------ |
+| no     | yes   | no    | Upload                                                                                     |
+| no     | no    | yes   | Download                                                                                   |
+| no     | yes   | yes   | Same size: just record it. Otherwise: resolve conflict                                     |
+| yes    | yes   | yes   | Only Drive changed: download · only vault changed: upload · both changed: resolve conflict |
+| yes    | yes   | no    | Vault changed: upload again · unchanged: delete from vault (confirmed in auto-sync)        |
+| yes    | no    | yes   | Drive changed: download again · unchanged: delete from Drive                               |
+| yes    | no    | no    | Forget the record                                                                          |
+
+Folders follow the same idea. A deleted folder is only removed on the other
+side if nothing inside it changed since the last sync; otherwise it is
+recreated.
+
 ## Settings
 
 Defaults are what a fresh install uses. _Recommended_ is for a vault that
