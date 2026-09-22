@@ -224,12 +224,12 @@ folder); for a vault only you edit, the defaults are fine except where noted.
 
 ### Features
 
-| Setting                 | Default     | Recommended               | What it does                                                                                                                                                                       |
-| ----------------------- | ----------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Realtime sync           | off, 5 s    | desktop: on · mobile: off | Syncs shortly after you edit a file.                                                                                                                                               |
-| Realtime sync fast mode | on          | on                        | Realtime syncs reuse the last remote listing instead of scanning Drive, so they only push your own changes. Remote changes arrive with the next startup, scheduled or manual sync. |
-| Startup sync            | off, 5 s    | on                        | Syncs once after Obsidian starts.                                                                                                                                                  |
-| Scheduled sync          | off, 15 min | on, 5–15 min              | Periodic full sync; this is what picks up files other apps add to Drive.                                                                                                           |
+| Setting                 | Default    | Recommended               | What it does                                                                                                                                                                       |
+| ----------------------- | ---------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Realtime sync           | off, 5 s   | desktop: on · mobile: off | Syncs shortly after you edit a file.                                                                                                                                               |
+| Realtime sync fast mode | on         | on                        | Realtime syncs reuse the last remote listing instead of scanning Drive, so they only push your own changes. Remote changes arrive with the next startup, scheduled or manual sync. |
+| Startup sync            | on, 5 s    | on                        | Syncs once after Obsidian starts.                                                                                                                                                  |
+| Scheduled sync          | on, 15 min | on, 5–15 min              | Periodic full sync; this is what picks up files other apps add to Drive.                                                                                                           |
 
 ### Controls
 

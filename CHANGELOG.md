@@ -17,7 +17,9 @@ First version of Drive Bridge.
 - The Drive folder holds a normal folder tree, so other apps and backups see
   the same structure as the vault.
 - Remote deletions ask for confirmation during automatic sync.
-- Startup, scheduled and on-change sync; review tasks before they run.
+- Syncs on startup and every 15 minutes out of the box; on-change sync can be
+  switched on per device. All three are configurable in the settings.
+- Manual syncs show the planned changes before they run.
 - Settings show when this device last synced and how it ended.
 
 ### Sign-in

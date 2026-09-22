@@ -92,8 +92,8 @@ export default class DriveBridge extends Plugin {
 			realtimeSync: { enabled: false, value: 5000 },
 			realtimeSyncFastMode: true,
 			remoteFs: '',
-			scheduledSync: { enabled: false, value: 15 * 60 * 1000 },
-			startupSync: { enabled: false, value: 5000 },
+			scheduledSync: { enabled: true, value: 15 * 60 * 1000 },
+			startupSync: { enabled: true, value: 5000 },
 			...((await this.loadData()) as Record<string, unknown>),
 		};
 		void this.saveSettings();
