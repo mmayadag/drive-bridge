@@ -1,7 +1,7 @@
 import type { Events, Translations } from '@';
+import type { Ref } from '@repo/shared/kernel';
+import type { DatabaseSync } from '@repo/shared/kv';
 import type { App, SecretStorage } from 'obsidian';
-import type { Ref } from 'synthkernel';
-import type { DatabaseSync } from 'uni-kv';
 import type { FileTreeTranslations } from '@/components/file-tree';
 import type { BatchOptimizer, Fs, MemoryControlSharedState } from '@/fs';
 import type { ControlsSettingTranslations } from '@/settings/controls';

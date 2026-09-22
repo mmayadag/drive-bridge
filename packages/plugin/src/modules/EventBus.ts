@@ -1,6 +1,6 @@
 import type { Events } from '@';
+import { ref } from '@repo/shared/kernel';
 import { apiVersion, Platform } from 'obsidian';
-import { ref } from 'synthkernel';
 import type { General } from '@/types';
 import formatDateTime from '@/utils/format-date';
 import { formatTime } from '@/utils/unit-converter';

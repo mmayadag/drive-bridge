@@ -1,6 +1,6 @@
 import testKit from '$/test-kit';
+import { openMemoryDB } from '@repo/shared/kv';
 import { beforeEach, expect, test } from 'bun:test';
-import { openMemoryDB } from 'uni-kv';
 import type { Stat } from '@/types';
 import { asymmetricStorageWrapper } from '@/fs';
 import { STORAGE_NAME } from '@/modules/Storage';

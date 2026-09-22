@@ -1,9 +1,9 @@
 import type { Events, Translations } from '@';
+import type { Ref } from '@repo/shared/kernel';
 import type { App, Command, DataAdapter, IconName } from 'obsidian';
-import type { Ref } from 'synthkernel';
 import { getMessage } from '@repo/shared/error';
+import { computed, ref } from '@repo/shared/kernel';
 import { Notice, Platform, setIcon } from 'obsidian';
-import { computed, ref } from 'synthkernel';
 import type { Progress } from '@/types';
 import roundPercent from '@/utils/round-percent';
 import { formatTime } from '@/utils/unit-converter';

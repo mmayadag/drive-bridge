@@ -1,7 +1,7 @@
 import type { Binary, MaybePromise, RequestParam, RequestResponse } from '@drive-bridge/sdk';
 import { testKit } from '@drive-bridge/sdk/dev';
+import { openMemoryDB } from '@repo/shared/kv';
 import { beforeEach, expect, test } from 'bun:test';
-import { openMemoryDB } from 'uni-kv';
 import type { GdriveDB } from '@/gdrive/fs';
 import { DRIVE_API, DRIVE_UPLOAD_API, FOLDER_MIME } from '@/gdrive/api';
 import GdriveFs from '@/gdrive/fs';

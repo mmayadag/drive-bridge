@@ -1,8 +1,8 @@
 import '@/global.css';
+import type { Context as KernelContext, MergeSingleKey } from '@repo/shared/kernel';
 import type { Command, EventRef, App } from 'obsidian';
-import type { Context as KernelContext, MergeSingleKey } from 'synthkernel';
+import { createContext } from '@repo/shared/kernel';
 import { Plugin } from 'obsidian';
-import { createContext } from 'synthkernel';
 import type { AddRibbonIcon } from '@/modules/Observability';
 import Bootstrap from '@/modules/Bootstrap';
 import BundledModules from '@/modules/BundledModules';

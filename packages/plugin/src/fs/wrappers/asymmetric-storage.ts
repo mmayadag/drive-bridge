@@ -1,4 +1,4 @@
-import type { StoreSync } from 'uni-kv';
+import type { StoreSync } from '@repo/shared/kv';
 import { basename, dirname, isFolder, isSub } from '@repo/shared/path';
 import type { Stat, Binary, FileStat } from '@/types';
 import type { Fs, ListReporter, WrappedFs } from '../interface';

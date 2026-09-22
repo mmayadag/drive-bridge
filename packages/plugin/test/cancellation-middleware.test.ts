@@ -1,6 +1,6 @@
 import testKit from '$/test-kit';
+import { ref } from '@repo/shared/kernel';
 import { expect, test } from 'bun:test';
-import { ref } from 'synthkernel';
 import type { RequestResponse } from '@/modules/Registrar';
 import { cancellationMiddleware } from '@/fs';
 

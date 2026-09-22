@@ -16,8 +16,8 @@ This is the monorepo for Drive Bridge, an Obsidian plugin that syncs vault files
 - **Tsdown** for building
 - **Oxlint and Oxfmt** for linting and formatting
 - **Solid.js** and **TailwindCSS** (via UnoCSS) for UI
-- custom package **SynthKernel** for dependency injection
-- custom package **Uni-KV** for IndexedDB and in-memory database.
+- `packages/shared/src/kernel.ts` for dependency injection and reactive refs
+- `packages/shared/src/kv.ts` for IndexedDB and in-memory key-value storage
 
 ## Commands
 
@@ -28,7 +28,6 @@ This is the monorepo for Drive Bridge, an Obsidian plugin that syncs vault files
 - `bun tests`: run all tests (do not use `bun test`).
 - `bun tests -F <package-name> -- <test path>`: run tests in specific file.
 - `bun <command> -F <package-name>`: run command targeting a specific package.
-- `cd packages/plugin && bun synthkernel <file-name> <type-alias>`: inspect the final flattened content of a type alias in a file, use to inspect merged types, do not explore the entire codebase.
 - `bun -e '<code>'` run TS code directly, can import from codebase, use double quotes inside code.
 
 ## Packages
@@ -57,7 +56,6 @@ This is the monorepo for Drive Bridge, an Obsidian plugin that syncs vault files
 - `gdrive` and `smart-merge` are modules bundled into `main.js` by `packages/plugin/src/modules/BundledModules.ts`. To add a module, import it there; there is no runtime module loading.
 - `null` forbidden, use `undefined` consistently.
 - Lint warnings must be cleared, except time-bounded ones (TODO with date, deprecated API for compat)
-- SDK types (`**/*.d.ts` in `packages/plugin/dist/`) are committed to satisfy Obsidian automated linting. Never edit, delete, restore, clean, or otherwise alter these files, even when builds or checks create uncommitted changes. Leave their existing worktree state unchanged.
 
 ## Documentation
 

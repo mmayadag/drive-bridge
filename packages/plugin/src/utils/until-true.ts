@@ -1,4 +1,4 @@
-import type { Ref } from 'synthkernel';
+import type { Ref } from '@repo/shared/kernel';
 
 export default function untilTrue(ref: Ref<boolean>, stop?: 'stop') {
 	if (ref()) return;

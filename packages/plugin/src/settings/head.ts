@@ -1,5 +1,5 @@
 import type { Events, Settings } from '@';
-import type { DatabaseSync } from 'uni-kv';
+import type { DatabaseSync } from '@repo/shared/kv';
 import { getMessage } from '@repo/shared/error';
 import { ExtraButtonComponent, Notice, PluginSettingTab, setTooltip } from 'obsidian';
 import type { Fragment, Translate } from '@/modules/I18n';

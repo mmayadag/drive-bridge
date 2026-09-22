@@ -1,6 +1,6 @@
 import type { Events } from '@';
+import type { Ref } from '@repo/shared/kernel';
 import type { App, EventRef, TAbstractFile } from 'obsidian';
-import type { Ref } from 'synthkernel';
 import type { GlobMatchRule, TogglableValue } from '@/types';
 import { prepareGlobMatch } from '@/utils/glob-match';
 import untilTrue from '@/utils/until-true';

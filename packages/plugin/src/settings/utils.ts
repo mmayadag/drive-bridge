@@ -1,3 +1,4 @@
+import type { DatabaseSync } from '@repo/shared/kv';
 import type {
 	ExtraButtonComponent,
 	Setting,
@@ -7,7 +8,6 @@ import type {
 	SettingDefinitionPage,
 	TextComponent,
 } from 'obsidian';
-import type { DatabaseSync } from 'uni-kv';
 import { encodeURIComponent3986 } from '@repo/shared/path';
 import { setIcon } from 'obsidian';
 import type { CallableOrObjectTree, SettingTree } from '@/modules/Setting';

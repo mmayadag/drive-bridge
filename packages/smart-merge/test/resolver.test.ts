@@ -1,8 +1,8 @@
 import type { DatabaseAsync, RecordStat, RecordStore } from '@drive-bridge/sdk';
 import { testKit } from '@drive-bridge/sdk/dev';
 import { uint8ArrayToText } from '@repo/shared/binary';
+import { openMemoryDB } from '@repo/shared/kv';
 import { beforeEach, expect, test } from 'bun:test';
-import { openMemoryDB } from 'uni-kv';
 import type { SmartMergeDatabase } from '@/index';
 import type { MergeOptions } from '@/utils/merge';
 import smartMergeResolver from '@/resolver';

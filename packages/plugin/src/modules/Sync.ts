@@ -1,8 +1,8 @@
 import type { Events, Translations } from '@';
-import type { Ref } from 'synthkernel';
+import type { Ref } from '@repo/shared/kernel';
 import { getMessage } from '@repo/shared/error';
+import { ref } from '@repo/shared/kernel';
 import { isSub } from '@repo/shared/path';
-import { ref } from 'synthkernel';
 import type { Fs, ListReporter } from '@/fs';
 import type {
 	BaseTask,

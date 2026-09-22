@@ -1,7 +1,7 @@
 import type { StoreAsync } from '@drive-bridge/sdk';
 import { testKit } from '@drive-bridge/sdk/dev';
+import { openMemoryDB } from '@repo/shared/kv';
 import { beforeEach, expect, test } from 'bun:test';
-import { openMemoryDB } from 'uni-kv';
 import smartMergeBaseTextWrapper from '@/wrapper';
 
 const { bytes, file, fs } = testKit;

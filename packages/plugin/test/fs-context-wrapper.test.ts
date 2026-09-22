@@ -1,7 +1,7 @@
-import type { DatabaseSync } from 'uni-kv';
+import type { DatabaseSync } from '@repo/shared/kv';
 import testKit from '$/test-kit';
+import { openMemoryDB } from '@repo/shared/kv';
 import { beforeEach, expect, test } from 'bun:test';
-import { openMemoryDB } from 'uni-kv';
 import type { Fs } from '@/fs';
 import type { FileStat, Stat } from '@/types';
 import { contextWrapper } from '@/fs';

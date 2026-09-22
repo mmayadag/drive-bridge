@@ -1,5 +1,5 @@
+import type { StoreAsync } from '@repo/shared/kv';
 import type { App, RequestUrlParam } from 'obsidian';
-import type { StoreAsync } from 'uni-kv';
 import { toArrayBuffer, toUint8Array } from '@repo/shared/binary';
 import hash from '@repo/shared/crypto';
 import { requestUrl } from 'obsidian';

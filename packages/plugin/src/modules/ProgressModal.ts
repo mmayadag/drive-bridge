@@ -1,8 +1,8 @@
 import type { Events, Translations } from '@';
+import type { Ref } from '@repo/shared/kernel';
 import type { App } from 'obsidian';
-import type { Ref } from 'synthkernel';
+import { computed, hook } from '@repo/shared/kernel';
 import { Modal, Setting } from 'obsidian';
-import { computed, hook } from 'synthkernel';
 import type { BaseTask, RemoveLocal, TaskNames } from '@/sync';
 import type { Progress } from '@/types';
 import mountFileTree from '@/components/file-tree';

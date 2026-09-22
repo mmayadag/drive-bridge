@@ -1,5 +1,5 @@
-import type { DatabaseAsync, StoreAsync } from 'uni-kv';
-import { deleteMemoryDB, openIndexedDB, openMemoryDB } from 'uni-kv';
+import type { DatabaseAsync, StoreAsync } from '@repo/shared/kv';
+import { deleteMemoryDB, openIndexedDB, openMemoryDB } from '@repo/shared/kv';
 import type { General, MaybePromise, RecordStat } from '@/types';
 
 export type IndexedDBSchema = Record<string, RecordStat>;

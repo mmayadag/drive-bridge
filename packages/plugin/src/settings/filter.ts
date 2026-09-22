@@ -1,6 +1,6 @@
 import type { Settings } from '@';
+import type { DatabaseSync } from '@repo/shared/kv';
 import type { SettingGroupItem } from 'obsidian';
-import type { DatabaseSync } from 'uni-kv';
 import type { Fragment, Snippet, Translate } from '@/modules/I18n';
 import type { CallableOrObjectTree } from '@/modules/Setting';
 import type { General, GlobMatchRule } from '@/types';

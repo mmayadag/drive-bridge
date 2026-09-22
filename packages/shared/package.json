@@ -14,5 +14,8 @@
 		"fix": "oxlint --silent --fix && oxfmt",
 		"check": "tsc && oxlint && oxfmt --check",
 		"tests": "bun test ./test"
+	},
+	"devDependencies": {
+		"idb": "^8.0.3"
 	}
 }

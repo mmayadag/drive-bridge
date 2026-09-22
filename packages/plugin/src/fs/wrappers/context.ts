@@ -1,4 +1,4 @@
-import type { DatabaseSync, StoreSync } from 'uni-kv';
+import type { DatabaseSync, StoreSync } from '@repo/shared/kv';
 import type { MaybePromise, Stat, Binary, FileStat } from '@/types';
 import type { WrappedFs, Fs, ListReporter } from '../interface';
 

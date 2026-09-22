@@ -42,8 +42,6 @@
 		"@unocss/postcss": "^66.10.0",
 		"postcss-merge-rules": "^9.0.3",
 		"solid-js": "^1.9.15",
-		"synthkernel": "./synthkernel.tgz",
-		"uni-kv": "../../uni-kv.tgz",
 		"unocss": "^66.10.0",
 		"unplugin-solid": "^2.0.0"
 	}

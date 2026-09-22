@@ -1,4 +1,4 @@
-import type { StoreAsync } from 'uni-kv';
+import type { StoreAsync } from '@repo/shared/kv';
 
 export default async function moveValue({
 	store,

@@ -23,7 +23,6 @@
       "devDependencies": {
         "@drive-bridge/sdk": "workspace:*",
         "@repo/shared": "workspace:*",
-        "uni-kv": "../../uni-kv.tgz",
       },
     },
     "packages/plugin": {
@@ -37,8 +36,6 @@
         "@unocss/postcss": "^66.10.0",
         "postcss-merge-rules": "^9.0.3",
         "solid-js": "^1.9.15",
-        "synthkernel": "./synthkernel.tgz",
-        "uni-kv": "../../uni-kv.tgz",
         "unocss": "^66.10.0",
         "unplugin-solid": "^2.0.0",
       },
@@ -46,6 +43,9 @@
     "packages/shared": {
       "name": "@repo/shared",
       "version": "0.0.1",
+      "devDependencies": {
+        "idb": "^8.0.3",
+      },
     },
     "packages/smart-merge": {
       "name": "smart-merge",
@@ -53,7 +53,6 @@
       "devDependencies": {
         "@drive-bridge/sdk": "workspace:*",
         "@repo/shared": "workspace:*",
-        "uni-kv": "../../uni-kv.tgz",
       },
     },
   },
@@ -620,8 +619,6 @@
 
     "style-mod": ["style-mod@4.1.3", "", {}, "sha512-i/n8VsZydrugj3Iuzll8+x/00GH2vnYsk1eomD8QiRrSAeW6ItbCQDtfXCeJHd0iwiNagqjQkvpvREEPtW3IoQ=="],
 
-    "synthkernel": ["synthkernel@./synthkernel.tgz", { "dependencies": { "typescript": "6.0.3" }, "bin": { "synthkernel": "./dist/bin.js" } }, "sha512-d2gFc3i5auI4YwCu5403Stb50aaRxruhZo9I71UKM21YcyV4hE1QBiuO8oIfpnp2Jh1KhkWZtReWjzRGGmPkMw=="],
-
     "tinyexec": ["tinyexec@1.3.1", "", {}, "sha512-GCvB3aoys96IuDFBMcTB46JOR6mdMtAToqwiW8JlWhsoh1mhHi/xn9ss/Dg7N555GiJyEt2qzoG/NHCwM6h1EA=="],
 
     "tinyglobby": ["tinyglobby@0.2.17", "", { "dependencies": { "fdir": "^6.5.0", "picomatch": "^4.0.4" } }, "sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g=="],
@@ -645,8 +642,6 @@
     "unconfig-core": ["unconfig-core@7.5.0", "", { "dependencies": { "@quansync/fs": "^1.0.0", "quansync": "^1.0.0" } }, "sha512-Su3FauozOGP44ZmKdHy2oE6LPjk51M/TRRjHv2HNCWiDvfvCoxC2lno6jevMA91MYAdCdwP05QnWdWpSbncX/w=="],
 
     "undici-types": ["undici-types@8.9.0", "", {}, "sha512-KTDyRTYX8sWmKXAikPHHSyc63CRPETMctyjKFupcC6OBLXT3xsN0e9aF7m+mIXutFWpUXuedtowG7iLOzp0kQg=="],
-
-    "uni-kv": ["uni-kv@../../uni-kv.tgz", { "dependencies": { "idb": "^8.0.3" } }, "sha512-QbiBxUAUUbBWxOvAEtsGJNuYuYYg+tUk42Wv7KLrCyb0Z8LNEdYAAS/EZxURbnrPDSVVRZjC8PCK9kwgA2clRQ=="],
 
     "unocss": ["unocss@66.10.5", "", { "dependencies": { "@unocss/cli": "66.10.5", "@unocss/core": "66.10.5", "@unocss/preset-attributify": "66.10.5", "@unocss/preset-icons": "66.10.5", "@unocss/preset-mini": "66.10.5", "@unocss/preset-tagify": "66.10.5", "@unocss/preset-typography": "66.10.5", "@unocss/preset-uno": "66.10.5", "@unocss/preset-web-fonts": "66.10.5", "@unocss/preset-wind": "66.10.5", "@unocss/preset-wind3": "66.10.5", "@unocss/preset-wind4": "66.10.5", "@unocss/rollup": "66.10.5", "@unocss/transformer-attributify-jsx": "66.10.5", "@unocss/transformer-compile-class": "66.10.5", "@unocss/transformer-directives": "66.10.5", "@unocss/transformer-variant-group": "66.10.5", "@unocss/vite": "66.10.5" }, "peerDependencies": { "@unocss/astro": "66.10.5", "@unocss/postcss": "66.10.5", "@unocss/webpack": "66.10.5" }, "optionalPeers": ["@unocss/astro", "@unocss/postcss", "@unocss/webpack"] }, "sha512-hts6uxRjtEdOLmdmo0Mbh5k3jrHsjsQlU3rFJdtob+wu57iM5b+d70fnxqMWe7yF/OBeiZKW6H+ti0qHNJBKPw=="],
 

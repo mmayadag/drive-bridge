@@ -1,8 +1,8 @@
 import type { Events } from '@';
 import type { App, ToggleComponent } from 'obsidian';
 import { getMessage } from '@repo/shared/error';
+import { ref } from '@repo/shared/kernel';
 import { Modal, Notice, Setting } from 'obsidian';
-import { ref } from 'synthkernel';
 import type { ExistingMemoryDB } from '@/modules/Bootstrap';
 import type { Dispatch } from '@/modules/EventBus';
 import type { Translate } from '@/modules/I18n';

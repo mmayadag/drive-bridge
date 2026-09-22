@@ -11,5 +11,3 @@ Drive Bridge Logs
 **/node_modules
 **/cache
 **/.env
-!packages/plugin/dist
-packages/plugin/dist/**/*.js
