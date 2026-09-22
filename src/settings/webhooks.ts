@@ -5,6 +5,22 @@ import type { CallableOrObjectTree } from '@/modules/setting';
 import { normalizeUrl } from '@/shared/path';
 import { reactivelyValidate, s } from './utils';
 
+/**
+ * Empty means the webhook is off. Anything else has to be an https URL: the payload
+ * carries the vault name and the sync result, which plain http would put in the clear.
+ * Returns undefined for anything else, which marks the field invalid while typing.
+ */
+export function parseWebhookUrl(value: string): string | undefined {
+	const entered = value.trim();
+	if (!entered) return '';
+	try {
+		const url = normalizeUrl(entered);
+		return url.startsWith('https://') ? url : undefined;
+	} catch {
+		return undefined;
+	}
+}
+
 export type WebhooksSettingTranslations = {
 	webhooks: string;
 	webhookOnStart: string;
@@ -37,15 +53,7 @@ export default function webhooksSettings({
 							settings[key] = value;
 							void saveSettings();
 						},
-						parse: (value) => {
-							const entered = value.trim();
-							if (!entered) return '';
-							const url = normalizeUrl(entered);
-							// A webhook carries the vault name and the sync result; plain http
-							// Would put both on the wire in the clear.
-							if (!url.startsWith('https://')) throw new Error('Only https');
-							return url;
-						},
+						parse: parseWebhookUrl,
 						text,
 					});
 				});
