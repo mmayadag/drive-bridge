@@ -22,6 +22,7 @@ import en from './i18n';
 import gdriveSetting from './setting';
 
 export type GdriveSettings = {
+	accountEmail: string;
 	baseDirectory: string;
 	clientId: string;
 	useTrash: boolean;
@@ -54,6 +55,7 @@ export default class Gdrive {
 	}
 
 	readonly moduleSettings: GdriveSettings = {
+		accountEmail: '',
 		baseDirectory: '',
 		clientId: '',
 		useTrash: true,

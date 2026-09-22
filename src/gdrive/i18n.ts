@@ -2,7 +2,8 @@ import type { GdriveTranslations } from './setting';
 
 const en: GdriveTranslations = {
 	accountConnected: 'Account connected',
-	accountConnectedDescription: 'Connected to Google Drive account.',
+	accountConnectedDescription: (email) =>
+		email ? `Connected as ${email}.` : 'Connected to Google Drive.',
 	authorizationFailed: (reason) => `Authorization failed: ${reason}`,
 	baseDirectory: 'Base directory',
 	baseDirectoryDescription:
@@ -17,24 +18,24 @@ const en: GdriveTranslations = {
 	configureFirst: 'Enter the OAuth client ID and client secret first.',
 	connect: 'Connect',
 	connectAccount: 'Connect account',
-	connectAccountDescription: 'Click the button to connect to your Google Drive account.',
-	connectSuccess: 'Connected to Google Drive.',
-	copyAndOpenGoogle: 'Copy and open Google',
-	deviceCodeInstruction: (url) =>
+	connectAccountDescription: () =>
 		createFragment((frag) => {
-			frag.appendText('Please visit ');
-			frag.createEl('a', { attr: { href: url } }).createEl('code', { text: url });
+			frag.appendText('On a computer, run ');
+			frag.createEl('code', { text: 'rclone authorize "drive" <client ID> <client secret>' });
 			frag.appendText(
-				' and enter the code below, then approve access. Switch back to Obsidian when you see "Continue on your device".',
+				" and paste the token it prints. Stored in this device's secure storage.",
 			);
 		}),
-	deviceCodeTitle: 'Connect Google Drive',
-	disconnect: 'Disconnect',
+	connectSuccess: 'Connected to Google Drive.',
+	disconnect: 'Forget on this device',
 	gdrive: 'Google Drive',
+	invalidRefreshToken: 'That does not look like a refresh token or rclone token output.',
+	limitedScope:
+		'This token only has limited Drive access (drive.file). Create it with rclone\'s default "drive" scope.',
+	refreshTokenPlaceholder: 'Refresh token or rclone output',
 	useTrash: 'Delete to trash',
 	useTrashDescription:
 		'Move deleted files to the Google Drive trash instead of deleting them permanently. Drive clears its trash after 30 days.',
-	waitingApproval: 'Waiting for approval…',
 };
 
 export default en;

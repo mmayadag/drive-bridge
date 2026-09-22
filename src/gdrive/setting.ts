@@ -1,5 +1,5 @@
-import type { App, SettingGroupItem } from 'obsidian';
-import { Modal, Notice, Setting } from 'obsidian';
+import type { SettingGroupItem } from 'obsidian';
+import { Notice } from 'obsidian';
 import type {
 	CallableOrObjectTree,
 	Dispatch,
@@ -7,7 +7,6 @@ import type {
 	LabelDefinition,
 	Snippet,
 	Translate,
-	Translations,
 	Events,
 } from '@/sdk';
 import { s } from '@/sdk';
@@ -15,21 +14,17 @@ import { getMessage } from '@/shared/error';
 import { normalizeBaseDir } from '@/shared/path';
 import type { GdriveSettings } from '.';
 import type { TokenManager } from './auth';
-import { pollDeviceToken, revokeToken, startDeviceAuthorization } from './auth';
+import { fetchAccount, parseRefreshToken } from './auth';
 
 export type GdriveTranslations = {
 	gdrive: string;
 	connectAccount: string;
 	accountConnected: string;
-	accountConnectedDescription: string;
-	connectAccountDescription: string;
+	accountConnectedDescription: Snippet<string>;
+	connectAccountDescription: Fragment;
 	connect: string;
 	disconnect: string;
 	configureFirst: string;
-	deviceCodeTitle: string;
-	deviceCodeInstruction: Fragment<string>;
-	copyAndOpenGoogle: string;
-	waitingApproval: string;
 	connectSuccess: string;
 	baseDirectory: string;
 	baseDirectoryDescription: string;
@@ -41,75 +36,21 @@ export type GdriveTranslations = {
 	clientIdDescription: string;
 	clientSecret: string;
 	clientSecretDescription: string;
+	invalidRefreshToken: string;
+	limitedScope: string;
+	refreshTokenPlaceholder: string;
 };
-
-type DeviceCodeModalOptions = {
-	translate: Translate<GdriveTranslations & Translations>;
-	userCode: string;
-	verificationUrl: string;
-	onClose: () => void;
-};
-
-class DeviceCodeModal extends Modal {
-	constructor(
-		app: App,
-		private readonly options: DeviceCodeModalOptions,
-	) {
-		super(app);
-	}
-
-	onOpen(): void {
-		const {
-			contentEl,
-			titleEl,
-			options: { translate, userCode, verificationUrl },
-		} = this;
-		titleEl.setText(translate('deviceCodeTitle'));
-		contentEl.addClass('markdown-rendered');
-		contentEl.createEl('p', {
-			text: translate('deviceCodeInstruction', verificationUrl),
-		});
-		contentEl.createEl('code', { cls: 'drive-bridge-device-code', text: userCode });
-		contentEl.createEl('p', {
-			cls: 'drive-bridge-device-code-status',
-			text: translate('waitingApproval'),
-		});
-		new Setting(contentEl)
-			.addButton((button) =>
-				button
-					.setButtonText(translate('cancel'))
-					.setDestructive()
-					.onClick(() => this.close()),
-			)
-			.addButton((button) =>
-				button
-					.setCta()
-					.setButtonText(translate('copyAndOpenGoogle'))
-					.onClick(() => {
-						void navigator.clipboard.writeText(userCode);
-						window.open(verificationUrl);
-						button.setIcon('check');
-					}),
-			);
-	}
-	onClose(): void {
-		this.contentEl.empty();
-		this.options.onClose();
-	}
-}
 
 export default function gdriveSetting(
 	{
 		translate,
 		saveSettings,
-		app,
 		matchLabel,
 		refreshSettingTab,
 		dispatch,
 	}: {
 		translate: Translate<GdriveTranslations>;
 		saveSettings: () => Promise<void>;
-		app: App;
 		matchLabel: () => LabelDefinition;
 		refreshSettingTab: () => void;
 		dispatch: Dispatch<Events>;
@@ -117,48 +58,33 @@ export default function gdriveSetting(
 	settings: GdriveSettings,
 	tokenManager: TokenManager,
 ): CallableOrObjectTree {
-	const connectGoogle = async (resolve: () => void) => {
-		let cancelled = false;
+	const connect = async (input: string) => {
 		if (!tokenManager.hasCredentials()) {
 			new Notice(translate('configureFirst'));
-			resolve();
 			return;
 		}
-		const credentials = tokenManager.getCredentials();
+		const refreshToken = parseRefreshToken(input);
+		if (!refreshToken) {
+			new Notice(translate('invalidRefreshToken'));
+			return;
+		}
+		tokenManager.setRefreshToken(refreshToken);
+		tokenManager.invalidate();
 		try {
-			const authorization = await startDeviceAuthorization(credentials);
-			const modal = new DeviceCodeModal(app, {
-				onClose: () => {
-					cancelled = true;
-					resolve();
-				},
-				translate,
-				userCode: authorization.userCode,
-				verificationUrl: authorization.verificationUrl,
-			});
-			modal.open();
-			try {
-				const { refreshToken, userId, accessToken, expiresIn } = await pollDeviceToken({
-					authorization,
-					credentials,
-					isCancelled: () => cancelled,
-				});
-				tokenManager.setRefreshToken(refreshToken);
-				settings.userId = userId;
-				tokenManager.setToken(accessToken, expiresIn);
-				void saveSettings();
-				new Notice(translate('connectSuccess'));
-				refreshSettingTab();
-			} finally {
-				modal.close();
-			}
+			const accessToken = await tokenManager.getToken(true);
+			if (!tokenManager.hasFullDriveScope()) throw new Error(translate('limitedScope'));
+			const { userId, email } = await fetchAccount(accessToken);
+			settings.userId = userId;
+			settings.accountEmail = email;
+			void saveSettings();
+			new Notice(translate('connectSuccess'));
+			refreshSettingTab();
 		} catch (error) {
-			if (cancelled) return;
+			tokenManager.deleteRefreshToken();
+			tokenManager.invalidate();
 			const reason = getMessage(error);
-			new Notice(translate('authorizationFailed', reason), 5);
+			new Notice(translate('authorizationFailed', reason), 5000);
 			dispatch('errorGeneral', `Google Drive auth failed: \`${reason}\`.`);
-		} finally {
-			resolve();
 		}
 	};
 
@@ -207,33 +133,36 @@ export default function gdriveSetting(
 					desc: translate('connectAccountDescription'),
 					name: translate('connectAccount'),
 					render: (setting) => {
-						setting.addButton((button) =>
-							button
-								.setButtonText(translate('connect'))
-								.setCta()
-								.onClick(
-									() =>
-										new Promise<void>((resolve) => {
-											void connectGoogle(resolve);
-										}),
-								),
-						);
+						let input = '';
+						setting
+							.addText((text) => {
+								text.inputEl.type = 'password';
+								text.setPlaceholder(translate('refreshTokenPlaceholder')).onChange(
+									(value) => (input = value),
+								);
+							})
+							.addButton((button) =>
+								button
+									.setButtonText(translate('connect'))
+									.setCta()
+									.onClick(() => connect(input)),
+							);
 					},
 					visible: () => !tokenManager.getRefreshToken(),
 				})),
 				1030: s(() => ({
-					desc: translate('accountConnectedDescription'),
+					desc: translate('accountConnectedDescription', settings.accountEmail),
 					name: translate('accountConnected'),
 					render: (setting) => {
 						setting.addButton((button) =>
 							button
 								.setButtonText(translate('disconnect'))
 								.setDestructive()
-								.onClick(async () => {
-									const token = tokenManager.getRefreshToken();
-									if (!token) return;
-									await revokeToken(token);
+								// Forgets the token on this device only.
+								// Other devices and the backup server may share it, so it is never revoked.
+								.onClick(() => {
 									settings.userId = '';
+									settings.accountEmail = '';
 									tokenManager.deleteRefreshToken();
 									tokenManager.invalidate();
 									void saveSettings();

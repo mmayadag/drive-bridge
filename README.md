@@ -31,9 +31,11 @@ Drive Bridge is not in the community store. Install it with
 
 ## Set up
 
-1. Create a Google Cloud OAuth client with the Drive API enabled.
-2. Paste the client ID and secret into Drive Bridge settings.
-3. Sign in, pick a Drive folder, run your first sync.
+1. Create a Google Cloud OAuth client (Desktop app) with the Drive API enabled.
+2. Get a refresh token once with
+   `rclone authorize "drive" <client ID> <client secret>`.
+3. On each device, enter the client ID, secret and token in Drive Bridge
+   settings, pick a Drive folder and run your first sync.
 
 Step-by-step instructions and the reasoning behind each choice are in
 [TECHNICAL.md](TECHNICAL.md).

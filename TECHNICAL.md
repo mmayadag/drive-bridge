@@ -4,14 +4,44 @@
 
 1. Create a new project in Google Cloud Console and enable the **Google Drive
    API**.
-2. Create an **OAuth client**.
-3. Scope: `https://www.googleapis.com/auth/drive` (full Drive).
-4. In Drive Bridge settings enter the client ID and client secret on every
-   device, then connect your account.
-5. Set the app's publishing status to **In production**. In Testing mode
+2. Create an **OAuth client** of type **Desktop app**.
+3. Set the app's publishing status to **In production**. In Testing mode
    refresh tokens expire after 7 days. The "unverified app" warning on the
    consent screen is expected for a personal client; continue via
    **Advanced**.
+
+## Signing in
+
+Drive Bridge does not run a sign-in flow itself. Get a refresh token once on a
+computer:
+
+```bash
+rclone authorize "drive" "<client ID>" "<client secret>"
+```
+
+rclone opens the browser, you approve, and it prints a JSON token. Then on
+every device, in Drive Bridge settings:
+
+1. Enter the **client ID** and **client secret**.
+2. Paste the token (the whole JSON or just the `refresh_token` value) and
+   press **Connect**.
+
+Connect checks the token right away: it gets an access token with your
+client, makes sure the grant is full `drive` rather than `drive.file`, and
+reads the account. If any step fails nothing is saved. Afterwards the
+account's email is shown in settings, and the connection check next to the
+backend setting keeps testing access.
+
+The same token can be used on every device and on the backup server.
+**Forget on this device** only removes it locally. To revoke it everywhere,
+remove the app under Google Account → Security → Third-party access.
+
+### Why not an in-plugin sign-in
+
+Google's device flow (enter a code on another screen) only allows
+`drive.file`. A browser redirect to a local server works on desktop but not on
+mobile. Pasting a token works everywhere and keeps the plugin free of any
+local server code.
 
 ### Why the full `drive` scope
 
@@ -21,11 +51,6 @@ never sync. Full `drive` scope is what lets Drive Bridge see them.
 
 The trade-off: a leaked token opens the whole Drive of that account. Use a
 Google account dedicated to your vault, not your personal one.
-
-> **Work in progress.** Sign-in currently uses Google's device flow, which only
-> allows `drive.file`. Full `drive` needs a different sign-in method, which is
-> the next change. Until then the plugin requests `drive.file` and needs an
-> OAuth client of type **TVs and Limited Input devices**.
 
 ## Security model
 

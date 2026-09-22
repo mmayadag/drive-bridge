@@ -21,7 +21,7 @@ void mock.module('obsidian', () => ({
 	},
 }));
 
-const { TokenManager, bearerMiddleware, pollDeviceToken, startDeviceAuthorization } =
+const { TokenManager, bearerMiddleware, fetchAccount, parseRefreshToken } =
 	await import('@/gdrive/auth');
 
 const credentials = { clientId: 'my-client', clientSecret: 'my-secret' };
@@ -31,147 +31,68 @@ function reset(...next: Array<HttpResponse>) {
 	responses = [...next];
 }
 
-async function expectPollFailure(err: Error, expected: string) {
-	reset({ throw: err });
+function secretStorage(entries: Array<[string, string]> = []) {
+	const secrets = new Map(entries);
+	const storage = {
+		deleteSecret: (id: string) => void secrets.delete(id),
+		getSecret: (id: string) => secrets.get(id),
+		setSecret: (id: string, value: string) => void secrets.set(id, value),
+	};
+	return { secrets, storage: storage as unknown as SecretStorage };
+}
+
+const FULL_DRIVE = 'https://www.googleapis.com/auth/drive';
+
+test('parses a bare refresh token and rclone output', () => {
+	expect(parseRefreshToken('  1//abc-DEF_123  ')).toBe('1//abc-DEF_123');
+	const rclone = JSON.stringify({ access_token: 'a', expiry: 'x', refresh_token: '1//r' });
+	expect(parseRefreshToken(rclone)).toBe('1//r');
+	expect(parseRefreshToken(`token = ${rclone}`)).toBe('1//r');
+	expect(parseRefreshToken('{"access_token":"a"}')).toBeUndefined();
+	expect(parseRefreshToken('not a token')).toBeUndefined();
+	expect(parseRefreshToken('')).toBeUndefined();
+});
+
+test('reads the account id and email from Drive', async () => {
+	reset({ json: { user: { emailAddress: 'me@test', permissionId: 'perm-1' } } });
+	expect(await fetchAccount('access')).toStrictEqual({ email: 'me@test', userId: 'perm-1' });
+	expect(requests[0]?.headers?.Authorization).toBe('Bearer access');
+	expect(String((requests[0] as { url?: string } | undefined)?.url)).toContain('/about');
+});
+
+test('fails to read the account on an error response', async () => {
+	reset({ json: { error: 'nope' }, status: 401 });
 	let caught: unknown;
 	try {
-		await pollDeviceToken({
-			authorization: {
-				deviceCode: 'device',
-				expiresIn: 60,
-				interval: 0,
-				userCode: 'code',
-				verificationUrl: 'url',
-			},
-			credentials,
-			isCancelled: () => false,
-		});
+		await fetchAccount('access');
 	} catch (error) {
 		caught = error;
 	}
-	expect(String(caught)).toContain(expected);
-}
+	expect(String(caught)).toContain('HTTP 401');
+});
 
-test('starts device authorization from Google response', async () => {
-	reset({
-		json: {
-			device_code: 'device',
-			expires_in: 900,
-			interval: 0,
-			user_code: 'ABCD',
-			verification_url: 'https://google.test/device',
-		},
-	});
-
-	expect(await startDeviceAuthorization(credentials)).toStrictEqual({
-		deviceCode: 'device',
-		expiresIn: 900,
-		interval: 0,
-		userCode: 'ABCD',
-		verificationUrl: 'https://google.test/device',
-	});
-	expect(requests[0]?.method).toBe('POST');
+test('refresh sends the user client and records the granted scope', async () => {
+	reset({ json: { access_token: 'a', expires_in: 3600, scope: `${FULL_DRIVE} openid` } });
+	const { storage } = secretStorage([
+		['drive-bridge-gdrive-refresh-token', 'refresh'],
+		['drive-bridge-gdrive-client-secret', 'my-secret'],
+	]);
+	const manager = new TokenManager(storage, () => 'my-client');
+	expect(await manager.getToken()).toBe('a');
 	expect(String(requests[0]?.body)).toContain('client_id=my-client');
+	expect(String(requests[0]?.body)).toContain('client_secret=my-secret');
+	expect(manager.hasFullDriveScope()).toBe(true);
 });
 
-test('polls device authorization and extracts user id from ID token', async () => {
-	const payload = btoa(JSON.stringify({ sub: 'google-user' }))
-		.replaceAll('+', '-')
-		.replaceAll('/', '_')
-		.replaceAll('=', '');
-	reset({
-		json: {
-			access_token: 'access',
-			expires_in: 3600,
-			id_token: `header.${payload}.signature`,
-			refresh_token: 'refresh',
-		},
-	});
-
-	expect(
-		await pollDeviceToken({
-			authorization: {
-				deviceCode: 'device',
-				expiresIn: 60,
-				interval: 0,
-				userCode: 'code',
-				verificationUrl: 'url',
-			},
-			credentials,
-			isCancelled: () => false,
-		}),
-	).toStrictEqual({
-		accessToken: 'access',
-		expiresIn: 3600,
-		refreshToken: 'refresh',
-		userId: 'google-user',
-	});
-});
-
-test('keeps polling through Android background network suspension', async () => {
-	const { Platform } = await import('obsidian');
-	const payload = btoa(JSON.stringify({ sub: 'google-user' }))
-		.replaceAll('+', '-')
-		.replaceAll('/', '_')
-		.replaceAll('=', '');
-	Platform.isAndroidApp = true;
-	try {
-		reset(
-			{
-				throw: new Error(
-					'Request failed. UnknownHostException Unable to resolve host "oauth2.googleapis.com"',
-				),
-			},
-			{
-				json: {
-					access_token: 'access',
-					expires_in: 3600,
-					id_token: `header.${payload}.signature`,
-					refresh_token: 'refresh',
-				},
-			},
-		);
-
-		expect(
-			await pollDeviceToken({
-				authorization: {
-					deviceCode: 'device',
-					expiresIn: 60,
-					interval: 0,
-					userCode: 'code',
-					verificationUrl: 'url',
-				},
-				credentials,
-				isCancelled: () => false,
-			}),
-		).toStrictEqual({
-			accessToken: 'access',
-			expiresIn: 3600,
-			refreshToken: 'refresh',
-			userId: 'google-user',
-		});
-	} finally {
-		Platform.isAndroidApp = false;
-	}
-});
-
-test('rethrows network errors other than the Android background suspension', async () => {
-	const { Platform } = await import('obsidian');
-	Platform.isAndroidApp = true;
-	try {
-		await expectPollFailure(
-			new Error('Request failed. The network connection was lost.'),
-			'network connection was lost',
-		);
-	} finally {
-		Platform.isAndroidApp = false;
-	}
-	await expectPollFailure(
-		new Error(
-			'Request failed. UnknownHostException Unable to resolve host "oauth2.googleapis.com"',
-		),
-		'UnknownHostException',
-	);
+test('detects a token limited to drive.file', async () => {
+	reset({ json: { access_token: 'a', expires_in: 3600, scope: `${FULL_DRIVE}.file` } });
+	const { storage } = secretStorage([
+		['drive-bridge-gdrive-refresh-token', 'refresh'],
+		['drive-bridge-gdrive-client-secret', 'my-secret'],
+	]);
+	const manager = new TokenManager(storage, () => 'my-client');
+	await manager.getToken();
+	expect(manager.hasFullDriveScope()).toBe(false);
 });
 
 test('caches tokens and retries bearer requests after a 401', async () => {

@@ -1,13 +1,8 @@
-import { Platform, requestUrl, SecretStorage } from 'obsidian';
+import type { SecretStorage } from 'obsidian';
+import { requestUrl } from 'obsidian';
 import type { Request } from '@/sdk';
 import { getStatus } from '@/shared/error';
-import {
-	buildUrl,
-	OAUTH_DEVICE_CODE_URL,
-	OAUTH_SCOPE,
-	OAUTH_TOKEN_URL,
-	TOKEN_REVOKE_URL,
-} from './api';
+import { buildUrl, DRIVE_API, OAUTH_TOKEN_URL } from './api';
 
 // Secret storage ids. Secret storage is per device and never synced.
 const REFRESH_TOKEN_ID = 'drive-bridge-gdrive-refresh-token';
@@ -19,9 +14,10 @@ export type ClientCredentials = { clientId: string; clientSecret: string };
 type TokenResponse = {
 	access_token: string;
 	expires_in: number;
-	refresh_token?: string;
-	id_token?: string;
+	scope?: string;
 };
+
+const FULL_DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive';
 
 type TokenError = {
 	error:
@@ -30,39 +26,8 @@ type TokenError = {
 		| 'invalid_grant'
 		| 'unauthorized_client'
 		| 'unsupported_grant_type'
-		| 'authorization_pending'
-		| 'slow_down'
-		| 'expired_token'
 		| 'access_denied';
 	error_description?: string;
-};
-
-type DeviceCodeResponse = {
-	device_code: string;
-	user_code: string;
-	verification_url: string;
-	expires_in: number;
-	interval: number;
-};
-
-type DeviceCodeError = {
-	error: 'invalid_request' | 'invalid_client' | 'unsupported_grant_type' | 'unauthorized_client';
-	error_description?: string;
-};
-
-export type DeviceAuthorization = {
-	deviceCode: string;
-	userCode: string;
-	verificationUrl: string;
-	expiresIn: number;
-	interval: number;
-};
-
-export type DeviceTokenResult = {
-	accessToken: string;
-	refreshToken: string;
-	expiresIn: number;
-	userId: string;
 };
 
 const FORM_CONTENT_TYPE = 'application/x-www-form-urlencoded';
@@ -75,106 +40,38 @@ function describeAuthError(data: TokenError, status: number): string {
 	return data.error_description ?? data.error ?? `HTTP ${status}`;
 }
 
-export async function startDeviceAuthorization(
-	credentials: ClientCredentials,
-): Promise<DeviceAuthorization> {
-	const response = await requestUrl({
-		body: formEncode({ client_id: credentials.clientId, scope: OAUTH_SCOPE }),
-		contentType: FORM_CONTENT_TYPE,
-		method: 'POST',
-		throw: false,
-		url: OAUTH_DEVICE_CODE_URL,
-	});
-	const data = response.json as DeviceCodeResponse | DeviceCodeError;
-	if ('error' in data)
-		throw new Error(
-			`Google device authorization failed: ${describeAuthError(data, response.status)}`,
-		);
-	return {
-		deviceCode: data.device_code,
-		expiresIn: data.expires_in,
-		interval: data.interval,
-		userCode: data.user_code,
-		verificationUrl: data.verification_url,
-	};
-}
-
-export async function pollDeviceToken(options: {
-	authorization: DeviceAuthorization;
-	credentials: ClientCredentials;
-	isCancelled: () => boolean;
-}): Promise<DeviceTokenResult> {
-	let interval = Math.max(options.authorization.interval, 1);
-	const deadline = Date.now() + options.authorization.expiresIn * 1000;
-	while (true) {
-		await sleep(interval * 1000);
-		if (options.isCancelled?.()) throw new Error('Google Drive connection was cancelled.');
-		if (Date.now() > deadline)
-			throw new Error('The device code expired, please try connecting again.');
-		let response: Awaited<ReturnType<typeof requestUrl>>;
+/**
+ * Accepts a bare refresh token or what `rclone authorize` prints: a JSON token object,
+ * optionally still prefixed with `token =` from rclone.conf.
+ */
+export function parseRefreshToken(input: string): string | undefined {
+	const text = input.trim().replace(/^token\s*=\s*/u, '');
+	if (!text) return undefined;
+	if (text.startsWith('{'))
 		try {
-			response = await requestUrl({
-				body: formEncode({
-					client_id: options.credentials.clientId,
-					client_secret: options.credentials.clientSecret,
-					device_code: options.authorization.deviceCode,
-					grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
-				}),
-				contentType: FORM_CONTENT_TYPE,
-				method: 'POST',
-				throw: false,
-				url: OAUTH_TOKEN_URL,
-			});
-		} catch (error) {
-			// Android suspends network access while the app is in background with UnknownHostException error.
-			if (Platform.isAndroidApp && String(error).includes('UnknownHostException')) continue;
-			throw error;
+			const { refresh_token } = JSON.parse(text) as { refresh_token?: unknown };
+			return typeof refresh_token === 'string' && refresh_token ? refresh_token : undefined;
+		} catch {
+			return undefined;
 		}
-		const data = response.json as TokenResponse | TokenError;
-		if ('access_token' in data)
-			if (data.refresh_token && data.id_token)
-				return {
-					accessToken: data.access_token,
-					expiresIn: data.expires_in,
-					refreshToken: data.refresh_token,
-					userId: extractSub(data.id_token),
-				};
-			else throw new Error('Google authorization payload is malformed!');
-		switch (data.error) {
-			case 'authorization_pending': {
-				continue;
-			}
-			case 'slow_down': {
-				interval += 5;
-				continue;
-			}
-			case 'access_denied': {
-				throw new Error('Google Drive access was denied.');
-			}
-			case 'expired_token': {
-				throw new Error('The device code expired, please try connecting again.');
-			}
-			default: {
-				throw new Error(
-					`Google Drive connection failed: ${describeAuthError(data, response.status)}`,
-				);
-			}
-		}
-	}
-}
-function extractSub(idToken: string): string {
-	const payload = JSON.parse(atob(idToken.split('.')[1])) as { sub: string };
-	return payload.sub;
+	return /^[\w./~+-]+$/u.test(text) ? text : undefined;
 }
 
-// Fire-and-forget revocation
-export function revokeToken(token: string) {
-	return requestUrl({
-		contentType: FORM_CONTENT_TYPE,
-		method: 'POST',
+export type Account = { userId: string; email: string };
+
+/** Reads the signed-in Google user. `userId` is stable and keeps sync records per account. */
+export async function fetchAccount(accessToken: string): Promise<Account> {
+	const response = await requestUrl({
+		headers: { Authorization: `Bearer ${accessToken}` },
+		method: 'GET',
 		throw: false,
-		url: buildUrl(TOKEN_REVOKE_URL, '', { token }),
-	}).catch(() => {});
+		url: buildUrl(DRIVE_API, '/about', { fields: 'user(permissionId,emailAddress)' }),
+	});
+	const user = (response.json as { user?: { permissionId?: string; emailAddress?: string } })
+		?.user;
+	if (response.status >= 300 || !user?.permissionId)
+		throw new Error(`Could not read the Google account: HTTP ${response.status}`);
+	return { email: user.emailAddress ?? '', userId: user.permissionId };
 }
 
 /**
@@ -185,6 +82,7 @@ export function revokeToken(token: string) {
 export class TokenManager {
 	private accessToken?: string;
 	private expiresAt = 0;
+	private grantedScopes: Array<string> = [];
 	private pending?: Promise<string>;
 
 	constructor(
@@ -221,10 +119,8 @@ export class TokenManager {
 
 	readonly deleteRefreshToken = () => this.secretStorage.deleteSecret(REFRESH_TOKEN_ID);
 
-	readonly setToken = (token: string, expiresIn: number) => {
-		this.accessToken = token;
-		this.expiresAt = Date.now() + expiresIn * 1000;
-	};
+	/** Whether the last refresh granted full Drive access rather than just drive.file. */
+	readonly hasFullDriveScope = () => this.grantedScopes.includes(FULL_DRIVE_SCOPE);
 
 	readonly invalidate = (): void => {
 		this.accessToken = undefined;
@@ -253,6 +149,7 @@ export class TokenManager {
 		if ('access_token' in data) {
 			this.accessToken = data.access_token;
 			this.expiresAt = Date.now() + data.expires_in * 1000;
+			this.grantedScopes = data.scope?.split(' ') ?? [];
 			return data.access_token;
 		}
 		this.invalidate();
