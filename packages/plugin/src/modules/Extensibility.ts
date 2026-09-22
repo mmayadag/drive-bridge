@@ -82,7 +82,7 @@ export default class Extensibility {
 			indexedDB: DatabaseAsync<Record<string, AugmentedModuleMeta>>;
 		},
 	) {
-		this.moduleDir = `${ctx.app.vault.configDir}/plugins/sync-engine/modules`;
+		this.moduleDir = `${ctx.app.vault.configDir}/plugins/drive-bridge/modules`;
 		(window as WindowAugmentation).syncEngineApiBridge = obsidian;
 		this.moduleStore = ctx.indexedDB.getStore(`modules-${hash(ctx.app.vault.getName())}`);
 	}

@@ -6,7 +6,7 @@ export type IndexedDBSchema = Record<string, RecordStat>;
 export type RecordStore = StoreAsync<RecordStat>;
 
 export const SYNC_STATE_STORE_NAME = 'sync-state';
-export const STORAGE_NAME = 'sync-engine';
+export const STORAGE_NAME = 'drive-bridge';
 
 export default class Storage {
 	private readonly memoryDB = openMemoryDB<General, General>(STORAGE_NAME);

@@ -62,7 +62,7 @@
     },
     "packages/plugin": {
       "name": "@hesprs/sync-engine-sdk",
-      "version": "3.1.7",
+      "version": "3.1.9",
       "dependencies": {
         "obsidian": "^1.13.1",
       },

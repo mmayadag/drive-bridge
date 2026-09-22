@@ -173,7 +173,7 @@ test('caches tokens and retries bearer requests after a 401', async () => {
 		{ json: { access_token: 'first', expires_in: 3600 } },
 		{ json: { access_token: 'second', expires_in: 3600 } },
 	);
-	const secrets = new Map([['sync-engine-gdrive-refresh-token', 'refresh']]);
+	const secrets = new Map([['drive-bridge-gdrive-refresh-token', 'refresh']]);
 	const storage = {
 		deleteSecret: (id: string) => void secrets.delete(id),
 		getSecret: (id: string) => secrets.get(id),

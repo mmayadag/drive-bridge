@@ -78,7 +78,7 @@ export default class SyncEngine extends Plugin {
 				'~$*.pptx',
 				'~$*.xls',
 				'~$*.xlsx',
-				`${this.app.vault.configDir}/plugins/sync-engine/modules`,
+				`${this.app.vault.configDir}/plugins/drive-bridge/modules`,
 				'.trash',
 				this.app.vault.configDir,
 			].map((expr) => ({ caseSensitive: false, expr })),
