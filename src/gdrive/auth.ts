@@ -1,6 +1,6 @@
 import type { SecretStorage } from 'obsidian';
 import { requestUrl } from 'obsidian';
-import type { Request } from '@/modules/Registrar';
+import type { Request } from '@/modules/registrar';
 import { getStatus } from '@/shared/error';
 import { buildUrl, DRIVE_API, OAUTH_TOKEN_URL } from './api';
 

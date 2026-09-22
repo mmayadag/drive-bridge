@@ -1,4 +1,4 @@
-import type { RequestResponse } from '@/modules/Registrar';
+import type { RequestResponse } from '@/modules/registrar';
 import type { FileStat } from '@/types';
 
 export const DRIVE_API = 'https://www.googleapis.com/drive/v3';

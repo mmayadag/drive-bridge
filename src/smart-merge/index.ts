@@ -1,8 +1,8 @@
 import type { SelectFromContext } from '@';
 import type { Fs } from '@/fs/interface';
-import type { ObsidianLanguageCode, TranslationResource, Translate } from '@/modules/I18n';
-import type { ConflictResolverEntry, FsWrapperEntry } from '@/modules/Registrar';
-import type { SettingEntry } from '@/modules/Setting';
+import type { ObsidianLanguageCode, TranslationResource, Translate } from '@/modules/i18n';
+import type { ConflictResolverEntry, FsWrapperEntry } from '@/modules/registrar';
+import type { SettingEntry } from '@/modules/setting';
 import type { DatabaseAsync, StoreAsync } from '@/shared/key-value-store';
 import type { SmartMergeTranslations } from './i18n';
 import type { SmartMergeSettings } from './setting';

@@ -1,7 +1,7 @@
 import type { Vault, Stat, ListedFiles, App } from 'obsidian';
 import { TFile, TFolder } from 'obsidian';
 import type { Binary, MaybePromise } from '@/types';
-import { OS } from '@/modules/EventBus';
+import { OS } from '@/modules/event-bus';
 import { toArrayBuffer, toUint8Array } from '@/shared/binary';
 import { basename, isFolder, stripEndSlash } from '@/shared/path';
 import createRangeReadStream from '@/shared/read-stream';

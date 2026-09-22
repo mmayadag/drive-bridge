@@ -1,5 +1,5 @@
 import type { ListReporter, RootFs } from '@/fs/interface';
-import type { Request, RequestParam, RequestResponse } from '@/modules/Registrar';
+import type { Request, RequestParam, RequestResponse } from '@/modules/registrar';
 import type { DatabaseSync, StoreSync } from '@/shared/key-value-store';
 import type { Binary, FileStat, Stat } from '@/types';
 import { textToUint8Array } from '@/shared/binary';

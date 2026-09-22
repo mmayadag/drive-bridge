@@ -1,16 +1,16 @@
 import type { FileStat, FolderStat, Stat, RecordStatsMap, StatsMap } from '@/types';
 import type { BaseTask, TaskNames } from '../tasks/interface';
-import AddRecord from '../tasks/AddRecord';
-import CreateLocalDir from '../tasks/CreateLocalDir';
-import CreateRemoteDir from '../tasks/CreateRemoteDir';
-import Download from '../tasks/Download';
-import MoveLocal from '../tasks/MoveLocal';
-import MoveRemote from '../tasks/MoveRemote';
-import RemoveLocal from '../tasks/RemoveLocal';
-import RemoveRecord from '../tasks/RemoveRecord';
-import RemoveRemote from '../tasks/RemoveRemote';
-import ResolveConflict from '../tasks/ResolveConflict';
-import Upload from '../tasks/Upload';
+import AddRecord from '../tasks/add-record';
+import CreateLocalDir from '../tasks/create-local-dir';
+import CreateRemoteDir from '../tasks/create-remote-dir';
+import Download from '../tasks/download';
+import MoveLocal from '../tasks/move-local';
+import MoveRemote from '../tasks/move-remote';
+import RemoveLocal from '../tasks/remove-local';
+import RemoveRecord from '../tasks/remove-record';
+import RemoveRemote from '../tasks/remove-remote';
+import ResolveConflict from '../tasks/resolve-conflict';
+import Upload from '../tasks/upload';
 
 export type TaskOptions = {
 	key: string;

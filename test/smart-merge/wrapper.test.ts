@@ -1,4 +1,4 @@
-import testKit from '$/test-kit';
+import testKit from '$/support/test-kit';
 import { beforeEach, expect, test } from 'bun:test';
 import type { StoreAsync } from '@/shared/key-value-store';
 import { openMemoryDB } from '@/shared/key-value-store';

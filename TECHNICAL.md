@@ -151,13 +151,13 @@ bun fix                # auto-fix lint and format
 
 ### Repository layout
 
-| Path               | Contents                              |
-| ------------------ | ------------------------------------- |
-| `src/`             | Plugin core: sync logic, settings, UI |
-| `src/gdrive/`      | Google Drive backend                  |
-| `src/smart-merge/` | Three-way text merge                  |
-| `src/shared/`      | Shared utilities and storage          |
-| `test/`            | Tests; `test/mocks.ts` mocks Obsidian |
+| Path               | Contents                                            |
+| ------------------ | --------------------------------------------------- |
+| `src/`             | Plugin core: sync logic, settings, UI               |
+| `src/gdrive/`      | Google Drive backend                                |
+| `src/smart-merge/` | Three-way text merge                                |
+| `src/shared/`      | Shared utilities and storage                        |
+| `test/`            | Tests, mirroring `src/`; helpers in `test/support/` |
 
 ### Test vault
 

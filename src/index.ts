@@ -1,18 +1,18 @@
 import type { Command, EventRef, App } from 'obsidian';
 import { Plugin } from 'obsidian';
-import type { AddRibbonIcon } from '@/modules/Observability';
+import type { AddRibbonIcon } from '@/modules/observability';
 import type { Context as KernelContext, MergeSingleKey } from '@/shared/module-context';
-import Bootstrap from '@/modules/Bootstrap';
-import BundledModules from '@/modules/BundledModules';
-import EventBus from '@/modules/EventBus';
-import I18n from '@/modules/I18n';
-import Observability from '@/modules/Observability';
-import ProgressModal from '@/modules/ProgressModal';
-import Registrar from '@/modules/Registrar';
-import Scheduler from '@/modules/Scheduler';
-import Setting from '@/modules/Setting';
-import Storage from '@/modules/Storage';
-import Sync from '@/modules/Sync';
+import Bootstrap from '@/modules/bootstrap';
+import BundledModules from '@/modules/bundled-modules';
+import EventBus from '@/modules/event-bus';
+import I18n from '@/modules/i18n';
+import Observability from '@/modules/observability';
+import ProgressModal from '@/modules/progress-modal';
+import Registrar from '@/modules/registrar';
+import Scheduler from '@/modules/scheduler';
+import Setting from '@/modules/setting';
+import Storage from '@/modules/storage';
+import Sync from '@/modules/sync';
 import { createContext } from '@/shared/module-context';
 
 const internalModules = [

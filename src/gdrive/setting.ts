@@ -1,9 +1,9 @@
 import type { Events } from '@';
 import type { SettingGroupItem } from 'obsidian';
 import { Notice } from 'obsidian';
-import type { Dispatch } from '@/modules/EventBus';
-import type { Fragment, Snippet, Translate } from '@/modules/I18n';
-import type { CallableOrObjectTree } from '@/modules/Setting';
+import type { Dispatch } from '@/modules/event-bus';
+import type { Fragment, Snippet, Translate } from '@/modules/i18n';
+import type { CallableOrObjectTree } from '@/modules/setting';
 import type { LabelDefinition } from '@/settings/utils';
 import { s } from '@/settings/utils';
 import { getMessage } from '@/shared/error';

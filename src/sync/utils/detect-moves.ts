@@ -2,8 +2,8 @@ import type { RecordStatsMap, Stat } from '@/types';
 import { basename, dirname } from '@/shared/path';
 import type { TaskNames } from '../tasks/interface';
 import { BaseTask } from '../tasks/interface';
-import MoveLocal from '../tasks/MoveLocal';
-import MoveRemote from '../tasks/MoveRemote';
+import MoveLocal from '../tasks/move-local';
+import MoveRemote from '../tasks/move-remote';
 
 type MoveSide = 'local' | 'remote';
 type MoveInfo = { key: string; oldKey: string; side: MoveSide };

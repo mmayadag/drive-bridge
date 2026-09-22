@@ -1,5 +1,5 @@
 import type { Fs } from '@/fs';
-import type { RecordStore } from '@/modules/Storage';
+import type { RecordStore } from '@/modules/storage';
 import type { FileStat, MaybePromise } from '@/types';
 import type { TaskOptions } from '../decision/interface';
 

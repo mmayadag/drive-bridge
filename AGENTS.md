@@ -35,7 +35,7 @@ This is the repository for Drive Bridge, an Obsidian plugin that syncs vault fil
 - `src/gdrive/`: Google Drive backend module.
 - `src/smart-merge/`: three-way merge module.
 - `src/shared/`: shared utilities: module context, reactive values, key-value store, paths.
-- `test/`: tests, mirroring `src/`. `test/mocks.ts` is preloaded and mocks `obsidian`.
+- `test/`: tests at the same path as the file they cover (`src/fs/vault/` → `test/fs/vault.test.ts`). Helpers live in `test/support/`; `setup.ts` is preloaded and mocks `obsidian`.
 
 ## Security
 
@@ -48,10 +48,11 @@ This is the repository for Drive Bridge, an Obsidian plugin that syncs vault fil
 
 - For mobile compatibility, Node.js API prohibited in plugin and modules.
 - Sentence case for UI text.
+- File and folder names are kebab-case (`progress-modal.ts`), including files that export a class. A test sits at the path of the file it covers, ending in `.test.ts`.
 - Module-specific behavior should not pollute plugin core.
-- All Obsidian API mocks go in `test/obsidian-mock-api.ts`.
+- All Obsidian API mocks go in `test/support/obsidian-api.ts`.
 - Styling goes in `src/global.css` with `drive-bridge-` prefixed classes; never add unscoped selectors that could affect Obsidian or other plugins. Use `el.show()` / `el.hide()` for visibility.
 - When any function or class needs to use `Context` as argument, prefer structural typing instead of direct `Context`.
-- `gdrive` and `smart-merge` are modules bundled into `main.js` by `src/modules/BundledModules.ts`. To add a module, import it there; there is no runtime module loading.
+- `gdrive` and `smart-merge` are modules bundled into `main.js` by `src/modules/bundled-modules.ts`. To add a module, import it there; there is no runtime module loading.
 - `null` forbidden, use `undefined` consistently.
 - Lint warnings must be cleared, except time-bounded ones (TODO with date, deprecated API for compat)

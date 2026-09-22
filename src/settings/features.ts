@@ -1,10 +1,10 @@
 import type { Settings, Context } from '@';
 import type { SettingGroupItem } from 'obsidian';
-import type { MigrationModalTranslations } from '@/components/MigrationModal';
-import type { Fragment, Translate } from '@/modules/I18n';
-import type { CallableOrObjectTree } from '@/modules/Setting';
+import type { MigrationModalTranslations } from '@/components/migration-modal';
+import type { Fragment, Translate } from '@/modules/i18n';
+import type { CallableOrObjectTree } from '@/modules/setting';
 import type { MaybePromise } from '@/types';
-import setNeedMigration from '@/components/MigrationModal';
+import setNeedMigration from '@/components/migration-modal';
 import type { LabelDefinition } from './utils';
 import { renderTogglableValue, s } from './utils';
 

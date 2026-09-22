@@ -1,9 +1,9 @@
 import type { RecordStatsMap, StatsMap } from '@/types';
 import { isSub } from '@/shared/path';
 import type { BaseTask } from '../tasks/interface';
-import Download from '../tasks/Download';
-import ResolveConflict from '../tasks/ResolveConflict';
-import Upload from '../tasks/Upload';
+import Download from '../tasks/download';
+import ResolveConflict from '../tasks/resolve-conflict';
+import Upload from '../tasks/upload';
 
 export default function isChanged({
 	key,

@@ -1,4 +1,4 @@
-import type { Request, RequestResponse } from '@/modules/Registrar';
+import type { Request, RequestResponse } from '@/modules/registrar';
 import type { Binary } from '@/types';
 import { concatBinary, textToUint8Array } from '@/shared/binary';
 import type { DriveFile } from './api';

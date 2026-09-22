@@ -1,8 +1,8 @@
 import type { SecretStorage } from 'obsidian';
-import ObsidianMock from '$/obsidian-mock';
-import testKit from '$/test-kit';
+import ObsidianMock from '$/support/obsidian-mock';
+import testKit from '$/support/test-kit';
 import { expect, mock, test } from 'bun:test';
-import type { RequestParam } from '@/modules/Registrar';
+import type { RequestParam } from '@/modules/registrar';
 
 const { request } = testKit;
 

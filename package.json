@@ -13,7 +13,7 @@
 		"build": "bun scripts/build.ts",
 		"check": "tsc && oxlint && oxfmt --check",
 		"fix": "oxlint --silent --fix && oxfmt",
-		"tests": "bun --preload=./test/mocks.ts test",
+		"tests": "bun --preload=./test/support/setup.ts test",
 		"ver": "bun scripts/version-bump.ts"
 	},
 	"devDependencies": {

@@ -1,5 +1,5 @@
 import { setIcon, setTooltip } from 'obsidian';
-import type { Snippet, Translate } from '@/modules/I18n';
+import type { Snippet, Translate } from '@/modules/i18n';
 import type { BaseTask } from '@/sync';
 import constructTaskIcon from '../construct-task-icon';
 import createFileTreeSelection from './selection';

@@ -1,7 +1,7 @@
 import type { Settings } from '@';
 import type { SettingGroupItem } from 'obsidian';
-import type { Translate } from '@/modules/I18n';
-import type { CallableOrObjectTree } from '@/modules/Setting';
+import type { Translate } from '@/modules/i18n';
+import type { CallableOrObjectTree } from '@/modules/setting';
 import type { LabelDefinition } from './utils';
 import { renderTogglableValue, s } from './utils';
 

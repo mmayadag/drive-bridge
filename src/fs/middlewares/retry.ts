@@ -1,4 +1,4 @@
-import type { Request } from '@/modules/Registrar';
+import type { Request } from '@/modules/registrar';
 import type { ErrorLike } from '@/shared/error';
 import { getStatus } from '@/shared/error';
 

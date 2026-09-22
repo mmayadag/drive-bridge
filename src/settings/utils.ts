@@ -8,7 +8,7 @@ import type {
 	TextComponent,
 } from 'obsidian';
 import { setIcon } from 'obsidian';
-import type { CallableOrObjectTree, SettingTree } from '@/modules/Setting';
+import type { CallableOrObjectTree, SettingTree } from '@/modules/setting';
 import type { DatabaseSync } from '@/shared/key-value-store';
 import type { General, TogglableValue } from '@/types';
 import { encodeURIComponent3986 } from '@/shared/path';

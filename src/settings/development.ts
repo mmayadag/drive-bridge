@@ -1,8 +1,8 @@
 import type { Settings } from '@';
 import type { SettingGroupItem } from 'obsidian';
 import { Notice } from 'obsidian';
-import type { Translate } from '@/modules/I18n';
-import type { CallableOrObjectTree } from '@/modules/Setting';
+import type { Translate } from '@/modules/i18n';
+import type { CallableOrObjectTree } from '@/modules/setting';
 import type { MaybePromise } from '@/types';
 import { normalizeBaseDir } from '@/shared/path';
 import { s } from './utils';

@@ -1,5 +1,5 @@
 import { setTooltip } from 'obsidian';
-import type { FailedTaskInfo } from '@/modules/Sync';
+import type { FailedTaskInfo } from '@/modules/sync';
 import constructTaskIcon from './construct-task-icon';
 
 function renderFailedTaskRow(

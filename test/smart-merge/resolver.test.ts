@@ -1,6 +1,6 @@
-import testKit from '$/test-kit';
+import testKit from '$/support/test-kit';
 import { beforeEach, expect, test } from 'bun:test';
-import type { RecordStore } from '@/modules/Storage';
+import type { RecordStore } from '@/modules/storage';
 import type { DatabaseAsync } from '@/shared/key-value-store';
 import type { SmartMergeDatabase } from '@/smart-merge/index';
 import type { MergeOptions } from '@/smart-merge/utils/merge';

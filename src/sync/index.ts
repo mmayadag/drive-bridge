@@ -1,14 +1,14 @@
-export { default as CreateLocalDir } from './tasks/CreateLocalDir';
-export { default as CreateRemoteDir } from './tasks/CreateRemoteDir';
-export { default as Download } from './tasks/Download';
-export { default as Upload } from './tasks/Upload';
-export { default as RemoveLocal } from './tasks/RemoveLocal';
-export { default as RemoveRemote } from './tasks/RemoveRemote';
-export { default as AddRecord } from './tasks/AddRecord';
-export { default as RemoveRecord } from './tasks/RemoveRecord';
-export { default as ResolveConflict } from './tasks/ResolveConflict';
-export { default as MoveLocal } from './tasks/MoveLocal';
-export { default as MoveRemote } from './tasks/MoveRemote';
+export { default as CreateLocalDir } from './tasks/create-local-dir';
+export { default as CreateRemoteDir } from './tasks/create-remote-dir';
+export { default as Download } from './tasks/download';
+export { default as Upload } from './tasks/upload';
+export { default as RemoveLocal } from './tasks/remove-local';
+export { default as RemoveRemote } from './tasks/remove-remote';
+export { default as AddRecord } from './tasks/add-record';
+export { default as RemoveRecord } from './tasks/remove-record';
+export { default as ResolveConflict } from './tasks/resolve-conflict';
+export { default as MoveLocal } from './tasks/move-local';
+export { default as MoveRemote } from './tasks/move-remote';
 export type {
 	BaseTask,
 	BaseTaskOptions,

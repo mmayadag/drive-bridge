@@ -1,12 +1,12 @@
 import type { Context, SelectFromContext, Settings, Translations } from '@';
 import type { App } from 'obsidian';
-import type { ObsidianLanguageCode, Translate, TranslationResource } from '@/modules/I18n';
+import type { ObsidianLanguageCode, Translate, TranslationResource } from '@/modules/i18n';
 import type {
 	FsWrapperEntry,
 	RemoteFsEntry,
 	RemoteRequestMiddlewareEntry,
-} from '@/modules/Registrar';
-import type { SettingEntry } from '@/modules/Setting';
+} from '@/modules/registrar';
+import type { SettingEntry } from '@/modules/setting';
 import digOriginal from '@/fs/dig-original';
 import prefixWrapper from '@/fs/wrappers/prefix';
 import type { GdriveDB } from './fs';

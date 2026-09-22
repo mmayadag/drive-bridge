@@ -1,4 +1,4 @@
-import type { Request } from '@/modules/Registrar';
+import type { Request } from '@/modules/registrar';
 
 type CustomHeadersOptions = Record<string, string>;
 
