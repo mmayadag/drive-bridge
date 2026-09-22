@@ -13,9 +13,6 @@ const options: BuildOptions = {
 	bundle: true,
 	define: {
 		'Bun.env.VERSION': JSON.stringify(man.version),
-		// No client credentials are compiled into the release.
-		'process.env.CLIENT_ID': JSON.stringify(''),
-		'process.env.CLIENT_SECRET': JSON.stringify(''),
 	},
 	entryPoints: { main: 'src/index.ts', styles: 'src/global.css' },
 	external: ['obsidian'],

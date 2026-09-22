@@ -9,9 +9,12 @@ import {
 	TOKEN_REVOKE_URL,
 } from './api';
 
-export const CLIENT_ID = atob(process.env.CLIENT_ID ?? '');
-export const CLIENT_SECRET = atob(process.env.CLIENT_SECRET ?? ''); // Not really a secret
-const KEYCHAIN_SECRET_ID = 'drive-bridge-gdrive-refresh-token'; // Secret storage id under which the Google refresh token is stored.
+// Secret storage ids. Secret storage is per device and never synced.
+const REFRESH_TOKEN_ID = 'drive-bridge-gdrive-refresh-token';
+const CLIENT_SECRET_ID = 'drive-bridge-gdrive-client-secret';
+
+/** The user's own Google Cloud OAuth client. Nothing is compiled into the plugin. */
+export type ClientCredentials = { clientId: string; clientSecret: string };
 
 type TokenResponse = {
 	access_token: string;
@@ -72,9 +75,11 @@ function describeAuthError(data: TokenError, status: number): string {
 	return data.error_description ?? data.error ?? `HTTP ${status}`;
 }
 
-export async function startDeviceAuthorization(): Promise<DeviceAuthorization> {
+export async function startDeviceAuthorization(
+	credentials: ClientCredentials,
+): Promise<DeviceAuthorization> {
 	const response = await requestUrl({
-		body: formEncode({ client_id: CLIENT_ID, scope: OAUTH_SCOPE }),
+		body: formEncode({ client_id: credentials.clientId, scope: OAUTH_SCOPE }),
 		contentType: FORM_CONTENT_TYPE,
 		method: 'POST',
 		throw: false,
@@ -96,6 +101,7 @@ export async function startDeviceAuthorization(): Promise<DeviceAuthorization> {
 
 export async function pollDeviceToken(options: {
 	authorization: DeviceAuthorization;
+	credentials: ClientCredentials;
 	isCancelled: () => boolean;
 }): Promise<DeviceTokenResult> {
 	let interval = Math.max(options.authorization.interval, 1);
@@ -109,8 +115,8 @@ export async function pollDeviceToken(options: {
 		try {
 			response = await requestUrl({
 				body: formEncode({
-					client_id: CLIENT_ID,
-					client_secret: CLIENT_SECRET,
+					client_id: options.credentials.clientId,
+					client_secret: options.credentials.clientSecret,
 					device_code: options.authorization.deviceCode,
 					grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
 				}),
@@ -181,7 +187,25 @@ export class TokenManager {
 	private expiresAt = 0;
 	private pending?: Promise<string>;
 
-	constructor(private readonly secretStorage: SecretStorage) {}
+	constructor(
+		private readonly secretStorage: SecretStorage,
+		private readonly getClientId: () => string,
+	) {}
+
+	readonly getCredentials = (): ClientCredentials => ({
+		clientId: this.getClientId(),
+		clientSecret: this.secretStorage.getSecret(CLIENT_SECRET_ID) ?? '',
+	});
+
+	readonly hasCredentials = () => {
+		const { clientId, clientSecret } = this.getCredentials();
+		return Boolean(clientId && clientSecret);
+	};
+
+	readonly setClientSecret = (secret: string) =>
+		secret
+			? this.secretStorage.setSecret(CLIENT_SECRET_ID, secret)
+			: this.secretStorage.deleteSecret(CLIENT_SECRET_ID);
 
 	readonly getToken = (force = false): Promise<string> => {
 		if (!force && this.accessToken && Date.now() < this.expiresAt - 60_000)
@@ -190,12 +214,12 @@ export class TokenManager {
 		return this.pending;
 	};
 
-	readonly getRefreshToken = () => this.secretStorage.getSecret(KEYCHAIN_SECRET_ID);
+	readonly getRefreshToken = () => this.secretStorage.getSecret(REFRESH_TOKEN_ID);
 
 	readonly setRefreshToken = (token: string) =>
-		this.secretStorage.setSecret(KEYCHAIN_SECRET_ID, token);
+		this.secretStorage.setSecret(REFRESH_TOKEN_ID, token);
 
-	readonly deleteRefreshToken = () => this.secretStorage.deleteSecret(KEYCHAIN_SECRET_ID);
+	readonly deleteRefreshToken = () => this.secretStorage.deleteSecret(REFRESH_TOKEN_ID);
 
 	readonly setToken = (token: string, expiresIn: number) => {
 		this.accessToken = token;
@@ -210,10 +234,13 @@ export class TokenManager {
 	private async refresh(): Promise<string> {
 		const refresh_token = this.getRefreshToken();
 		if (!refresh_token) throw new Error('Please authorize Google Account!');
+		const { clientId, clientSecret } = this.getCredentials();
+		if (!clientId || !clientSecret)
+			throw new Error('Enter the OAuth client ID and client secret in the settings.');
 		const response = await requestUrl({
 			body: formEncode({
-				client_id: CLIENT_ID,
-				client_secret: CLIENT_SECRET,
+				client_id: clientId,
+				client_secret: clientSecret,
 				grant_type: 'refresh_token',
 				refresh_token,
 			}),

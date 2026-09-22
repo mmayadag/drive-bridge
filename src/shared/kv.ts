@@ -1,9 +1,6 @@
 // Key-value storage with one interface over two backends: in-memory (sync) and IndexedDB (async).
 // Each database holds named stores; stores are created on first use.
 
-import type { IDBPDatabase } from 'idb';
-import { deleteDB, openDB } from 'idb';
-
 type Empty = Record<never, never>;
 type IsPromise<T, Async extends boolean> = Async extends true ? Promise<T> : T;
 
@@ -130,10 +127,72 @@ class NeedsUpgradeError extends Error {
 	override name = 'NeedsUpgradeError';
 }
 
-type Connection = IDBPDatabase;
+type Connection = IDBDatabase;
 
-// Readers share the connection. Creating or deleting object stores needs a version upgrade, and
-// That upgrade must run alone.
+// Promise wrappers over the IndexedDB request API.
+function settle<R>(request: IDBRequest<R>) {
+	return new Promise<R>((resolve, reject) => {
+		request.addEventListener('success', () => resolve(request.result));
+		request.addEventListener('error', () =>
+			reject(request.error ?? new Error('IndexedDB request failed')),
+		);
+	});
+}
+
+function completion(transaction: IDBTransaction) {
+	return new Promise<void>((resolve, reject) => {
+		transaction.addEventListener('complete', () => resolve());
+		transaction.addEventListener('error', () =>
+			reject(transaction.error ?? new Error('IndexedDB transaction failed')),
+		);
+		transaction.addEventListener('abort', () =>
+			reject(transaction.error ?? new DOMException('Transaction aborted', 'AbortError')),
+		);
+	});
+}
+
+// One request in its own transaction; resolves once the transaction has committed.
+async function single<R>(
+	db: Connection,
+	storeName: string,
+	mode: IDBTransactionMode,
+	makeRequest: (store: IDBObjectStore) => IDBRequest<R>,
+) {
+	const transaction = db.transaction(storeName, mode);
+	const [result] = await Promise.all([
+		settle(makeRequest(transaction.objectStore(storeName))),
+		completion(transaction),
+	]);
+	return result;
+}
+
+function openDatabase(
+	name: string,
+	version: number | undefined,
+	handlers: {
+		upgrade?: (db: Connection) => void;
+		// Another connection asked for a newer version or a delete.
+		versionChange: () => void;
+		// The browser closed the connection on its own.
+		closed: () => void;
+	},
+) {
+	return new Promise<Connection>((resolve, reject) => {
+		const request = indexedDB.open(name, version);
+		request.addEventListener('upgradeneeded', () => handlers.upgrade?.(request.result));
+		request.addEventListener('success', () => {
+			const db = request.result;
+			db.addEventListener('versionchange', handlers.versionChange);
+			db.addEventListener('close', handlers.closed);
+			resolve(db);
+		});
+		request.addEventListener('error', () =>
+			reject(request.error ?? new Error('IndexedDB request failed')),
+		);
+	});
+}
+
+// Readers share the connection; creating or deleting stores needs an upgrade that runs alone.
 class ReadWriteGate {
 	private readers = 0;
 	private writer = false;
@@ -221,29 +280,34 @@ class IndexedDBStore<T> implements StoreAsync<T> {
 		private readonly storeName: string,
 	) {}
 
-	get = (key: string) => this.run((db) => db.get(this.storeName, key) as Promise<T | undefined>);
+	private readonly single = <R>(
+		mode: IDBTransactionMode,
+		makeRequest: (store: IDBObjectStore) => IDBRequest<R>,
+	) => this.run((db) => single(db, this.storeName, mode, makeRequest));
+
+	get = (key: string) =>
+		this.single('readonly', (store) => store.get(key) as IDBRequest<T | undefined>);
 	set = async (key: string, value: T) =>
-		void (await this.run((db) => db.put(this.storeName, value, key)));
-	delete = async (key: string) => this.run((db) => db.delete(this.storeName, key));
-	clear = async () => this.run((db) => db.clear(this.storeName));
+		void (await this.single('readwrite', (store) => store.put(value, key)));
+	delete = async (key: string) => this.single('readwrite', (store) => store.delete(key));
+	clear = async () => this.single('readwrite', (store) => store.clear());
+	values = () => this.single('readonly', (store) => store.getAll() as IDBRequest<Array<T>>);
 
-	keys = () =>
-		this.run(async (db) =>
-			(await db.getAllKeys(this.storeName)).map((key) => {
-				if (typeof key !== 'string')
-					throw new TypeError('IndexedDB store key is not a string');
-				return key;
-			}),
-		);
-
-	values = () => this.run((db) => db.getAll(this.storeName) as Promise<Array<T>>);
+	keys = async () =>
+		(await this.single('readonly', (store) => store.getAllKeys())).map((key) => {
+			if (typeof key !== 'string') throw new TypeError('IndexedDB store key is not a string');
+			return key;
+		});
 
 	entries = () =>
 		this.run(async (db) => {
 			const transaction = db.transaction(this.storeName, 'readonly');
 			const store = transaction.objectStore(this.storeName);
-			const [keys, values] = await Promise.all([store.getAllKeys(), store.getAll()]);
-			await transaction.done;
+			const [keys, values] = await Promise.all([
+				settle(store.getAllKeys()),
+				settle(store.getAll() as IDBRequest<Array<T>>),
+				completion(transaction),
+			]);
 			return keys.map((key, index) => [key, values[index]] as [string, T]);
 		});
 
@@ -253,18 +317,20 @@ class IndexedDBStore<T> implements StoreAsync<T> {
 			const readOnly = operations.every((operation) => operation.type === 'get');
 			const transaction = db.transaction(this.storeName, readOnly ? 'readonly' : 'readwrite');
 			const store = transaction.objectStore(this.storeName);
-			const results = await Promise.all(
-				operations.map(async (operation): Promise<GetResult<T> | undefined> => {
-					if (operation.type === 'get')
-						return { key: operation.key, value: (await store.get(operation.key)) as T };
-					await (operation.type === 'set'
-						? store.put?.(operation.value, operation.key)
-						: store.delete?.(operation.key));
-					return undefined;
-				}),
-			);
-			await transaction.done;
-			return results.filter((result) => result !== undefined);
+			// Every request is queued synchronously so they all land in this transaction.
+			const pending = operations.map(async (operation): Promise<GetResult<T> | void> => {
+				if (operation.type === 'get') {
+					const value = await settle(
+						store.get(operation.key) as IDBRequest<T | undefined>,
+					);
+					return { key: operation.key, value };
+				}
+				await (operation.type === 'set'
+					? settle(store.put(operation.value, operation.key))
+					: settle(store.delete(operation.key)));
+			});
+			const [results] = await Promise.all([Promise.all(pending), completion(transaction)]);
+			return results.filter((result): result is GetResult<T> => result !== undefined);
 		});
 	};
 }
@@ -276,19 +342,19 @@ class IndexedDBDatabase {
 	constructor(private readonly name: string) {}
 
 	private createConnection(version?: number, upgrade?: (db: Connection) => void) {
-		const connection: Promise<Connection> = openDB(this.name, version, {
+		const connection: Promise<Connection> = openDatabase(this.name, version, {
+			closed: () => {
+				if (this.connection === connection) this.connection = undefined;
+			},
+			upgrade,
 			// Another tab wants to upgrade: let go so it isn't blocked.
-			blocking: () => {
+			versionChange: () => {
 				if (this.connection === connection) this.connection = undefined;
 				connection.then(
 					(db) => db.close(),
 					() => {},
 				);
 			},
-			terminated: () => {
-				if (this.connection === connection) this.connection = undefined;
-			},
-			upgrade,
 		});
 		return connection;
 	}
@@ -380,10 +446,14 @@ class IndexedDBDatabase {
 	};
 
 	getMeta = (key: PropertyKey) =>
-		this.withStore(META_STORE, (db) => db.get(META_STORE, String(key)));
+		this.withStore(META_STORE, (db) =>
+			single(db, META_STORE, 'readonly', (store) => store.get(String(key))),
+		);
 
 	setMeta = async (key: PropertyKey, value: unknown) =>
-		void (await this.withStore(META_STORE, (db) => db.put(META_STORE, value, String(key))));
+		void (await this.withStore(META_STORE, (db) =>
+			single(db, META_STORE, 'readwrite', (store) => store.put(value, String(key))),
+		));
 
 	dispose = () =>
 		this.gate.exclusive(async () => {
@@ -399,5 +469,5 @@ export function openIndexedDB<
 }
 
 export function deleteIndexedDB(name: string) {
-	return deleteDB(name);
+	return settle(indexedDB.deleteDatabase(name)).then(noop);
 }

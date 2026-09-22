@@ -6,7 +6,9 @@
    API**.
 2. Create an **OAuth client**.
 3. Scope: `https://www.googleapis.com/auth/drive` (full Drive).
-4. Set the app's publishing status to **In production**. In Testing mode
+4. In Drive Bridge settings enter the client ID and client secret on every
+   device, then connect your account.
+5. Set the app's publishing status to **In production**. In Testing mode
    refresh tokens expire after 7 days. The "unverified app" warning on the
    consent screen is expected for a personal client; continue via
    **Advanced**.
@@ -20,16 +22,22 @@ never sync. Full `drive` scope is what lets Drive Bridge see them.
 The trade-off: a leaked token opens the whole Drive of that account. Use a
 Google account dedicated to your vault, not your personal one.
 
+> **Work in progress.** Sign-in currently uses Google's device flow, which only
+> allows `drive.file`. Full `drive` needs a different sign-in method, which is
+> the next change. Until then the plugin requests `drive.file` and needs an
+> OAuth client of type **TVs and Limited Input devices**.
+
 ## Security model
 
 | Rule                          | How                                                                                             |
 | ----------------------------- | ----------------------------------------------------------------------------------------------- |
 | No remote code                | The plugin never downloads or evaluates code at runtime. All modules are bundled at build time. |
 | No third-party servers        | Network calls go only to `googleapis.com` and `oauth2.googleapis.com`.                          |
-| No credentials in the release | Client ID and secret are entered in settings, not compiled in.                                  |
-| Refresh token off disk        | Stored in Obsidian's secret storage (OS keychain), not in `data.json`.                          |
+| No credentials in the release | You bring your own OAuth client; nothing is compiled in.                                        |
+| Secrets off disk              | Client secret and refresh token live in Obsidian's secret storage, not in `data.json`.          |
 
-Keep `data.json` out of any sync or git: it holds the client ID and secret.
+`data.json` holds settings and the client ID, no secrets. Still keep it and the
+workspace files out of any sync or git:
 
 ```
 .obsidian/plugins/drive-bridge/data.json

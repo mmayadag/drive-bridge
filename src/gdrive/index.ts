@@ -18,11 +18,12 @@ import type { GdriveTranslations } from './setting';
 import { TokenManager, bearerMiddleware } from './auth';
 import checkConnection from './check-connection';
 import GdriveFs from './fs';
-import { ru, en, zh, zhTW } from './i18n';
+import en from './i18n';
 import gdriveSetting from './setting';
 
 export type GdriveSettings = {
 	baseDirectory: string;
+	clientId: string;
 	useTrash: boolean;
 	userId: string;
 };
@@ -46,14 +47,15 @@ export default class Gdrive {
 		if (!this.moduleSettings.baseDirectory)
 			this.moduleSettings.baseDirectory = `${ctx.app.vault.getName()}/`;
 		ctx.registerI18n('en', en);
-		ctx.registerI18n('zh', zh);
-		ctx.registerI18n('zh-TW', zhTW);
-		ctx.registerI18n('ru', ru);
-		this.tokenManager = new TokenManager(ctx.app.secretStorage);
+		this.tokenManager = new TokenManager(
+			ctx.app.secretStorage,
+			() => this.moduleSettings.clientId,
+		);
 	}
 
 	readonly moduleSettings: GdriveSettings = {
 		baseDirectory: '',
+		clientId: '',
 		useTrash: true,
 		userId: '',
 	};

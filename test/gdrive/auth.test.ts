@@ -24,6 +24,8 @@ void mock.module('obsidian', () => ({
 const { TokenManager, bearerMiddleware, pollDeviceToken, startDeviceAuthorization } =
 	await import('@/gdrive/auth');
 
+const credentials = { clientId: 'my-client', clientSecret: 'my-secret' };
+
 function reset(...next: Array<HttpResponse>) {
 	requests.length = 0;
 	responses = [...next];
@@ -41,6 +43,7 @@ async function expectPollFailure(err: Error, expected: string) {
 				userCode: 'code',
 				verificationUrl: 'url',
 			},
+			credentials,
 			isCancelled: () => false,
 		});
 	} catch (error) {
@@ -60,7 +63,7 @@ test('starts device authorization from Google response', async () => {
 		},
 	});
 
-	expect(await startDeviceAuthorization()).toStrictEqual({
+	expect(await startDeviceAuthorization(credentials)).toStrictEqual({
 		deviceCode: 'device',
 		expiresIn: 900,
 		interval: 0,
@@ -68,6 +71,7 @@ test('starts device authorization from Google response', async () => {
 		verificationUrl: 'https://google.test/device',
 	});
 	expect(requests[0]?.method).toBe('POST');
+	expect(String(requests[0]?.body)).toContain('client_id=my-client');
 });
 
 test('polls device authorization and extracts user id from ID token', async () => {
@@ -93,6 +97,7 @@ test('polls device authorization and extracts user id from ID token', async () =
 				userCode: 'code',
 				verificationUrl: 'url',
 			},
+			credentials,
 			isCancelled: () => false,
 		}),
 	).toStrictEqual({
@@ -136,6 +141,7 @@ test('keeps polling through Android background network suspension', async () => 
 					userCode: 'code',
 					verificationUrl: 'url',
 				},
+				credentials,
 				isCancelled: () => false,
 			}),
 		).toStrictEqual({
@@ -173,13 +179,16 @@ test('caches tokens and retries bearer requests after a 401', async () => {
 		{ json: { access_token: 'first', expires_in: 3600 } },
 		{ json: { access_token: 'second', expires_in: 3600 } },
 	);
-	const secrets = new Map([['drive-bridge-gdrive-refresh-token', 'refresh']]);
+	const secrets = new Map([
+		['drive-bridge-gdrive-refresh-token', 'refresh'],
+		['drive-bridge-gdrive-client-secret', 'my-secret'],
+	]);
 	const storage = {
 		deleteSecret: (id: string) => void secrets.delete(id),
 		getSecret: (id: string) => secrets.get(id),
 		setSecret: (id: string, value: string) => void secrets.set(id, value),
 	};
-	const manager = new TokenManager(storage as unknown as SecretStorage);
+	const manager = new TokenManager(storage as unknown as SecretStorage, () => 'my-client');
 	const seen: Array<string | undefined> = [];
 	const req = request((url, params) => {
 		seen.push(params.headers?.Authorization);
@@ -194,4 +203,39 @@ test('caches tokens and retries bearer requests after a 401', async () => {
 	const wrapped = bearerMiddleware(req.request, manager);
 	expect((await wrapped('https://drive.test')).status).toBe(200);
 	expect(seen).toStrictEqual(['Bearer first', 'Bearer second']);
+});
+
+test('refuses to refresh without a client configured', async () => {
+	reset();
+	const secrets = new Map([['drive-bridge-gdrive-refresh-token', 'refresh']]);
+	const storage = {
+		deleteSecret: (id: string) => void secrets.delete(id),
+		getSecret: (id: string) => secrets.get(id),
+		setSecret: (id: string, value: string) => void secrets.set(id, value),
+	};
+	const manager = new TokenManager(storage as unknown as SecretStorage, () => '');
+	let caught: unknown;
+	try {
+		await manager.getToken();
+	} catch (error) {
+		caught = error;
+	}
+	expect(String(caught)).toContain('client ID and client secret');
+	expect(requests).toHaveLength(0);
+});
+
+test('stores the client secret in secret storage and clears it when emptied', () => {
+	const secrets = new Map<string, string>();
+	const storage = {
+		deleteSecret: (id: string) => void secrets.delete(id),
+		getSecret: (id: string) => secrets.get(id),
+		setSecret: (id: string, value: string) => void secrets.set(id, value),
+	};
+	const manager = new TokenManager(storage as unknown as SecretStorage, () => 'my-client');
+	manager.setClientSecret('my-secret');
+	expect(manager.getCredentials()).toStrictEqual(credentials);
+	expect(manager.hasCredentials()).toBe(true);
+	manager.setClientSecret('');
+	expect(secrets.has('drive-bridge-gdrive-client-secret')).toBe(false);
+	expect(manager.hasCredentials()).toBe(false);
 });

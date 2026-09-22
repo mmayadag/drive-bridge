@@ -37,6 +37,10 @@ export type GdriveTranslations = {
 	useTrash: string;
 	useTrashDescription: string;
 	authorizationFailed: Snippet<string>;
+	clientId: string;
+	clientIdDescription: string;
+	clientSecret: string;
+	clientSecretDescription: string;
 };
 
 type DeviceCodeModalOptions = {
@@ -115,8 +119,14 @@ export default function gdriveSetting(
 ): CallableOrObjectTree {
 	const connectGoogle = async (resolve: () => void) => {
 		let cancelled = false;
+		if (!tokenManager.hasCredentials()) {
+			new Notice(translate('configureFirst'));
+			resolve();
+			return;
+		}
+		const credentials = tokenManager.getCredentials();
 		try {
-			const authorization = await startDeviceAuthorization();
+			const authorization = await startDeviceAuthorization(credentials);
 			const modal = new DeviceCodeModal(app, {
 				onClose: () => {
 					cancelled = true;
@@ -130,6 +140,7 @@ export default function gdriveSetting(
 			try {
 				const { refreshToken, userId, accessToken, expiresIn } = await pollDeviceToken({
 					authorization,
+					credentials,
 					isCancelled: () => cancelled,
 				});
 				tokenManager.setRefreshToken(refreshToken);
@@ -160,6 +171,39 @@ export default function gdriveSetting(
 			}),
 			{
 				1000: s(() => ({
+					desc: translate('clientIdDescription'),
+					name: translate('clientId'),
+					render: (setting) => {
+						setting.addText((text) => {
+							text.setValue(settings.clientId).inputEl.addEventListener(
+								'blur',
+								() => {
+									const value = text.getValue().trim();
+									text.setValue(value);
+									if (value === settings.clientId) return;
+									settings.clientId = value;
+									void saveSettings();
+								},
+							);
+						});
+					},
+				})),
+				1010: s(() => ({
+					desc: translate('clientSecretDescription'),
+					name: translate('clientSecret'),
+					render: (setting) => {
+						setting.addText((text) => {
+							text.inputEl.type = 'password';
+							text.setValue(tokenManager.getCredentials().clientSecret);
+							text.inputEl.addEventListener('blur', () => {
+								const value = text.getValue().trim();
+								text.setValue(value);
+								tokenManager.setClientSecret(value);
+							});
+						});
+					},
+				})),
+				1020: s(() => ({
 					desc: translate('connectAccountDescription'),
 					name: translate('connectAccount'),
 					render: (setting) => {
@@ -177,7 +221,7 @@ export default function gdriveSetting(
 					},
 					visible: () => !tokenManager.getRefreshToken(),
 				})),
-				1100: s(() => ({
+				1030: s(() => ({
 					desc: translate('accountConnectedDescription'),
 					name: translate('accountConnected'),
 					render: (setting) => {
