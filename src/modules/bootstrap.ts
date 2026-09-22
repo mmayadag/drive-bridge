@@ -20,7 +20,6 @@ import {
 	memoryControlWrapper,
 	retryMiddleware,
 	hierarchicalOptimizer,
-	asymmetricStorageWrapper,
 	customHeadersMiddleware,
 	cancellationMiddleware,
 	optimizationCompanionWrapper,
@@ -49,10 +48,9 @@ import type {
 
 export type CustomHeaders = Array<{ type: 'plaintext' | 'secret'; value: string; key: string }>;
 export type ExistingMemoryDB = DatabaseSync<
-	{ localContext20000: Stat; remoteContext10000: Stat; remoteContext20000: Stat },
+	{ localContext20000: Stat; remoteContext20000: Stat },
 	{
 		localContext20000Marker: string;
-		remoteContext10000Marker?: string;
 		remoteContext20000Marker: string;
 	}
 >;
@@ -96,7 +94,6 @@ export default class Bootstrap {
 		maxRequestConcurrency: TogglableValue;
 		minRequestInterval: TogglableValue;
 		realtimeSyncFastMode: boolean;
-		asymmetricStorage: boolean;
 		customHeaders: CustomHeaders;
 		confirmDeleteInAutoSync: boolean;
 		confirmTasksInSync: boolean;
@@ -142,7 +139,6 @@ export default class Bootstrap {
 			registerConflictResolver,
 			registerRemoteRequestMiddleware,
 			registerLocalRequestMiddleware,
-			dispatch,
 			optimizeLocal,
 			optimizeRemote,
 		} = this.ctx;
@@ -189,14 +185,6 @@ export default class Bootstrap {
 		registerTrigger('startup', {
 			options: () => ({ needConfirmDeletion: getDeletionConfirm() }),
 			priority: 3000,
-		});
-		registerTrigger('migration', {
-			options: () => ({
-				decider: mirrorLocalDecider,
-				detectMoves: false,
-				remoteLister: () => [], // Remote has already been cleared in phase 2
-			}),
-			priority: 3980,
 		});
 		registerTrigger('nonInteractiveManual', { priority: 3990 });
 		registerTrigger('manual', {
@@ -273,28 +261,6 @@ export default class Bootstrap {
 				if (this.isCancelled) return cancellationWrapper(fs, this.isCancelled);
 			},
 			priority: 3000,
-		});
-		registerRemoteFsWrapper({
-			apply: (fs) => {
-				if (this.settings.asymmetricStorage)
-					return contextWrapper(fs, {
-						db: memoryDB,
-						marker: 'remoteContext10000Marker',
-						store: 'remoteContext10000',
-					});
-			},
-			priority: 10_000,
-		});
-		registerRemoteFsWrapper({
-			apply: (fs) => {
-				if (this.settings.asymmetricStorage)
-					return asymmetricStorageWrapper(
-						fs,
-						memoryDB.getStore('remoteContext10000'),
-						(str) => dispatch('logSync', str),
-					);
-			},
-			priority: 11_000,
 		});
 		registerRemoteFsWrapper({
 			apply: (fs) =>

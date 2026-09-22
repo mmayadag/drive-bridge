@@ -13,46 +13,6 @@ const en: Translations = {
 	addInclusionRule: 'Add inclusion rule',
 	addRecord: 'Add record',
 	addSecretHeader: 'Add secret header',
-	asymmetricStorage: 'Asymmetric storage',
-	asymmetricStorageDescription: () =>
-		createFragment((frag) => {
-			frag.appendText('Use asymmetric storage to substantially accelerate syncing.');
-		}),
-	asymmetricStorageMigration: (enable) =>
-		createFragment((frag) => {
-			if (enable) {
-				frag.createEl('p', {
-					text: 'You should be cautious about following points before enabling asymmetric storage:',
-				});
-				const ol = frag.createEl('ol');
-				ol.createEl('li', {
-					text: 'Remote storage will no longer mirror local hierarchical structure. All files will be uploaded flatly to the base directory with random string anchors prepended.',
-				});
-				ol.createEl('li', {
-					text: "If you need the remote to remain readable by humans, please don't enable this feature.",
-				});
-				ol.createEl('li', {
-					text: 'After enabling, please ensure all devices have asymmetric storage enabled.',
-				});
-				ol.createEl('li', {
-					text: 'Migration is necessary if this vault was previously uploaded without asymmetric storage.',
-				});
-			} else {
-				frag.createEl('p', {
-					text: 'You should be cautious about following points before disabling asymmetric storage:',
-				});
-				const ol = frag.createEl('ol');
-				ol.createEl('li', {
-					text: 'All subsequent uploads will mirror local hierarchical structure.',
-				});
-				ol.createEl('li', {
-					text: 'Please ensure all devices have asymmetric storage disabled.',
-				});
-				ol.createEl('li', {
-					text: 'Migration is necessary if this vault was previously uploaded with asymmetric storage enabled.',
-				});
-			}
-		}),
 	avoidAutoSyncWhenOffline: 'Avoid auto sync when offline',
 	avoidAutoSyncWhenOfflineDescription:
 		"Silently skip non-manual sync runs when there's no internet connection.",
@@ -157,13 +117,6 @@ const en: Translations = {
 	maxRequestConcurrencyDescription:
 		'Limit the number of simultaneous requests during synchronization. This option is useful for services with request rate limits. Alter the concurrency limit in the field.',
 	maxRequestConcurrencyPlaceholder: 'Enter concurrency limit',
-	migrationDescription:
-		'Migration may take seconds to minutes depending on the vault size. If you have migrated the remote on other devices, you can skip the migration.\n\nStart migration now?',
-	migrationFailed: 'Migration failed',
-	migrationPhase1Description: 'Ensure local state is up-to-date',
-	migrationPhase2Description: 'Clean up remote and records',
-	migrationPhase3Description: 'Populate remote with new structure',
-	migrationProcess: 'Migration process',
 	minRequestInterval: 'Min request interval',
 	minRequestIntervalDescription:
 		'Limit the minimum time between consecutive requests during synchronization. This option is useful for services with request rate limits. Alter the interval in the field.',
@@ -187,7 +140,6 @@ const en: Translations = {
 		'Reuse cached data and avoid unnecessary remote discovery during real-time sync to accelerate sync.',
 	realtimeSyncPlaceholder: 'Enter sync delay (e.g. 500ms, 5s)',
 	recordsCleared: 'Records cleared',
-	remoteMigration: 'Remote migration',
 	removeLocal: 'Remove local',
 	removeRecord: 'Remove record',
 	removeRemote: 'Remove remote',
@@ -212,7 +164,6 @@ const en: Translations = {
 	skip: 'Skip',
 	speed: 'Speed',
 	speedLabelDescription: 'Properly configuring this setting could improve sync speed.',
-	startMigration: 'Start migration',
 	startNonInteractiveSync: 'Start non-interactive sync',
 	startSync: 'Start sync',
 	startupSync: 'Startup sync',
@@ -223,7 +174,6 @@ const en: Translations = {
 	syncProgress: 'Sync progress',
 	syncStrategy: 'Sync strategy',
 	syncStrategyDescription: 'Select the synchronization strategy to resolve file changes.',
-	toggleWithoutMigration: 'Toggle without migration',
 	upload: 'Upload',
 	walkingRemote: 'Discovering remote files',
 	xConfigured: (count) => `${count} configured`,

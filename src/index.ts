@@ -56,7 +56,6 @@ export default class DriveBridge extends Plugin {
 
 	async onload() {
 		const settings: Settings = {
-			asymmetricStorage: false,
 			avoidAutoSyncWhenOffline: true,
 			confirmDeleteInAutoSync: true,
 			confirmTasksInSync: true,

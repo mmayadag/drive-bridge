@@ -1,10 +1,7 @@
-import type { Settings, Context } from '@';
+import type { Settings } from '@';
 import type { SettingGroupItem } from 'obsidian';
-import type { MigrationModalTranslations } from '@/components/migration-modal';
-import type { Fragment, Translate } from '@/modules/i18n';
+import type { Translate } from '@/modules/i18n';
 import type { CallableOrObjectTree } from '@/modules/setting';
-import type { MaybePromise } from '@/types';
-import setNeedMigration from '@/components/migration-modal';
 import type { LabelDefinition } from './utils';
 import { renderTogglableValue, s } from './utils';
 
@@ -21,10 +18,7 @@ export type FeaturesSettingTranslations = {
 	scheduledSync: string;
 	scheduledSyncDescription: string;
 	scheduledSyncPlaceholder: string;
-	asymmetricStorage: string;
-	asymmetricStorageDescription: Fragment;
-	asymmetricStorageMigration: Fragment<boolean>;
-} & MigrationModalTranslations;
+};
 
 export default function featuresSettings(ctx: {
 	translate: Translate<FeaturesSettingTranslations>;
@@ -32,20 +26,10 @@ export default function featuresSettings(ctx: {
 	startScheduledSync: () => void;
 	stopScheduledSync: () => void;
 	settings: Settings;
-	recordStoreExists: () => MaybePromise<boolean>;
-	matchLabel: () => LabelDefinition;
 	speedLabel: () => LabelDefinition;
 }): CallableOrObjectTree {
-	const {
-		translate,
-		saveSettings,
-		startScheduledSync,
-		stopScheduledSync,
-		settings,
-		recordStoreExists,
-		matchLabel,
-		speedLabel,
-	} = ctx;
+	const { translate, saveSettings, startScheduledSync, stopScheduledSync, settings, speedLabel } =
+		ctx;
 	return {
 		1000: s(
 			(self) => ({
@@ -101,24 +85,6 @@ export default function featuresSettings(ctx: {
 					desc: translate('realtimeSyncFastModeDescription'),
 					labels: [speedLabel()],
 					name: translate('realtimeSyncFastMode'),
-				})),
-				5000: s(() => ({
-					desc: translate('asymmetricStorageDescription'),
-					labels: [matchLabel(), speedLabel()],
-					name: translate('asymmetricStorage'),
-					render: (setting) => {
-						setting.addToggle((toggle) =>
-							setNeedMigration(ctx as Context, {
-								apply: (value) => {
-									settings.asymmetricStorage = value;
-									void saveSettings();
-								},
-								content: (value) => translate('asymmetricStorageMigration', value),
-								needMigration: () => recordStoreExists(),
-								toggle: toggle.setValue(settings.asymmetricStorage),
-							}),
-						);
-					},
 				})),
 			},
 		),

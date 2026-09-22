@@ -167,10 +167,6 @@ input[type='text'].drive-bridge-invalid-input {
 	gap: 0.5rem;
 }
 
-.drive-bridge-migration-progress {
-	margin-bottom: 0.75rem;
-}
-
 .drive-bridge-progress-text {
 	display: flex;
 	font-size: 0.75rem;
