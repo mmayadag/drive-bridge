@@ -23,6 +23,12 @@ export type SyncStage =
 
 const MOBILE_SYNC_NOTICE_HIDE_DELAY = 2000;
 
+export type LastSync = {
+	at: number;
+	result: SyncTerminateReason['result'];
+	error?: string;
+};
+
 export type AddRibbonIcon = (
 	icon: IconName,
 	title: string,
@@ -69,6 +75,8 @@ export default class Observability {
 	declare readonly settings: {
 		noticeStatusOnMobile: boolean;
 		exportLogsDirectory: string;
+		/** Result of the last sync on this device. Not synced, `data.json` is device-local. */
+		lastSync?: LastSync;
 	};
 	declare readonly i18n: {
 		startSync: string;
@@ -93,6 +101,7 @@ export default class Observability {
 			addRibbonIcon: AddRibbonIcon;
 			getLogs: () => string;
 			app: App;
+			saveSettings: () => Promise<void>;
 		},
 	) {
 		this.t = ctx.translate;
@@ -157,6 +166,12 @@ export default class Observability {
 						mobileSyncNotice = undefined;
 					}, MOBILE_SYNC_NOTICE_HIDE_DELAY);
 				this.lastSyncTime = Date.now();
+				this.settings.lastSync = {
+					at: this.lastSyncTime,
+					...(reason.result === 'failed' ? { error: reason.error } : {}),
+					result: reason.result,
+				};
+				void ctx.saveSettings();
 				const setUpdateInterval = () =>
 					(updateInterval = window.setInterval(() => {
 						const sinceNow = Date.now() - this.lastSyncTime;

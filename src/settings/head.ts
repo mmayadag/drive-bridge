@@ -1,7 +1,8 @@
 import type { Events, Settings } from '@';
 import { ExtraButtonComponent, Notice, PluginSettingTab, setTooltip } from 'obsidian';
 import type { Dispatch } from '@/modules/event-bus';
-import type { Fragment, Translate } from '@/modules/i18n';
+import type { Fragment, Snippet, Translate } from '@/modules/i18n';
+import type { LastSync } from '@/modules/observability';
 import type {
 	CheckConnectionResult,
 	ConflictResolverEntry,
@@ -12,6 +13,7 @@ import type { CallableOrObjectTree } from '@/modules/setting';
 import type { DatabaseSync } from '@/shared/key-value-store';
 import type { General, MaybePromise } from '@/types';
 import { getMessage } from '@/shared/error';
+import formatDateTime from '@/utils/format-date';
 import type { AugmentedSettingDefinitionItem, LabelDefinition } from './utils';
 import { s } from './utils';
 
@@ -22,6 +24,13 @@ export type HeadSettingTranslations = {
 	backendDescription: string;
 	syncStrategy: string;
 	syncStrategyDescription: string;
+	lastSync: string;
+	lastSyncNever: string;
+	lastSyncValue: Snippet<{ time: string; result: string }>;
+	completed: string;
+	completedNoop: string;
+	cancelled: string;
+	failed: string;
 	checkConnectionFailed: string;
 	checkConnectionSuccess: string;
 	checkConnection: string;
@@ -85,6 +94,11 @@ export default function headSettings(
 					recurseLabel(tab.settingItems);
 				});
 			},
+			search: false,
+		})),
+		15: s(() => ({
+			desc: describeLastSync(settings.lastSync, translate),
+			name: translate('lastSync'),
 			search: false,
 		})),
 		20: s(() => ({
@@ -239,4 +253,23 @@ function addLabel(
 	tag.style.setProperty('--flair-color', textColor);
 	tag.style.setProperty('--flair-background', color);
 	return tag;
+}
+
+const RESULT_KEYS = {
+	cancelled: 'cancelled',
+	completed: 'completed',
+	failed: 'failed',
+	noop: 'completedNoop',
+} as const;
+
+export function describeLastSync(
+	lastSync: LastSync | undefined,
+	translate: Translate<HeadSettingTranslations>,
+) {
+	if (!lastSync) return translate('lastSyncNever');
+	const text = translate('lastSyncValue', {
+		result: translate(RESULT_KEYS[lastSync.result]),
+		time: formatDateTime(lastSync.at),
+	});
+	return lastSync.error ? `${text}: ${lastSync.error}` : text;
 }

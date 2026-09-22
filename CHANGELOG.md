@@ -14,9 +14,11 @@ First version of Drive Bridge.
   `drive` scope).
 - Conflicting edits keep both versions (`name.conflict.md`). Optional smart
   merge does a three-way text merge and also keeps both when it cannot.
-- Asymmetric storage is off by default so Drive holds a normal folder tree.
+- The Drive folder holds a normal folder tree, so other apps and backups see
+  the same structure as the vault.
 - Remote deletions ask for confirmation during automatic sync.
 - Startup, scheduled and on-change sync; review tasks before they run.
+- Settings show when this device last synced and how it ended.
 
 ### Sign-in
 
