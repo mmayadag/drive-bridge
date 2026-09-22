@@ -17,6 +17,8 @@ type SmartMergeStoreMeta = Record<string, never>;
 export type SmartMergeDatabase = DatabaseAsync<SmartMergeStoreSchema, SmartMergeStoreMeta>;
 export type BaseTextStore = StoreAsync<string>;
 
+const RESOLVER_ID = 'smartMerge';
+
 export default class SmartMerge {
 	private readonly cleanup: Array<() => void> = [];
 
@@ -34,6 +36,9 @@ export default class SmartMerge {
 	) {
 		ctx.registerI18n('en', en);
 	}
+
+	// Reads the core setting so base texts are only captured when they can be used.
+	declare readonly settings: { conflictResolver: string };
 
 	readonly moduleSettings: SmartMergeSettings = {
 		conflictAEnd: '</mark>',
@@ -56,14 +61,18 @@ export default class SmartMerge {
 		} = this.ctx;
 		this.cleanup.push(
 			registerRemoteFsWrapper({
-				apply: (fs) =>
-					smartMergeBaseTextWrapper(
+				// Storing a copy of every synced text file is only worth it while
+				// Smart merge is the chosen conflict strategy.
+				apply: (fs) => {
+					if (this.settings.conflictResolver !== RESOLVER_ID) return;
+					return smartMergeBaseTextWrapper(
 						fs,
 						indexedDB.getStore(`base-text-${getNamespace(undefined, fs)}`),
-					),
+					);
+				},
 				priority: 20_098,
 			}),
-			registerConflictResolver('smartMerge', {
+			registerConflictResolver(RESOLVER_ID, {
 				prettyName: () => translate('smartMerge'),
 				resolver: smartMergeResolver(this.moduleSettings, indexedDB, getNamespace),
 			}),

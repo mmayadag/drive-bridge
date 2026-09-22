@@ -33,3 +33,6 @@ jobs:
 
       - name: Run tests
         run: bun tests
+
+      - name: Build plugin
+        run: bun run build

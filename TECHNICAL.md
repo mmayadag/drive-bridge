@@ -269,6 +269,8 @@ folder); for a vault only you edit, the defaults are fine except where noted.
 - **Conflicts:** both versions are kept by default (`renameAndKeepBoth`).
   Optional smart merge does a three-way merge for text when a common base is
   known and falls back to keeping both.
+  Smart merge needs a base, so it only keeps a copy of each synced text file
+  while it is the selected strategy, and merges only files synced since then.
 - **Deletes:** remote deletions require confirmation during automatic sync
   (`confirmDeleteInAutoSync`).
 - **Layout:** one vault maps to one Drive folder (`baseDirectory`). Listing is
