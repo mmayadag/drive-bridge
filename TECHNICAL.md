@@ -111,16 +111,16 @@ thinking about that limit.
 In Obsidian, install Drive Bridge (see the README), then open
 **Settings → Drive Bridge**:
 
-1. **Backend**: choose **Google Drive**.
-2. **OAuth client ID**: paste the client ID.
-3. **OAuth client secret**: paste the client secret. It is stored in the
+1. **OAuth client ID**: paste the client ID. (**Storage backend** is already
+   on Google Drive.)
+2. **OAuth client secret**: paste the client secret. It is stored in the
    device's secure storage, not in synced files.
-4. **Connect account**: paste the token from step 3 (the `eyJ…` string, the
+3. **Connect account**: paste the token from step 3 above (the `eyJ…` string, the
    JSON, or only its `refresh_token` value) and press **Connect**.
-5. **Base directory**: the Drive folder for this vault. It defaults to the
+4. **Base directory**: the Drive folder for this vault. It defaults to the
    vault name and is created on the first sync. Every device syncing the same
    vault must use the same folder.
-6. Run the first sync from the command palette or the ribbon icon and review
+5. Run the first sync from the command palette or the ribbon icon and review
    the tasks before confirming.
 
 Connect verifies the token before saving anything. It gets an access token
@@ -319,7 +319,7 @@ folder); for a vault only you edit, the defaults are fine except where noted.
 | Setting                   | Default              | Recommended          | What it does                                                                                                                                                                                                                  |
 | ------------------------- | -------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Last sync                 | none                 | none                 | Read-only: when this device last synced and how it ended.                                                                                                                                                                     |
-| Storage backend           | none                 | Google Drive         | The only backend.                                                                                                                                                                                                             |
+| Storage backend           | Google Drive         | Google Drive         | The only backend, selected out of the box. The icon next to it checks the connection.                                                                                                                                         |
 | Sync strategy             | Bidirectional        | Bidirectional        | Which direction files move in. _Mirror local_ / _Mirror remote_ make one side an exact copy of the other and delete the rest, so keep them for repairs. See [Sync strategies](#sync-strategies).                              |
 | Conflict resolve strategy | Rename and keep both | Rename and keep both | What happens when both sides changed the same file. The default keeps both versions; _Latest survives_, _Keep local_ and _Keep remote_ silently discard one. See [Conflict resolve strategies](#conflict-resolve-strategies). |
 

@@ -94,7 +94,7 @@ export default class DriveBridge extends Plugin {
 			noticeStatusOnMobile: true,
 			realtimeSync: { enabled: false, value: 5000 },
 			realtimeSyncFastMode: true,
-			remoteFs: '',
+			remoteFs: 'gdrive',
 			scheduledSync: { enabled: true, value: 15 * 60 * 1000 },
 			startupSync: { enabled: true, value: 5000 },
 			syncOnLeave: true,
