@@ -12,16 +12,16 @@ This is the repository for Drive Bridge, an Obsidian plugin that syncs vault fil
 
 - **TypeScript 6** as programming language
 - **Bun** as its package manager and task runner
-- **Tsdown** for building
+- **esbuild** for building (`scripts/build.ts`)
 - **Oxlint and Oxfmt** for linting and formatting
-- **Solid.js** and **TailwindCSS** (via UnoCSS) for UI
+- Obsidian's DOM helpers (`createEl`, `createDiv`, `setIcon`) and plain CSS in `src/global.css` for UI
 - `src/shared/kernel.ts` for dependency injection and reactive refs
 - `src/shared/kv.ts` for IndexedDB and in-memory key-value storage
 
 ## Commands
 
 - `bun run build`: build the plugin into `dist/`.
-- `bun dev`: build without clearing `dist/`.
+- `bun dev`: rebuild on change (unminified, inline source maps).
 - `bun fix`: format and fix fixable lint errors (always run before `bun check`).
 - `bun check`: check types, lint and format (no file change).
 - `bun tests`: run all tests (do not use `bun test`, it skips the Obsidian mock preload).
@@ -51,7 +51,7 @@ This is the repository for Drive Bridge, an Obsidian plugin that syncs vault fil
 - Sentence case for UI text.
 - Module-specific behavior should not pollute plugin core.
 - All Obsidian API mocks go `src/shared/obsidian-mock.spec.ts`.
-- Use inline Tailwind CSS for common styling, only use semantic CSS for animations and complex compositions. (Documentation website doesn't use TailwindCSS, you need to edit `docs/.vitepress/theme/styles.css`)
+- Styling goes in `src/global.css` with `drive-bridge-` prefixed classes; never add unscoped selectors that could affect Obsidian or other plugins. Use `el.show()` / `el.hide()` for visibility.
 - When any function or class needs to use `Context` as argument, prefer structural typing instead of direct `Context`.
 - `gdrive` and `smart-merge` are modules bundled into `main.js` by `src/modules/BundledModules.ts`. To add a module, import it there; there is no runtime module loading.
 - `null` forbidden, use `undefined` consistently.

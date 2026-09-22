@@ -135,10 +135,7 @@ export default function filterSettings({
 					}
 				});
 				setting.addExtraButton((button) => {
-					const activeClasses = [
-						'bg-[--interactive-accent]!',
-						'color-[--text-on-accent]!',
-					];
+					const activeClasses = ['drive-bridge-toggle-active'];
 					const updateStatus = () => {
 						if (item.value.caseSensitive)
 							button.extraSettingsEl.addClasses(activeClasses);

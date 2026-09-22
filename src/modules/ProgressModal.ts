@@ -202,12 +202,12 @@ export default class ProgressModal extends Modal {
 	};
 
 	private readonly showDetails = () => {
-		this.description?.removeClass('hidden');
-		this.detailContainer?.removeClass('hidden');
+		this.description?.show();
+		this.detailContainer?.show();
 	};
 	private readonly hideDetails = () => {
-		this.description?.addClass('hidden');
-		this.detailContainer?.addClass('hidden');
+		this.description?.hide();
+		this.detailContainer?.hide();
 	};
 
 	onOpen() {
@@ -264,12 +264,12 @@ export default class ProgressModal extends Modal {
 			{ deps: [this.ctx.walkProgress, this.ctx.syncStage, this.ctx.executionProgress] },
 		);
 
-		const container = contentEl.createDiv('flex flex-col gap-4 max-h-[75vh] pt-3 pb-3');
+		const container = contentEl.createDiv('drive-bridge-progress-modal');
 		const { bar, left, right } = renderProgress(container);
-		this.description = container.createEl('p', 'whitespace-pre-line hidden my-0');
-		this.detailContainer = container.createDiv(
-			'max-h-[50vh] overflow-y-auto rounded-lg border border-[--background-modifier-border] bg-[--background-secondary] p-3 hidden',
-		);
+		this.description = container.createEl('p', 'drive-bridge-progress-description');
+		this.description.hide();
+		this.detailContainer = container.createDiv('drive-bridge-progress-details');
+		this.detailContainer.hide();
 
 		this.modalCleanupCallbacks.subscribe(
 			progress.subscribe(

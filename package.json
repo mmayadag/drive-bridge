@@ -9,8 +9,8 @@
 	},
 	"type": "module",
 	"scripts": {
-		"dev": "MODE=dev bun --bun tsdown",
-		"build": "bun --bun tsdown",
+		"dev": "bun scripts/build.ts --watch",
+		"build": "bun scripts/build.ts",
 		"check": "tsc && oxlint && oxfmt --check",
 		"fix": "oxlint --silent --fix && oxfmt",
 		"tests": "bun --preload=./test/mocks.ts test",
@@ -18,20 +18,14 @@
 	},
 	"devDependencies": {
 		"@obsidian-typings/obsidian-public-latest": "^6.36.0",
-		"@tsdown/css": "^0.23.0",
 		"@types/bun": "^1.4.2",
-		"@unocss/postcss": "^66.10.0",
+		"esbuild": "^0.28.2",
 		"idb": "^8.0.3",
 		"obsidian": "^1.13.1",
 		"oxfmt": "^0.67.0",
 		"oxlint": "^1.83.0",
 		"oxlint-tsgolint": "^7.0.2002",
-		"postcss-merge-rules": "^9.0.3",
-		"solid-js": "^1.9.15",
-		"tsdown": "^0.23.0",
-		"typescript": "^6.0.3",
-		"unocss": "^66.10.0",
-		"unplugin-solid": "^2.0.0"
+		"typescript": "^6.0.3"
 	},
 	"packageManager": "bun@1.4.2"
 }

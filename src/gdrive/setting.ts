@@ -65,9 +65,9 @@ class DeviceCodeModal extends Modal {
 		contentEl.createEl('p', {
 			text: translate('deviceCodeInstruction', verificationUrl),
 		});
-		contentEl.createEl('code', { cls: 'gdrive-device-code', text: userCode });
+		contentEl.createEl('code', { cls: 'drive-bridge-device-code', text: userCode });
 		contentEl.createEl('p', {
-			cls: 'gdrive-device-code-status',
+			cls: 'drive-bridge-device-code-status',
 			text: translate('waitingApproval'),
 		});
 		new Setting(contentEl)

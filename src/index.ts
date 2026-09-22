@@ -1,4 +1,3 @@
-import '@/global.css';
 import type { Command, EventRef, App } from 'obsidian';
 import { Plugin } from 'obsidian';
 import type { AddRibbonIcon } from '@/modules/Observability';

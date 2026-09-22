@@ -63,10 +63,10 @@ class MigrationModal extends Modal {
 		contentEl.empty();
 
 		if (typeof content === 'string')
-			contentEl.createEl('p', { cls: 'whitespace-pre-wrap', text: content });
+			contentEl.createEl('p', { cls: 'drive-bridge-pre-wrap', text: content });
 		else contentEl.append(content);
 		contentEl.createEl('p', {
-			cls: 'whitespace-pre-wrap',
+			cls: 'drive-bridge-pre-wrap',
 			text: translate('migrationDescription'),
 		});
 
@@ -93,7 +93,7 @@ class MigrationModal extends Modal {
 		const { translate, dispatch } = ctx;
 		contentEl.empty();
 		this.setTitle(translate('migrationProcess'));
-		const { left, right, bar } = renderProgress(contentEl, 'mb-3');
+		const { left, right, bar } = renderProgress(contentEl, 'drive-bridge-migration-progress');
 
 		let controls: HTMLElement | undefined;
 		const renderControls = (text: 'hide' | 'done') => {

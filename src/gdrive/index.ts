@@ -1,4 +1,3 @@
-import 'tsdown/client';
 import type { App } from 'obsidian';
 import type {
 	Context,
@@ -21,7 +20,6 @@ import checkConnection from './check-connection';
 import GdriveFs from './fs';
 import { ru, en, zh, zhTW } from './i18n';
 import gdriveSetting from './setting';
-import styles from './styles.css?inline';
 
 export type GdriveSettings = {
 	baseDirectory: string;
@@ -43,7 +41,6 @@ export default class Gdrive {
 			registerRemoteRequestMiddleware: (entry: RemoteRequestMiddlewareEntry) => () => void;
 			registerSetting: (entry: SettingEntry) => () => void;
 			registerI18n: (lang: ObsidianLanguageCode, translations: TranslationResource) => void;
-			registerCss: (css: string) => () => void;
 		}>,
 	) {
 		if (!this.moduleSettings.baseDirectory)
@@ -71,10 +68,8 @@ export default class Gdrive {
 			registerRemoteFsWrapper,
 			registerRemoteRequestMiddleware,
 			registerSetting,
-			registerCss,
 		} = this.ctx;
 		this.cleanup.push(
-			registerCss(styles),
 			registerRemoteFs('gdrive', {
 				checkConnection,
 				instantiate: (request) => new GdriveFs(request, this.moduleSettings, memoryDB),

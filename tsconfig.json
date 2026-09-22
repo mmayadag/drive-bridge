@@ -15,20 +15,11 @@
 		"allowImportingTsExtensions": true,
 		"lib": ["ESNext", "DOM", "DOM.Iterable"],
 		"types": ["bun", "@obsidian-typings/obsidian-public-latest"],
-		"jsx": "preserve",
-		"jsxImportSource": "solid-js",
 		"paths": {
 			"@": ["./src"],
 			"@/*": ["./src/*"],
 			"$/*": ["./test/*"]
 		}
 	},
-	"include": [
-		"src/**/*.ts",
-		"src/**/*.tsx",
-		"test/**/*.ts",
-		"scripts/**/*.ts",
-		"tsdown.config.ts",
-		"uno.config.ts"
-	]
+	"include": ["src/**/*.ts", "test/**/*.ts", "scripts/**/*.ts"]
 }

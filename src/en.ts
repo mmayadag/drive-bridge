@@ -201,11 +201,10 @@ const en: Translations = {
 	settingTips: ({ labels, addLabel }) =>
 		createFragment((frag) => {
 			frag.createEl('p', { text: 'Labels on settings:' });
-			const ul = frag.createEl('ul', 'list-none ps-0!');
+			const ul = frag.createEl('ul', 'drive-bridge-label-list');
 			for (const label of labels) {
 				const li = ul.createEl('li');
 				const flair = addLabel(li, label);
-				flair.addClass('m-0');
 				li.appendText(` ${flair.ariaLabel}`);
 			}
 		}),

@@ -164,31 +164,31 @@ function setupCheckConnection({
 }) {
 	let timeout: number | undefined;
 	const possibleClasses = [
-		'color-[--color-green]',
-		'color-[--color-red]',
-		'color-[-text-faint]',
-		'animate-spin',
+		'drive-bridge-status-ok',
+		'drive-bridge-status-error',
+		'drive-bridge-status-pending',
+		'drive-bridge-spin',
 	];
 	const setChecking = () => {
 		button.setIcon('loader-circle');
 		const ele = button.extraSettingsEl.firstElementChild;
 		if (!ele) return;
 		ele.removeClasses(possibleClasses);
-		ele.addClasses(['animate-spin', 'color-[-text-faint]']);
+		ele.addClasses(['drive-bridge-spin', 'drive-bridge-status-pending']);
 	};
 	const setSuccess = () => {
 		button.setIcon('check');
 		const ele = button.extraSettingsEl.firstElementChild;
 		if (!ele) return;
 		ele.removeClasses(possibleClasses);
-		ele.addClasses(['color-[--color-green]']);
+		ele.addClass('drive-bridge-status-ok');
 	};
 	const setError = () => {
 		button.setIcon('cloud-off');
 		const ele = button.extraSettingsEl.firstElementChild;
 		if (!ele) return;
 		ele.removeClasses(possibleClasses);
-		ele.addClasses(['color-[--color-red]']);
+		ele.addClass('drive-bridge-status-error');
 	};
 	const scheduleCheckConnection = () =>
 		(timeout = window.setTimeout(() => void check(), CHECK_CONNECTION_INTERVAL));
