@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test';
-import { deleteMemoryDB, openMemoryDB } from '@/shared/kv';
+import { deleteMemoryDB, openMemoryDB } from '@/shared/key-value-store';
 
 test('memory stores keep values per store', () => {
 	const db = openMemoryDB<Record<string, number>>('kv-test-stores');

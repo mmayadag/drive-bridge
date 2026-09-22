@@ -1,6 +1,6 @@
 import type { Events, Translations } from '@';
 import type { Fs, ListReporter } from '@/fs';
-import type { Ref } from '@/shared/kernel';
+import type { Ref } from '@/shared/reactive';
 import type {
 	BaseTask,
 	ConflictResolver,
@@ -19,8 +19,8 @@ import type {
 } from '@/types';
 import type { GlobMatchResult } from '@/utils/glob-match';
 import { getMessage } from '@/shared/error';
-import { ref } from '@/shared/kernel';
 import { isSub } from '@/shared/path';
+import { ref } from '@/shared/reactive';
 import {
 	RemoveLocal,
 	CreateRemoteDir,

@@ -1,13 +1,13 @@
 import type { Events, Translations } from '@';
 import type { App } from 'obsidian';
 import { Modal, Setting } from 'obsidian';
-import type { Ref } from '@/shared/kernel';
+import type { Ref } from '@/shared/reactive';
 import type { BaseTask, RemoveLocal, TaskNames } from '@/sync';
 import type { Progress } from '@/types';
 import mountFileTree from '@/components/file-tree';
 import renderFailedTasks from '@/components/render-failed-tasks';
 import renderProgress from '@/components/render-progress';
-import { computed, hook } from '@/shared/kernel';
+import { computed, hook } from '@/shared/reactive';
 import roundPercent from '@/utils/round-percent';
 import type { Dispatch, On } from './EventBus';
 import type { Snippet, Translate } from './I18n';

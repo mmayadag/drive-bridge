@@ -4,7 +4,7 @@ import type { Binary, MaybePromise, RequestParam, RequestResponse } from '@/sdk'
 import { DRIVE_API, DRIVE_UPLOAD_API, FOLDER_MIME } from '@/gdrive/api';
 import GdriveFs from '@/gdrive/fs';
 import { testKit } from '@/sdk/dev';
-import { openMemoryDB } from '@/shared/kv';
+import { openMemoryDB } from '@/shared/key-value-store';
 
 const { bytes, file, request } = testKit;
 const db: GdriveDB = openMemoryDB<{ gdriveIds: string }, { gdriveIdsMarker?: string }>(

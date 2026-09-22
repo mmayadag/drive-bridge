@@ -2,7 +2,7 @@ import type { Settings } from '@';
 import type { SettingGroupItem } from 'obsidian';
 import type { Fragment, Snippet, Translate } from '@/modules/I18n';
 import type { CallableOrObjectTree } from '@/modules/Setting';
-import type { DatabaseSync } from '@/shared/kv';
+import type { DatabaseSync } from '@/shared/key-value-store';
 import type { General, GlobMatchRule } from '@/types';
 import { normalizeGlob } from '@/utils/glob-match';
 import type { LabelDefinition } from './utils';

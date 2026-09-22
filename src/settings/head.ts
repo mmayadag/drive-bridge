@@ -9,7 +9,7 @@ import type {
 } from '@/modules/Registrar';
 import type { CallableOrObjectTree } from '@/modules/Setting';
 import type { Dispatch } from '@/sdk';
-import type { DatabaseSync } from '@/shared/kv';
+import type { DatabaseSync } from '@/shared/key-value-store';
 import type { General, MaybePromise } from '@/types';
 import { getMessage } from '@/shared/error';
 import type { AugmentedSettingDefinitionItem, LabelDefinition } from './utils';

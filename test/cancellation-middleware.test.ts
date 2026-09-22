@@ -2,7 +2,7 @@ import testKit from '$/test-kit';
 import { expect, test } from 'bun:test';
 import type { RequestResponse } from '@/modules/Registrar';
 import { cancellationMiddleware } from '@/fs';
-import { ref } from '@/shared/kernel';
+import { ref } from '@/shared/reactive';
 
 const { deferred, flush, request } = testKit;
 

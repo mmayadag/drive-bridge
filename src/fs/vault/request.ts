@@ -3,7 +3,6 @@ import { TFile, TFolder } from 'obsidian';
 import type { Binary, MaybePromise } from '@/types';
 import { OS } from '@/modules/EventBus';
 import { toArrayBuffer, toUint8Array } from '@/shared/binary';
-import { requestNative } from '@/shared/e2e-utils.spec';
 import { basename, isFolder, stripEndSlash } from '@/shared/path';
 import createRangeReadStream from '@/shared/read-stream';
 import { chunkSize, concurrency } from '@/utils/pipe';
@@ -118,7 +117,7 @@ export default function createVaultRequest(app: App): VaultRequest {
 					},
 					requestRange: async (start, end) =>
 						(
-							await requestNative(url, {
+							await fetch(url, {
 								headers: { Range: `bytes=${start}-${end}` },
 								method: 'GET',
 							})
@@ -126,7 +125,8 @@ export default function createVaultRequest(app: App): VaultRequest {
 					size: params.size,
 				}) as never;
 			}
-			const response = await requestNative(url);
+			// Reads a local vault file through its resource URL; fetch can stream, requestUrl cannot.
+			const response = await fetch(url);
 			if (!response.body) throw new Error('Streaming vault file is not supported!');
 			return response.body as never;
 		}

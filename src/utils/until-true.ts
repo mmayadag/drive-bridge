@@ -1,4 +1,4 @@
-import type { Ref } from '@/shared/kernel';
+import type { Ref } from '@/shared/reactive';
 
 export default function untilTrue(ref: Ref<boolean>, stop?: 'stop') {
 	if (ref()) return;

@@ -3,7 +3,7 @@ import type { App, SettingGroupItem } from 'obsidian';
 import { SecretComponent } from 'obsidian';
 import type { Snippet, Translate } from '@/modules/I18n';
 import type { CallableOrObjectTree } from '@/modules/Setting';
-import type { DatabaseSync } from '@/shared/kv';
+import type { DatabaseSync } from '@/shared/key-value-store';
 import type { General } from '@/types';
 import { generateEditableList, reactivelyValidate, s } from './utils';
 

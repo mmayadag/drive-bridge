@@ -1,7 +1,7 @@
 import type { Events } from '@';
 import { apiVersion, Platform } from 'obsidian';
 import type { General } from '@/types';
-import { ref } from '@/shared/kernel';
+import { ref } from '@/shared/reactive';
 import formatDateTime from '@/utils/format-date';
 import { formatTime } from '@/utils/unit-converter';
 

@@ -1,4 +1,4 @@
-import type { StoreSync } from '@/shared/kv';
+import type { StoreSync } from '@/shared/key-value-store';
 import type { Stat, Binary, FileStat } from '@/types';
 import { basename, dirname, isFolder, isSub } from '@/shared/path';
 import type { Fs, ListReporter, WrappedFs } from '../interface';

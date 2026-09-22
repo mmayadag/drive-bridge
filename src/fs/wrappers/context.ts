@@ -1,4 +1,4 @@
-import type { DatabaseSync, StoreSync } from '@/shared/kv';
+import type { DatabaseSync, StoreSync } from '@/shared/key-value-store';
 import type { MaybePromise, Stat, Binary, FileStat } from '@/types';
 import type { WrappedFs, Fs, ListReporter } from '../interface';
 

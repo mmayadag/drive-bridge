@@ -1,4 +1,4 @@
-import type { Ref } from '@/shared/kernel';
+import type { Ref } from '@/shared/reactive';
 import type { MaybePromise, Binary, FileStat, General } from '@/types';
 import { syncCancelledError } from '@/sync';
 import type { Fs, ListReporter, WrappedFs } from '../interface';

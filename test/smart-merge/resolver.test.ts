@@ -4,7 +4,7 @@ import type { SmartMergeDatabase } from '@/smart-merge/index';
 import type { MergeOptions } from '@/smart-merge/utils/merge';
 import { testKit } from '@/sdk/dev';
 import { uint8ArrayToText } from '@/shared/binary';
-import { openMemoryDB } from '@/shared/kv';
+import { openMemoryDB } from '@/shared/key-value-store';
 import smartMergeResolver from '@/smart-merge/resolver';
 
 const { bytes, file, fs, stream } = testKit;

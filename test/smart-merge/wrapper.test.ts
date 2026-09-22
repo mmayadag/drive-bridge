@@ -1,7 +1,7 @@
 import { beforeEach, expect, test } from 'bun:test';
 import type { StoreAsync } from '@/sdk';
 import { testKit } from '@/sdk/dev';
-import { openMemoryDB } from '@/shared/kv';
+import { openMemoryDB } from '@/shared/key-value-store';
 import smartMergeBaseTextWrapper from '@/smart-merge/wrapper';
 
 const { bytes, file, fs } = testKit;

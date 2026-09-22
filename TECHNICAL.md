@@ -83,7 +83,7 @@ bun fix                # auto-fix lint and format
 | `src/`             | Plugin core: sync logic, settings, UI |
 | `src/gdrive/`      | Google Drive backend                  |
 | `src/smart-merge/` | Three-way text merge                  |
-| `src/shared/`      | Shared utilities, storage, DI kernel  |
+| `src/shared/`      | Shared utilities and storage          |
 | `test/`            | Tests; `test/mocks.ts` mocks Obsidian |
 
 ### Releasing

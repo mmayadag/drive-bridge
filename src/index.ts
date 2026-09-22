@@ -1,7 +1,7 @@
 import type { Command, EventRef, App } from 'obsidian';
 import { Plugin } from 'obsidian';
 import type { AddRibbonIcon } from '@/modules/Observability';
-import type { Context as KernelContext, MergeSingleKey } from '@/shared/kernel';
+import type { Context as KernelContext, MergeSingleKey } from '@/shared/module-context';
 import Bootstrap from '@/modules/Bootstrap';
 import BundledModules from '@/modules/BundledModules';
 import EventBus from '@/modules/EventBus';
@@ -13,7 +13,7 @@ import Scheduler from '@/modules/Scheduler';
 import Setting from '@/modules/Setting';
 import Storage from '@/modules/Storage';
 import Sync from '@/modules/Sync';
-import { createContext } from '@/shared/kernel';
+import { createContext } from '@/shared/module-context';
 
 const internalModules = [
 	EventBus,

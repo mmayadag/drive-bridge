@@ -1,7 +1,7 @@
 import type { App, RequestUrlParam } from 'obsidian';
 import { requestUrl } from 'obsidian';
 import type { BatchOptimizer, Fs, RootFs, VaultRequest } from '@/fs';
-import type { StoreAsync } from '@/shared/kv';
+import type { StoreAsync } from '@/shared/key-value-store';
 import type { ConflictResolver, Decider } from '@/sync';
 import type { General, MaybePromise, RecordStat, Binary } from '@/types';
 import { createVaultRequest, VaultFs } from '@/fs';

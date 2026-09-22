@@ -1,4 +1,4 @@
 // oxlint-disable-next-line import/no-namespace
-import * as ObsidianMock from './obsidian-mock.spec';
+import * as ObsidianMock from './obsidian-mock-api';
 
 export default ObsidianMock;

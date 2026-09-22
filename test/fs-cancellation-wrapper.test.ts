@@ -1,7 +1,7 @@
 import testKit from '$/test-kit';
 import { expect, test } from 'bun:test';
 import { cancellationWrapper } from '@/fs';
-import { ref } from '@/shared/kernel';
+import { ref } from '@/shared/reactive';
 import { syncCancelledError } from '@/sync';
 
 const { bytes, deferred, file, flush, fs, stream } = testKit;

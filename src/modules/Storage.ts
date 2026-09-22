@@ -1,6 +1,6 @@
-import type { DatabaseAsync, StoreAsync } from '@/shared/kv';
+import type { DatabaseAsync, StoreAsync } from '@/shared/key-value-store';
 import type { General, MaybePromise, RecordStat } from '@/types';
-import { deleteMemoryDB, openIndexedDB, openMemoryDB } from '@/shared/kv';
+import { deleteMemoryDB, openIndexedDB, openMemoryDB } from '@/shared/key-value-store';
 
 export type IndexedDBSchema = Record<string, RecordStat>;
 export type RecordStore = StoreAsync<RecordStat>;

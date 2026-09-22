@@ -8,8 +8,8 @@ import type { FeaturesSettingTranslations } from '@/settings/features';
 import type { FilterSettingTranslations } from '@/settings/filter';
 import type { HeadSettingTranslations } from '@/settings/head';
 import type { MiscellaneousSettingTranslations } from '@/settings/miscellaneous';
-import type { Ref } from '@/shared/kernel';
-import type { DatabaseSync } from '@/shared/kv';
+import type { DatabaseSync } from '@/shared/key-value-store';
+import type { Ref } from '@/shared/reactive';
 import type { Stat, TogglableValue } from '@/types';
 import en from '@/en';
 import {

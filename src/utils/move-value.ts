@@ -1,4 +1,4 @@
-import type { StoreAsync } from '@/shared/kv';
+import type { StoreAsync } from '@/shared/key-value-store';
 
 export default async function moveValue({
 	store,

@@ -9,7 +9,7 @@ import type {
 } from 'obsidian';
 import { setIcon } from 'obsidian';
 import type { CallableOrObjectTree, SettingTree } from '@/modules/Setting';
-import type { DatabaseSync } from '@/shared/kv';
+import type { DatabaseSync } from '@/shared/key-value-store';
 import type { General, TogglableValue } from '@/types';
 import { encodeURIComponent3986 } from '@/shared/path';
 import { formatFileSize, formatTime, parseFileSize, parseTime } from '@/utils/unit-converter';

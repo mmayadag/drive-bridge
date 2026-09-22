@@ -1,11 +1,11 @@
 import testKit from '$/test-kit';
 import { beforeEach, expect, test } from 'bun:test';
 import type { Fs } from '@/fs';
-import type { DatabaseSync } from '@/shared/kv';
+import type { DatabaseSync } from '@/shared/key-value-store';
 import type { FileStat, Stat } from '@/types';
 import { contextWrapper } from '@/fs';
 import { STORAGE_NAME } from '@/modules/Storage';
-import { openMemoryDB } from '@/shared/kv';
+import { openMemoryDB } from '@/shared/key-value-store';
 
 const { bytes, file, folder, fs, stream } = testKit;
 type ContextMemoryDB = DatabaseSync<

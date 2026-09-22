@@ -15,8 +15,9 @@ This is the repository for Drive Bridge, an Obsidian plugin that syncs vault fil
 - **esbuild** for building (`scripts/build.ts`)
 - **Oxlint and Oxfmt** for linting and formatting
 - Obsidian's DOM helpers (`createEl`, `createDiv`, `setIcon`) and plain CSS in `src/global.css` for UI
-- `src/shared/kernel.ts` for dependency injection and reactive refs
-- `src/shared/kv.ts` for IndexedDB and in-memory key-value storage
+- `src/shared/module-context.ts` for wiring modules together (dependency injection)
+- `src/shared/reactive.ts` for `ref`, `computed` and `hook`
+- `src/shared/key-value-store.ts` for IndexedDB and in-memory key-value storage
 
 ## Commands
 
@@ -33,7 +34,7 @@ This is the repository for Drive Bridge, an Obsidian plugin that syncs vault fil
 - `src/`: plugin core (sync, settings, UI). Entry point `src/index.ts`.
 - `src/gdrive/`: Google Drive backend module.
 - `src/smart-merge/`: three-way merge module.
-- `src/shared/`: shared utilities, including `kernel.ts` and `kv.ts`.
+- `src/shared/`: shared utilities: module context, reactive values, key-value store, paths.
 - `src/sdk/`: the API surface modules use (`@/sdk`).
 - `test/`: tests, mirroring `src/`. `test/mocks.ts` is preloaded and mocks `obsidian`.
 - `docs/`: upstream documentation site. Not built, linted or formatted; kept until we decide what to do with it.
@@ -50,7 +51,7 @@ This is the repository for Drive Bridge, an Obsidian plugin that syncs vault fil
 - For mobile compatibility, Node.js API prohibited in plugin and modules.
 - Sentence case for UI text.
 - Module-specific behavior should not pollute plugin core.
-- All Obsidian API mocks go `src/shared/obsidian-mock.spec.ts`.
+- All Obsidian API mocks go in `test/obsidian-mock-api.ts`.
 - Styling goes in `src/global.css` with `drive-bridge-` prefixed classes; never add unscoped selectors that could affect Obsidian or other plugins. Use `el.show()` / `el.hide()` for visibility.
 - When any function or class needs to use `Context` as argument, prefer structural typing instead of direct `Context`.
 - `gdrive` and `smart-merge` are modules bundled into `main.js` by `src/modules/BundledModules.ts`. To add a module, import it there; there is no runtime module loading.

@@ -9,7 +9,7 @@ import type { SyncTerminateReason } from '@/modules/Sync';
 import type { MaybePromise } from '@/types';
 import renderProgress from '@/components/render-progress';
 import { getMessage } from '@/shared/error';
-import { ref } from '@/shared/kernel';
+import { ref } from '@/shared/reactive';
 import roundPercent from '@/utils/round-percent';
 
 export type MigrationModalTranslations = {

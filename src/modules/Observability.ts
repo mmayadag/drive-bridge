@@ -1,10 +1,10 @@
 import type { Events, Translations } from '@';
 import type { App, Command, DataAdapter, IconName } from 'obsidian';
 import { Notice, Platform, setIcon } from 'obsidian';
-import type { Ref } from '@/shared/kernel';
+import type { Ref } from '@/shared/reactive';
 import type { Progress } from '@/types';
 import { getMessage } from '@/shared/error';
-import { computed, ref } from '@/shared/kernel';
+import { computed, ref } from '@/shared/reactive';
 import roundPercent from '@/utils/round-percent';
 import { formatTime } from '@/utils/unit-converter';
 import type { Dispatch, On } from './EventBus';

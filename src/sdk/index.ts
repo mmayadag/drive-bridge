@@ -26,7 +26,7 @@ export type {
 	DatabaseAsync,
 	DatabaseSync,
 	StoreOperations,
-} from '@/shared/kv';
+} from '@/shared/key-value-store';
 export type {
 	RecordStat,
 	RecordStatsMap,

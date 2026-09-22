@@ -3,7 +3,7 @@ import { beforeEach, expect, test } from 'bun:test';
 import type { Stat } from '@/types';
 import { asymmetricStorageWrapper } from '@/fs';
 import { STORAGE_NAME } from '@/modules/Storage';
-import { openMemoryDB } from '@/shared/kv';
+import { openMemoryDB } from '@/shared/key-value-store';
 
 const { bytes, file, folder, fs } = testKit;
 

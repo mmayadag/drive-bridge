@@ -1,4 +1,5 @@
-export type { General } from '@/shared/e2e-utils.spec';
+// oxlint-disable-next-line typescript/no-explicit-any
+export type General = any;
 export type { Binary } from '@/shared/binary';
 
 export type MaybePromise<T> = Promise<T> | T;
