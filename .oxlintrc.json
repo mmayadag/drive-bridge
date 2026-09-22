@@ -112,6 +112,7 @@
 		"typescript/prefer-nullish-coalescing": ["warn", { "ignorePrimitives": true }],
 		"unicorn/prefer-query-selector": "off",
 		"eslint/no-inline-comments": "off",
+		"eslint/capitalized-comments": "off",
 		"unicorn/prefer-number-coercion": "off",
 		"prefer-promise-reject-errors": "off", // Has TypeScript equivalence
 		"eslint/no-throw-literal": "off", // Officially deprecated

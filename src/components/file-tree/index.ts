@@ -10,7 +10,7 @@ export type FileTreeTranslations = { selectAll: string; xSelected: Snippet<numbe
 type Row = { checkbox: HTMLInputElement; label: HTMLElement };
 
 // Renders a checkbox tree of sync tasks. Selection rules live in ./selection; this file only
-// Keeps the DOM in step with them.
+// keeps the DOM in step with them.
 export default function mount(
 	el: HTMLElement,
 	tasks: Array<BaseTask>,

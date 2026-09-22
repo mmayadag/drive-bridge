@@ -3,7 +3,7 @@ import { requestUrl } from 'obsidian';
 import type { BatchOptimizer, Fs, RootFs, VaultRequest } from '@/fs';
 import type { StoreAsync } from '@/shared/key-value-store';
 import type { ConflictResolver, Decider } from '@/sync';
-import type { General, MaybePromise, RecordStat, Binary } from '@/types';
+import type { MaybePromise, RecordStat, Binary } from '@/types';
 import { createVaultRequest, VaultFs } from '@/fs';
 import { toArrayBuffer, toUint8Array } from '@/shared/binary';
 import hash from '@/shared/crypto';
@@ -25,7 +25,7 @@ export type RemoteFsEntry = {
 export type DeciderEntry = { decider: Decider; prettyName: () => string };
 export type ConflictResolverEntry = { prettyName: () => string; resolver: ConflictResolver };
 
-type GeneralFn = (...args: ReadonlyArray<General>) => unknown;
+type GeneralFn = (...args: ReadonlyArray<never>) => unknown;
 type RejectableApply<F extends GeneralFn> = (...input: Parameters<F>) => ReturnType<F> | undefined;
 type OrderedApplyEntry<F extends GeneralFn> = { apply: RejectableApply<F>; priority: number };
 

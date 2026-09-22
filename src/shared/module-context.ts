@@ -1,26 +1,24 @@
 // Dependency container that wires the plugin's modules into one shared context.
 
-import type { General } from '@/types';
-
 type Empty = Record<never, never>;
 
-type GeneralConstructor = new (...args: Array<General>) => General;
-type ModuleConstructor<C extends object> = new (context: C) => General;
+type GeneralConstructor = new (...args: Array<never>) => object;
+type ModuleConstructor<C extends object> = new (context: C) => object;
 type GeneralModuleInput = ReadonlyArray<GeneralConstructor> | ReadonlyArray<object>;
 
-type AnyFunction = (...args: Array<General>) => General;
+type AnyFunction = (...args: Array<never>) => unknown;
 type NonPlain =
 	| AnyFunction
 	| GeneralConstructor
 	| Date
 	| RegExp
-	| Array<General>
-	| Map<General, General>
-	| Set<General>;
+	| Array<unknown>
+	| Map<unknown, unknown>
+	| Set<unknown>;
 type IsPlainObject<T> = T extends object ? (T extends NonPlain ? false : true) : false;
 type ShallowMerge<A, B> =
 	IsPlainObject<A> extends true ? (IsPlainObject<B> extends true ? Omit<A, keyof B> & B : B) : B;
-type Keys<T> = T extends General ? keyof T : never;
+type Keys<T> = T extends unknown ? keyof T : never;
 type InstanceEach<T extends GeneralModuleInput> =
 	T extends ReadonlyArray<GeneralConstructor> ? { [K in keyof T]: InstanceType<T[K]> } : T;
 type PickEach<T extends ReadonlyArray<object>, K extends PropertyKey> = {
@@ -67,7 +65,7 @@ export type Context<
 	Po extends object = Empty,
 > = MergeResult<M, K, Pr, Po> & {
 	__modules__: WeakMap<M[number], InstanceEach<M>[number]>;
-	__getModule__: <C extends new (ctx: General) => InstanceEach<M>[number]>(
+	__getModule__: <C extends new (ctx: never) => InstanceEach<M>[number]>(
 		ctor: C,
 	) => InstanceType<C>;
 	__addModule__: <N extends ModuleConstructor<Context<[...M, N], K, Pr, Po>>>(
@@ -147,7 +145,9 @@ export function createContext<
 	};
 
 	const addInstance = (ctor: GeneralConstructor) => {
-		const instance = new ctor(context) as PlainObject;
+		const instance = new (ctor as unknown as new (context: PlainObject) => object)(
+			context,
+		) as PlainObject;
 		modules.set(ctor, instance);
 		instances.push(instance);
 		mergeInstance(instance);

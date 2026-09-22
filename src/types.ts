@@ -1,10 +1,3 @@
-// The one deliberate `any` in the plugin.
-// Generic plumbing needs a type that stays assignable in both directions.
-// That rules out `unknown`.
-// Module context, translations and task factories all rely on it.
-// Nothing ever reads a value at this type.
-// oxlint-disable-next-line typescript/no-explicit-any
-export type General = any;
 export type { Binary } from '@/shared/binary';
 
 export type MaybePromise<T> = Promise<T> | T;

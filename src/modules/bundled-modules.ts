@@ -1,5 +1,4 @@
 import type { Context, Events } from '@';
-import type { General } from '@/types';
 import Gdrive from '@/gdrive';
 import SmartMerge from '@/smart-merge';
 import type { Dispatch } from './event-bus';
@@ -32,7 +31,7 @@ export default class BundledModules {
 			__addModule__: Context['__addModule__'];
 			__getModule__: Context['__getModule__'];
 			dispatch: Dispatch<Events>;
-			allModules: Set<General>;
+			allModules: Set<unknown>;
 			saveSettings: () => Promise<void>;
 		},
 	) {}

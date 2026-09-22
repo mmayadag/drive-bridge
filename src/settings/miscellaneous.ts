@@ -4,7 +4,6 @@ import { Notice, SecretComponent } from 'obsidian';
 import type { Snippet, Translate } from '@/modules/i18n';
 import type { CallableOrObjectTree } from '@/modules/setting';
 import type { DatabaseSync } from '@/shared/key-value-store';
-import type { General } from '@/types';
 import { generateEditableList, reactivelyValidate, s } from './utils';
 
 const RESERVED_HEADERS = new Set(['authorization', 'content-type', 'content-length', 'host']);
@@ -50,7 +49,7 @@ export default function miscellaneousSettings({
 	translate: Translate<MiscellaneousSettingTranslations>;
 	saveSettings: () => Promise<void>;
 	settings: Settings;
-	memoryDB: DatabaseSync<General>;
+	memoryDB: DatabaseSync;
 	rerenderSettingTab: () => void;
 	app: App;
 }): CallableOrObjectTree {

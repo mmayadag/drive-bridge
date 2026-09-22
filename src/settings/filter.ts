@@ -3,7 +3,7 @@ import type { SettingGroupItem } from 'obsidian';
 import type { Fragment, Snippet, Translate } from '@/modules/i18n';
 import type { CallableOrObjectTree } from '@/modules/setting';
 import type { DatabaseSync } from '@/shared/key-value-store';
-import type { General, GlobMatchRule } from '@/types';
+import type { GlobMatchRule } from '@/types';
 import { normalizeGlob } from '@/utils/glob-match';
 import type { LabelDefinition } from './utils';
 import { generateEditableList, reactivelyValidate, s } from './utils';
@@ -33,7 +33,7 @@ export default function filterSettings({
 	translate: Translate<FilterSettingTranslations>;
 	saveSettings: () => Promise<void>;
 	settings: Settings;
-	memoryDB: DatabaseSync<General>;
+	memoryDB: DatabaseSync;
 	rerenderSettingTab: () => void;
 	speedLabel: () => LabelDefinition;
 }): CallableOrObjectTree {

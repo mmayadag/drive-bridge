@@ -1,10 +1,8 @@
-import type { General } from '@/types';
-
 type Factory<A = undefined> = (args: A) => DocumentFragment | string;
 export type Fragment<A = undefined> = (args: A) => DocumentFragment;
 export type Snippet<A = undefined> = (args: A) => string;
 
-type TranslationTypes = string | Factory<General>;
+type TranslationTypes = string | Factory<never>;
 export type TranslationResource = Record<string, TranslationTypes>;
 
 type TranslateParams<R extends TranslationTypes> =
@@ -12,11 +10,11 @@ type TranslateParams<R extends TranslationTypes> =
 export type Translate<O extends TranslationResource> = <K extends keyof O>(
 	key: K,
 	...arg: TranslateParams<O[K]>
-) => O[K] extends string | Snippet<General> ? string : DocumentFragment;
+) => O[K] extends string | Snippet<never> ? string : DocumentFragment;
 
 export default class I18n {
 	// One language for now. Adding more means merging another resource here and
-	// Choosing between them, which nothing needs yet.
+	// choosing between them, which nothing needs yet.
 	readonly i18n: TranslationResource = {};
 
 	private readonly registerTranslations = (resource: TranslationResource) =>
@@ -25,7 +23,7 @@ export default class I18n {
 	private readonly translate = ((key: string, arg: unknown) => {
 		const value = this.i18n[key];
 		if (typeof value === 'string') return value;
-		return value(arg);
+		return (value as Factory<unknown>)(arg);
 	}) as Translate<TranslationResource>;
 
 	root = {

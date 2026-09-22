@@ -66,7 +66,7 @@ export default function gdriveSetting(
 	tokenManager: TokenManager,
 ): CallableOrObjectTree {
 	// The three fields Connect needs. Kept here so Connect can point at whichever
-	// One is still empty instead of spending a round trip to Google to find out.
+	// one is still empty instead of spending a round trip to Google to find out.
 	let clientIdField: TextComponent | undefined;
 	let clientSecretField: TextComponent | undefined;
 	let tokenField: TextComponent | undefined;
@@ -85,7 +85,7 @@ export default function gdriveSetting(
 	};
 
 	// Reads what is on screen: the fields save on blur, and a click on Connect
-	// Blurs first, but a keyboard activation may not.
+	// blurs first, but a keyboard activation may not.
 	const entered = (field: TextComponent | undefined, stored: string) =>
 		(field ? field.getValue() : stored).trim();
 
@@ -178,8 +178,8 @@ export default function gdriveSetting(
 					render: (setting) => {
 						let input = '';
 						// The token is long. This row gives the field and the button a line
-						// Of their own under the description, instead of squeezing both
-						// Into the control column.
+						// of their own under the description, instead of squeezing both
+						// into the control column.
 						setting.settingEl.addClass('drive-bridge-stacked-setting');
 						setting
 							.addText((text) => {

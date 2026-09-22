@@ -1,5 +1,5 @@
-import type { DatabaseAsync, StoreAsync } from '@/shared/key-value-store';
-import type { General, MaybePromise, RecordStat } from '@/types';
+import type { StoreAsync } from '@/shared/key-value-store';
+import type { MaybePromise, RecordStat } from '@/types';
 import { deleteMemoryDB, openIndexedDB, openMemoryDB } from '@/shared/key-value-store';
 
 export type IndexedDBSchema = Record<string, RecordStat>;
@@ -9,7 +9,10 @@ export const SYNC_STATE_STORE_NAME = 'sync-state';
 export const STORAGE_NAME = 'drive-bridge';
 
 export default class Storage {
-	private readonly memoryDB = openMemoryDB<General, General>(STORAGE_NAME);
+	// Shared databases.
+	// Each module reads them through a schema of its own, so the type here has to
+	// fit every one of those schemas; `never` is the only type that does.
+	private readonly memoryDB: never = openMemoryDB(STORAGE_NAME) as never;
 	private readonly indexedDB = openIndexedDB<IndexedDBSchema>(STORAGE_NAME);
 
 	constructor(private readonly ctx: { getNamespace: () => string }) {}
@@ -41,7 +44,7 @@ export default class Storage {
 		clearRecordStores: this.clearRecordStores,
 		deleteRecordStore: this.deleteRecordStore,
 		getRecordStore: this.getRecordStore,
-		indexedDB: this.indexedDB as DatabaseAsync<General, General>,
+		indexedDB: this.indexedDB as never,
 		memoryDB: this.memoryDB,
 		recordStoreExists: this.recordStoreExists,
 	};

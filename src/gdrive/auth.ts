@@ -142,7 +142,7 @@ export class TokenManager {
 		this.secretStorage.setSecret(REFRESH_TOKEN_ID, token);
 
 	// `deleteSecret` works but is missing from Obsidian's public typings; the bundled
-	// Type augmentation declares it.
+	// type augmentation declares it.
 	readonly deleteRefreshToken = () => this.secretStorage.deleteSecret(REFRESH_TOKEN_ID);
 
 	/** Whether the last refresh granted full Drive access rather than just drive.file. */

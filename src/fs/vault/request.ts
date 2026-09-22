@@ -42,7 +42,7 @@ export type VaultRequest = <T extends VaultRequestParam = { method: 'GET' }>(
 
 // Capacitor ranged local file request only supports those extensions
 // Fixed in Capacitor 7: https://github.com/ionic-team/capacitor/pull/7868
-// But Obsidian is still using 5
+// but Obsidian is still using 5
 // oxlint-disable-next-line eslint/no-warning-comments -- time-bounded, revisit 2027-01-01
 // TODO(2027-01-01): remove once Obsidian adopts Capacitor 7
 const CAPACITOR_MEDIA_EXTENSIONS = [

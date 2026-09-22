@@ -1,5 +1,5 @@
 import type { Ref } from '@/shared/reactive';
-import type { MaybePromise, Binary, FileStat, General } from '@/types';
+import type { MaybePromise, Binary, FileStat } from '@/types';
 import { syncCancelledError } from '@/sync';
 import type { Fs, ListReporter, WrappedFs } from '../interface';
 
@@ -68,28 +68,31 @@ class CancellationFs implements WrappedFs {
 	}
 }
 
-export function cancellationMiddleware<
-	T extends (...args: ReadonlyArray<General>) => Promise<General>,
->(request: T, isCancelled: Ref<boolean>): T {
-	return ((...params: Parameters<T>) => {
+export function cancellationMiddleware<T extends (...args: never) => Promise<unknown>>(
+	request: T,
+	isCancelled: Ref<boolean>,
+): NoInfer<T> {
+	// T is only known to be some async function, so call it through an untyped view.
+	const call = request as unknown as (...args: Array<unknown>) => Promise<unknown>;
+	return ((...params: Array<unknown>) => {
 		// Both `Request` and `VaultRequest` take options as their second argument.
 		const options = params[1] as { ignoreCancellation?: boolean } | undefined;
-		if (options?.ignoreCancellation) return request(...params);
+		if (options?.ignoreCancellation) return call(...params);
 		assertNotCancelled(isCancelled);
-		const promise = new Promise<Awaited<ReturnType<T>>>((resolve, reject) => {
+		const promise = new Promise<unknown>((resolve, reject) => {
 			const unsub = isCancelled.subscribe((cancelled) => {
 				if (cancelled) {
 					unsub();
 					reject(new DOMException('Aborted', 'AbortError'));
 				}
 			});
-			request(...params)
+			call(...params)
 				.then(resolve)
 				.catch(reject)
 				.finally(unsub);
 		});
 		return promise;
-	}) as T;
+	}) as unknown as T;
 }
 
 export function cancellationWrapper(original: Fs, isCancelled: Ref<boolean>): WrappedFs {

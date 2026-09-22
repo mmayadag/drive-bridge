@@ -10,7 +10,7 @@ import type {
 import { setIcon } from 'obsidian';
 import type { CallableOrObjectTree, SettingTree } from '@/modules/setting';
 import type { DatabaseSync } from '@/shared/key-value-store';
-import type { General, TogglableValue } from '@/types';
+import type { TogglableValue } from '@/types';
 import { encodeURIComponent3986 } from '@/shared/path';
 import { formatFileSize, formatTime, parseFileSize, parseTime } from '@/utils/unit-converter';
 
@@ -21,7 +21,7 @@ type EphemeralEditableItem<T> = {
 	value: T;
 };
 type EphemeralEditableListSchema = {
-	ephemeralEditableLists: Array<EphemeralEditableItem<General>>;
+	ephemeralEditableLists: Array<EphemeralEditableItem<unknown>>;
 };
 export type AugmentedSettingDefinitionItem<K extends string = string> =
 	| SettingDefinitionGroup<K>
@@ -176,7 +176,7 @@ export function generateEditableList<T>({
 	const ephemeralStore = memoryDB.getStore('ephemeralEditableLists');
 	const existingList = ephemeralStore.get(identifier);
 	let list: Array<EphemeralEditableItem<T>>;
-	if (existingList) list = existingList;
+	if (existingList) list = existingList as Array<EphemeralEditableItem<T>>;
 	else {
 		list = items.map((value) => ({ new: false, valid: true, value }));
 		ephemeralStore.set(identifier, list);
