@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.1.1 - 2026-09-23
+
+Housekeeping only; sync behaviour is unchanged.
+
+- The active toggle in filter rules is styled by selector specificity instead
+  of `!important`, so a theme can still override it.
+- Fewer loose types: the module context no longer declares its own `any` or
+  uses the bare `Function` type, and the translation lookup dropped a
+  redundant assertion.
+- LICENSE is plain MIT again, so GitHub recognises it. The notice covering the
+  code this project builds on moved to NOTICE.
+- Shorter plugin description in the manifest.
+
 ## v0.1.0 - 2026-09-23
 
 First version of Drive Bridge.
