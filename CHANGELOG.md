@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.1.2 - 2026-09-23
+
+- Google Drive is selected as the storage backend out of the box, so a fresh
+  install starts at the client ID.
+- **Connect** checks the client ID, client secret and token fields first and
+  puts the cursor in the first one still empty, instead of failing at Google.
+  The token field and its button now get a line of their own.
+- The **Last sync** row at the top carries a **Start sync** button, disabled
+  while a sync is running.
+- The legend for the Match and Speed labels moved down, just above
+  Development.
+- Dropped a lint suppression the Obsidian plugin review flags as an error.
+
 ## v0.1.1 - 2026-09-23
 
 Housekeeping only; sync behaviour is unchanged.
