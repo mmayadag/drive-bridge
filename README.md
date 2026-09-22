@@ -38,7 +38,7 @@ Drive Bridge is not in the community store. Install it with
    settings, pick a Drive folder and run your first sync.
 
 Step-by-step instructions and the reasoning behind each choice are in
-[TECHNICAL.md](TECHNICAL.md).
+[TECHNICAL.md](TECHNICAL.md#setup).
 
 Drive safe :)
 

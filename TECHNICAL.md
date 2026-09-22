@@ -1,40 +1,86 @@
 # Drive Bridge — technical notes
 
-## Google Cloud setup
+## Setup
 
-1. Create a new project in Google Cloud Console and enable the **Google Drive
-   API**.
-2. Create an **OAuth client** of type **Desktop app**.
-3. Set the app's publishing status to **In production**. In Testing mode
-   refresh tokens expire after 7 days. The "unverified app" warning on the
-   consent screen is expected for a personal client; continue via
-   **Advanced**.
+Do steps 1–3 once. Step 4 is repeated on every device.
 
-## Signing in
+### 1. Pick a Google account
 
-Drive Bridge does not run a sign-in flow itself. Get a refresh token once on a
-computer:
+Use a Google account dedicated to this vault, not your personal one. Drive
+Bridge asks for full Drive access (see [below](#why-the-full-drive-scope)), so
+a leaked token would expose everything in that account's Drive.
+
+### 2. Create an OAuth client in Google Cloud
+
+Sign in to [Google Cloud Console](https://console.cloud.google.com) with that
+account.
+
+1. **Create a project**: project picker → **New project**. Any name works.
+2. **Enable the Drive API**: **APIs & Services → Library**, search for
+   **Google Drive API**, open it and press **Enable**.
+3. **Configure the consent screen**: **Google Auth Platform → Branding**. Fill
+   in an app name (for example _Drive Bridge_) and your email as support and
+   developer contact. Save.
+4. **Set the audience**: **Google Auth Platform → Audience**. Choose
+   **External**, then press **Publish app** so the status reads
+   **In production**. In _Testing_ status refresh tokens expire after 7 days
+   and sync stops.
+5. **Create the client**: **Google Auth Platform → Clients → Create client**.
+   Application type **Desktop app**, any name. Copy the **client ID** and
+   **client secret**; you need both in the next steps.
+
+You do not need to submit the app for verification. It is only used by you.
+
+### 3. Get a refresh token
+
+On a computer with [rclone](https://rclone.org/downloads/) installed:
 
 ```bash
 rclone authorize "drive" "<client ID>" "<client secret>"
 ```
 
-rclone opens the browser, you approve, and it prints a JSON token. Then on
-every device, in Drive Bridge settings:
+1. A browser opens. Sign in with the account from step 1.
+2. Google warns that the app is not verified. Press **Advanced → Go to
+   <app name> (unsafe)**. This is your own client, so the warning is expected.
+3. Approve access to Google Drive.
+4. Back in the terminal, rclone prints a JSON block between
+   `Paste the following into your remote machine --->` and `<---End paste`.
+   Copy the JSON, from `{` to `}`.
 
-1. Enter the **client ID** and **client secret**.
-2. Paste the token (the whole JSON or just the `refresh_token` value) and
-   press **Connect**.
+`"drive"` without further options asks for the full `drive` scope, which is
+what Drive Bridge needs. The same token also works for the backup server's
+rclone remote.
 
-Connect checks the token right away: it gets an access token with your
-client, makes sure the grant is full `drive` rather than `drive.file`, and
-reads the account. If any step fails nothing is saved. Afterwards the
-account's email is shown in settings, and the connection check next to the
-backend setting keeps testing access.
+Treat the token like a password. Anyone holding it together with the client
+ID and secret can read and change the whole Drive of that account.
 
-The same token can be used on every device and on the backup server.
-**Forget on this device** only removes it locally. To revoke it everywhere,
-remove the app under Google Account → Security → Third-party access.
+### 4. Connect each device
+
+In Obsidian, install Drive Bridge (see the README), then open
+**Settings → Drive Bridge**:
+
+1. **Backend**: choose **Google Drive**.
+2. **OAuth client ID**: paste the client ID.
+3. **OAuth client secret**: paste the client secret. It is stored in the
+   device's secure storage, not in synced files.
+4. **Connect account**: paste the JSON from step 3 (or only its
+   `refresh_token` value) and press **Connect**.
+5. **Base directory**: the Drive folder for this vault. It defaults to the
+   vault name and is created on the first sync. Every device syncing the same
+   vault must use the same folder.
+6. Run the first sync from the command palette or the ribbon icon and review
+   the tasks before confirming.
+
+Connect verifies the token before saving anything. It gets an access token
+with your client, checks that the grant is full `drive` rather than
+`drive.file`, and reads the account. On success the settings show
+_Connected as <email>_. The check button next to **Backend** keeps testing
+access afterwards.
+
+The same token can be used on every device. **Forget on this device** only
+removes it locally. To revoke it everywhere, remove the app under
+Google Account → Security → Third-party access; every device then needs a new
+token.
 
 ### Why not an in-plugin sign-in
 
@@ -110,6 +156,62 @@ bun fix                # auto-fix lint and format
 | `src/smart-merge/` | Three-way text merge                  |
 | `src/shared/`      | Shared utilities and storage          |
 | `test/`            | Tests; `test/mocks.ts` mocks Obsidian |
+
+### Test vault
+
+A throwaway vault on your computer that loads the plugin straight from
+`dist/`. Use a test Google account and a test Drive folder.
+
+```bash
+REPO=~/Desktop/obsidian/drive-bridge   # this repository
+VAULT=~/Desktop/drive-bridge-test      # any empty folder
+PLUGIN="$VAULT/.obsidian/plugins/drive-bridge"
+
+cd "$REPO" && bun run build
+mkdir -p "$PLUGIN"
+for f in main.js manifest.json styles.css; do ln -sf "$REPO/dist/$f" "$PLUGIN/$f"; done
+echo '["drive-bridge"]' > "$VAULT/.obsidian/community-plugins.json"
+printf '# Welcome\n\nTest note.\n' > "$VAULT/Welcome.md"
+```
+
+The three build outputs are linked one by one instead of linking the whole
+folder. The build clears `dist/`, and Obsidian writes the plugin's
+`data.json` next to `main.js`; linking the folder would wipe your settings on
+every build.
+
+Then in Obsidian: **Open folder as vault**, pick the folder, answer
+**Trust author and enable plugins**, and follow [Connect each
+device](#4-connect-each-device).
+
+### Development loop
+
+```bash
+bun dev   # rebuilds dist/ on every change, unminified with source maps
+```
+
+After a rebuild, run **Reload app without saving** from the command palette
+to load the new code. The developer console (**Cmd+Option+I**) shows errors
+and the plugin's log output.
+
+### First run checklist
+
+Things that are easy to break and not covered by unit tests:
+
+- **Settings**: client ID and secret save on blur; Connect with an empty
+  client shows a notice; a malformed token is rejected; a `drive.file` token
+  is rejected with a clear message; a good token shows _Connected as_;
+  **Forget on this device** returns to the Connect row.
+- **Connection check**: the icon next to **Backend** spins, then turns green,
+  or red when offline.
+- **Confirm dialog**: the file tree renders with icons and indentation;
+  **Select all** toggles everything and shows a mixed state when partly
+  selected; deselected rows are dimmed.
+- **Progress**: the modal shows progress and counts; failed tasks list with
+  their error; the status bar text and the spinning ribbon icon reset when
+  idle.
+- **Round trip**: a note created in Obsidian appears in Drive; a Markdown file
+  uploaded to the Drive folder by another app appears in the vault; edits on
+  both sides produce a merge or a kept copy, never a silent overwrite.
 
 ### Releasing
 
