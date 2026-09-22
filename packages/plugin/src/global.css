@@ -1,0 +1,116 @@
+@unocss;
+
+.view-action[aria-disabled='true'] {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.background-none {
+	background: none;
+}
+
+.border {
+	border-style: solid;
+}
+
+input[type='checkbox']:indeterminate::after {
+	content: '';
+	top: -1px;
+	inset-inline-start: -1px;
+	position: absolute;
+	width: var(--checkbox-size);
+	height: var(--checkbox-size);
+	display: block;
+	background-color: var(--checkbox-marker-color);
+	mask-position: 52% 52%;
+	mask-size: 65%;
+	mask-repeat: no-repeat;
+	mask-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2012%208'%3E%3Cpath%20fill='%23000'%20d='M1%203h10v2H1z'/%3E%3C/svg%3E");
+}
+input[type='checkbox']:indeterminate {
+	background-color: var(--checkbox-color);
+	border-color: var(--checkbox-color);
+}
+
+.conflict.ours,
+.conflict.theirs {
+	position: relative;
+	white-space: pre-wrap;
+	word-break: break-word;
+}
+
+.conflict.ours {
+	background-color: rgb(0, 255, 208);
+}
+
+.conflict.theirs {
+	background-color: rgb(0, 132, 255);
+}
+
+.conflict.deleted {
+	background-color: rgb(246, 5, 34);
+}
+
+@container (max-width: 500px) {
+	.sync-engine-togglable-value {
+		flex-direction: column;
+		.setting-item-control {
+			width: 100%;
+			justify-content: center;
+			input[type='text'] {
+				flex: 1;
+			}
+		}
+	}
+}
+
+input[type='text'].sync-engine-invalid-input {
+	border-color: var(--text-warning);
+	--background-modifier-border-focus: var(--text-warning);
+	background-image: var(--sync-engine-warning);
+	background-repeat: no-repeat;
+	background-position: right calc(var(--input-height) * 0.5 - 0.5rem) center;
+	background-size: 1rem 1rem;
+	padding-right: calc(0.9 * var(--input-height));
+}
+
+.sync-engine-setting input[type='text'] {
+	width: 175px;
+}
+.is-mobile .sync-engine-setting input[type='text'] {
+	width: 150px;
+	flex: 1;
+}
+
+.sync-engine-prominent {
+	--flair-background: var(--color-accent);
+	--flair-color: var(--text-on-accent);
+}
+
+.setting-item.sync-engine-editable-list {
+	.setting-item-info {
+		display: none;
+	}
+	.setting-item-control input[type='text'] {
+		flex: 1;
+	}
+}
+
+.sync-engine-cropped-icon {
+	mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M0 0H100V50H75A25 25 0 0 0 50 75V100H0Z' fill='white'/%3E%3C/svg%3E");
+}
+
+.sync-engine-setting-tip {
+	.setting-item-name {
+		display: none;
+	}
+	.setting-item-description {
+		padding-top: 0;
+		> *:first-child {
+			margin-top: 0;
+		}
+		> *:last-child {
+			margin-bottom: 0;
+		}
+	}
+}

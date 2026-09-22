@@ -1,0 +1,71 @@
+{
+	"name": "@hesprs/sync-engine-sdk",
+	"version": "3.1.9",
+	"description": "Official SDK for developing modules targeting Sync Engine, the extensible Obsidian syncing plugin.",
+	"keywords": [
+		"obsidian-plugin",
+		"sdk",
+		"synchronization"
+	],
+	"homepage": "https://sync.consensia.cc",
+	"bugs": {
+		"url": "https://github.com/hesprs/sync-engine/issues"
+	},
+	"license": "MIT",
+	"author": {
+		"name": "Hēsperus",
+		"email": "hesprs@yandex.com"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/hesprs/sync-engine.git"
+	},
+	"files": [
+		"./dist"
+	],
+	"type": "module",
+	"sideEffects": false,
+	"module": "./dist/index.js",
+	"types": "./dist/index.spec.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.spec.d.ts",
+			"default": "./dist/index.js"
+		},
+		"./dev": {
+			"types": "./dist/dev.spec.d.ts",
+			"default": "./dist/dev.js"
+		},
+		"./tsdown-plugin": {
+			"types": "./dist/tsdown-plugin.spec.d.ts",
+			"default": "./dist/tsdown-plugin.js"
+		}
+	},
+	"publishConfig": {
+		"access": "public",
+		"provenance": true
+	},
+	"scripts": {
+		"dev:plugin": "MODE=dev BUILD=plugin bun --bun tsdown",
+		"build:plugin": "BUILD=plugin bun --bun tsdown",
+		"dev": "MODE=dev PASS=dts bun --bun tsdown && MODE=dev bun --bun tsdown",
+		"compile": "PASS=dts bun --bun tsdown && bun --bun tsdown",
+		"fix": "oxlint --silent --fix && oxfmt",
+		"check": "tsc && oxlint && oxfmt --check",
+		"tests": "bun --preload=./test/mocks test"
+	},
+	"dependencies": {
+		"obsidian": "^1.13.1"
+	},
+	"devDependencies": {
+		"@repo/shared": "workspace:*",
+		"@unocss/postcss": "^66.10.0",
+		"postcss-merge-rules": "^9.0.3",
+		"solid-js": "^1.9.15",
+		"synthkernel": "./synthkernel.tgz",
+		"uni-kv": "../../uni-kv.tgz",
+		"unocss": "^66.10.0",
+		"unplugin-solid": "^2.0.0",
+		"verkit": "^0.4.0"
+	}
+}

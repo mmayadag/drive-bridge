@@ -1,0 +1,52 @@
+:root {
+	--vp-c-brand-1: #9849ff !important;
+	--vp-c-brand-2: #6865ff !important;
+	--vp-c-brand-3: #1a90ff !important;
+	--vp-c-brand-soft: #9849ff20 !important;
+
+	--rose: oklch(64.5% 0.246 16.439);
+}
+
+html.dark {
+	--vp-c-brand-1: #b277ff !important;
+	--vp-c-brand-2: #8987ff !important;
+	--vp-c-brand-3: #5db1ff !important;
+	--vp-c-brand-soft: #a661ff20 !important;
+}
+
+.canvas-viewer {
+	width: 100%;
+	aspect-ratio: 16 / 9;
+	border-radius: 12px;
+	box-shadow: var(--vp-shadow-2);
+	border: 1px solid var(--vp-c-border);
+	overflow: hidden;
+	@media (max-width: 768px) {
+		aspect-ratio: 1 / 1;
+		margin-left: -24px;
+		border-radius: 0;
+		border: none;
+		width: 100vw;
+	}
+	h3::after {
+		display: none;
+	}
+	h2,
+	h3,
+	h4 {
+		&:hover {
+			padding-left: initial !important;
+		}
+	}
+	h1,
+	h2 {
+		padding: initial !important;
+		border-top: initial !important;
+	}
+	ol,
+	ul {
+		li {
+			line-height: initial !important;
+		}
+	}
+}
