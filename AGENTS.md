@@ -1,6 +1,6 @@
 # Drive Bridge
 
-This is the monorepo for Drive Bridge, an Obsidian plugin that syncs vault files with Google Drive. The plugin itself and its modules are in `packages/`. User-facing overview is in `README.md`, technical notes in `TECHNICAL.md`.
+This is the repository for Drive Bridge, an Obsidian plugin that syncs vault files with Google Drive. All source code is in `src/`, tests in `test/`. User-facing overview is in `README.md`, technical notes in `TECHNICAL.md`.
 
 ## Context
 
@@ -12,31 +12,31 @@ This is the monorepo for Drive Bridge, an Obsidian plugin that syncs vault files
 
 - **TypeScript 6** as programming language
 - **Bun** as its package manager and task runner
-- **Turbo** for monorepo orchestration
 - **Tsdown** for building
 - **Oxlint and Oxfmt** for linting and formatting
 - **Solid.js** and **TailwindCSS** (via UnoCSS) for UI
-- `packages/shared/src/kernel.ts` for dependency injection and reactive refs
-- `packages/shared/src/kv.ts` for IndexedDB and in-memory key-value storage
+- `src/shared/kernel.ts` for dependency injection and reactive refs
+- `src/shared/kv.ts` for IndexedDB and in-memory key-value storage
 
 ## Commands
 
-- `bun dev:plugin`: build plugin without cleaning dist
+- `bun run build`: build the plugin into `dist/`.
+- `bun dev`: build without clearing `dist/`.
 - `bun fix`: format and fix fixable lint errors (always run before `bun check`).
 - `bun check`: check types, lint and format (no file change).
-- `bun dev`: building without clearing dist.
-- `bun tests`: run all tests (do not use `bun test`).
-- `bun tests -F <package-name> -- <test path>`: run tests in specific file.
-- `bun <command> -F <package-name>`: run command targeting a specific package.
+- `bun tests`: run all tests (do not use `bun test`, it skips the Obsidian mock preload).
+- `bun tests <test path>`: run tests in a specific file.
 - `bun -e '<code>'` run TS code directly, can import from codebase, use double quotes inside code.
 
-## Packages
+## Layout
 
-- Plugin & module SDK: `packages/plugin/`, package name `@drive-bridge/sdk`, `dev` builds SDK.
-- Google Drive module: `packages/gdrive/`, package name `gdrive`.
-- Shared utils: `packages/shared/`, package name `@repo/shared`.
-- Upstream documentation site: `docs/`. Not a workspace and not built; kept until we decide what to do with it.
-- Smart merge module: `packages/smart-merge/`, package name `smart-merge`.
+- `src/`: plugin core (sync, settings, UI). Entry point `src/index.ts`.
+- `src/gdrive/`: Google Drive backend module.
+- `src/smart-merge/`: three-way merge module.
+- `src/shared/`: shared utilities, including `kernel.ts` and `kv.ts`.
+- `src/sdk/`: the API surface modules use (`@/sdk`).
+- `test/`: tests, mirroring `src/`. `test/mocks.ts` is preloaded and mocks `obsidian`.
+- `docs/`: upstream documentation site. Not built, linted or formatted; kept until we decide what to do with it.
 
 ## Security
 
@@ -50,10 +50,10 @@ This is the monorepo for Drive Bridge, an Obsidian plugin that syncs vault files
 - For mobile compatibility, Node.js API prohibited in plugin and modules.
 - Sentence case for UI text.
 - Module-specific behavior should not pollute plugin core.
-- All Obsidian API mocks go `packages/shared/test/obsidian-mock.ts`.
+- All Obsidian API mocks go `src/shared/obsidian-mock.spec.ts`.
 - Use inline Tailwind CSS for common styling, only use semantic CSS for animations and complex compositions. (Documentation website doesn't use TailwindCSS, you need to edit `docs/.vitepress/theme/styles.css`)
 - When any function or class needs to use `Context` as argument, prefer structural typing instead of direct `Context`.
-- `gdrive` and `smart-merge` are modules bundled into `main.js` by `packages/plugin/src/modules/BundledModules.ts`. To add a module, import it there; there is no runtime module loading.
+- `gdrive` and `smart-merge` are modules bundled into `main.js` by `src/modules/BundledModules.ts`. To add a module, import it there; there is no runtime module loading.
 - `null` forbidden, use `undefined` consistently.
 - Lint warnings must be cleared, except time-bounded ones (TODO with date, deprecated API for compat)
 

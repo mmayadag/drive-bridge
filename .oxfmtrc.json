@@ -27,5 +27,5 @@
 			}
 		}
 	],
-	"ignorePatterns": ["**/node_modules/**", "**/dist/**", "**/public/**"]
+	"ignorePatterns": ["**/node_modules/**", "**/dist/**", "docs/**"]
 }

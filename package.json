@@ -1,34 +1,37 @@
 {
 	"name": "drive-bridge",
-	"version": "0.0.1",
+	"version": "0.1.0",
 	"private": true,
 	"license": "MIT",
-	"workspaces": [
-		"./packages/*"
-	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/mmayadag/drive-bridge.git"
+	},
 	"type": "module",
 	"scripts": {
-		"postinstall": "turbo run dev -F @drive-bridge/sdk",
-		"dev:plugin": "cd packages/plugin && bun dev:plugin",
-		"build:plugin": "cd packages/plugin && bun build:plugin",
-		"dev": "turbo run dev",
-		"compile": "turbo run compile",
-		"ver": "bun scripts/version-bump.ts",
-		"fix": "turbo run fix",
-		"check": "turbo run check",
-		"tests": "turbo run tests"
+		"dev": "MODE=dev bun --bun tsdown",
+		"build": "bun --bun tsdown",
+		"check": "tsc && oxlint && oxfmt --check",
+		"fix": "oxlint --silent --fix && oxfmt",
+		"tests": "bun --preload=./test/mocks.ts test",
+		"ver": "bun scripts/version-bump.ts"
 	},
 	"devDependencies": {
 		"@obsidian-typings/obsidian-public-latest": "^6.36.0",
 		"@tsdown/css": "^0.23.0",
 		"@types/bun": "^1.4.2",
+		"@unocss/postcss": "^66.10.0",
+		"idb": "^8.0.3",
 		"obsidian": "^1.13.1",
 		"oxfmt": "^0.67.0",
 		"oxlint": "^1.83.0",
 		"oxlint-tsgolint": "^7.0.2002",
+		"postcss-merge-rules": "^9.0.3",
+		"solid-js": "^1.9.15",
 		"tsdown": "^0.23.0",
-		"turbo": "^2.10.13",
-		"typescript": "^6.0.3"
+		"typescript": "^6.0.3",
+		"unocss": "^66.10.0",
+		"unplugin-solid": "^2.0.0"
 	},
 	"packageManager": "bun@1.4.2"
 }

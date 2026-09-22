@@ -36,7 +36,7 @@ jobs:
           fi
 
       - name: Build plugin
-        run: bun build:plugin
+        run: bun run build
 
       - name: Attest plugin artifacts
         uses: actions/attest@v4

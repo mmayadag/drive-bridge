@@ -62,7 +62,7 @@ Requires [Bun](https://bun.sh) 1.4.2 or later.
 
 ```bash
 bun install
-bun run build:plugin   # output: dist/
+bun run build          # output: dist/
 bun tests              # all tests (not `bun test`)
 bun check              # types, lint, format
 bun fix                # auto-fix lint and format
@@ -70,12 +70,13 @@ bun fix                # auto-fix lint and format
 
 ### Repository layout
 
-| Path                   | Contents                               |
-| ---------------------- | -------------------------------------- |
-| `packages/plugin`      | Plugin core: sync logic, settings, UI  |
-| `packages/gdrive`      | Google Drive backend                   |
-| `packages/smart-merge` | Three-way text merge                   |
-| `packages/shared`      | Shared utilities                       |
+| Path               | Contents                              |
+| ------------------ | ------------------------------------- |
+| `src/`             | Plugin core: sync logic, settings, UI |
+| `src/gdrive/`      | Google Drive backend                  |
+| `src/smart-merge/` | Three-way text merge                  |
+| `src/shared/`      | Shared utilities, storage, DI kernel  |
+| `test/`            | Tests; `test/mocks.ts` mocks Obsidian |
 
 ### Releasing
 

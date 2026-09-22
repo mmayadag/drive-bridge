@@ -170,7 +170,7 @@
 			}
 		}
 	],
-	"ignorePatterns": ["**/node_modules/**", "**/dist/**", "*.js"],
+	"ignorePatterns": ["**/node_modules/**", "**/dist/**", "*.js", "docs/**"],
 	"options": {
 		"typeAware": true
 	}

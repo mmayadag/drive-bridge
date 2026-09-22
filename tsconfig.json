@@ -14,7 +14,21 @@
 		"verbatimModuleSyntax": true,
 		"allowImportingTsExtensions": true,
 		"lib": ["ESNext", "DOM", "DOM.Iterable"],
-		"types": ["bun", "@obsidian-typings/obsidian-public-latest"]
+		"types": ["bun", "@obsidian-typings/obsidian-public-latest"],
+		"jsx": "preserve",
+		"jsxImportSource": "solid-js",
+		"paths": {
+			"@": ["./src"],
+			"@/*": ["./src/*"],
+			"$/*": ["./test/*"]
+		}
 	},
-	"include": ["scripts/**/*.ts"]
+	"include": [
+		"src/**/*.ts",
+		"src/**/*.tsx",
+		"test/**/*.ts",
+		"scripts/**/*.ts",
+		"tsdown.config.ts",
+		"uno.config.ts"
+	]
 }

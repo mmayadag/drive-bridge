@@ -1,0 +1,398 @@
+import type { Events, Translations } from '@';
+import type { Fs, ListReporter } from '@/fs';
+import type { Ref } from '@/shared/kernel';
+import type {
+	BaseTask,
+	ConflictResolver,
+	Decider,
+	TaskFactory,
+	TaskNames,
+	TaskOptionsMap,
+} from '@/sync';
+import type {
+	GlobMatchRule,
+	MaybePromise,
+	Progress,
+	Stat,
+	StatsMap,
+	TogglableValue,
+} from '@/types';
+import type { GlobMatchResult } from '@/utils/glob-match';
+import { getMessage } from '@/shared/error';
+import { ref } from '@/shared/kernel';
+import { isSub } from '@/shared/path';
+import {
+	RemoveLocal,
+	CreateRemoteDir,
+	Upload,
+	AddRecord,
+	RemoveRecord,
+	convertMoves,
+	syncCancelledError,
+	taskMap,
+} from '@/sync';
+import { prepareGlobMatch } from '@/utils/glob-match';
+import type { Dispatch, On } from './EventBus';
+import type { Translate } from './I18n';
+import type { DeleteConfirmReturn } from './ProgressModal';
+import type { Infras } from './Registrar';
+
+export type SyncTerminateReason =
+	| { result: 'cancelled' }
+	| { result: 'completed' }
+	| { result: 'failed'; error: string }
+	| { result: 'noop' };
+
+export type TaskInfo = { name: TaskNames; key: string; prettyName: string; isDir: boolean };
+export type FailedTaskInfo = TaskInfo & { error: string };
+export type RemoteLister = (info: Infras & { reporter: ListReporter }) => MaybePromise<Array<Stat>>;
+export type SyncOptions = {
+	decider?: Decider;
+	remoteLister?: RemoteLister;
+	conflictResolver?: ConflictResolver;
+	detectMoves?: boolean;
+	needConfirmTasks?: boolean;
+	needConfirmDeletion?: boolean;
+	exclusionRules?: Array<GlobMatchRule>;
+	inclusionRules?: Array<GlobMatchRule>;
+};
+
+export default class Sync {
+	constructor(
+		private readonly ctx: {
+			dispatch: Dispatch<Events>;
+			initializeSync: () => Infras;
+			getDecider: () => Decider;
+			on: On<Events>;
+			translate: Translate<Translations>;
+			getConflictResolver: () => ConflictResolver;
+		},
+	) {}
+
+	declare readonly events: {
+		syncStarted: { isCancelled: Ref<boolean>; trigger: string };
+		syncInitialized: Infras & { match: (path: string) => GlobMatchResult };
+		remoteWalkProgress: Progress;
+		syncTerminated: SyncTerminateReason;
+		requestConfirmDelete: Array<RemoveLocal>;
+		requestConfirmTasks: Array<BaseTask>;
+		syncCanceled: undefined;
+		taskCompleted: TaskInfo;
+		taskFailed: FailedTaskInfo;
+		executionStarted: Array<BaseTask>;
+	};
+	declare readonly settings: {
+		maxFileSize: TogglableValue;
+		exclusionRules: Array<GlobMatchRule>;
+		inclusionRules: Array<GlobMatchRule>;
+	};
+
+	private readonly postProcess = (
+		stats: Array<Stat>,
+		pruner: (stats: Array<Stat>) => Array<Stat>,
+	) => {
+		const statsMap = toMap(pruner(stats));
+		const maxSize = this.settings.maxFileSize.enabled
+			? this.settings.maxFileSize.value
+			: Infinity;
+		const includedStats: StatsMap = new Map();
+		if (statsMap.size === 0) return includedStats;
+		for (const [path, stat] of statsMap) {
+			if (!stat.isDir && stat.size > maxSize) continue;
+			includedStats.set(path, stat);
+		}
+		return includedStats;
+	};
+
+	private readonly confirmTasks = (tasks: Array<BaseTask>) =>
+		new Promise<Array<BaseTask>>((resolve, reject) => {
+			const { on, dispatch } = this.ctx;
+			const unsub1 = on('tasksConfirmed', (result) => {
+				cleanup();
+				resolve(result);
+			});
+			const unsub2 = on('syncCanceled', () => {
+				cleanup();
+				reject(syncCancelledError);
+			});
+			function cleanup() {
+				unsub1();
+				unsub2();
+			}
+			dispatch('requestConfirmTasks', tasks);
+		});
+
+	private readonly confirmDeletion = (tasks: Array<RemoveLocal>) =>
+		new Promise<DeleteConfirmReturn>((resolve, reject) => {
+			const { on, dispatch } = this.ctx;
+			const unsub1 = on('deleteConfirmed', (result) => {
+				cleanup();
+				resolve(result);
+			});
+			const unsub2 = on('syncCanceled', () => {
+				cleanup();
+				reject(syncCancelledError);
+			});
+			function cleanup() {
+				unsub1();
+				unsub2();
+			}
+			dispatch('requestConfirmDelete', tasks);
+		});
+
+	private readonly executeSync = async (
+		trigger: string,
+		options: SyncOptions = {},
+	): Promise<SyncTerminateReason> => {
+		const { settings, ctx, postProcess, confirmDeletion, confirmTasks, convertDeleteToUpload } =
+			this;
+		const { on, dispatch, initializeSync, getConflictResolver, translate, getDecider } = ctx;
+		const {
+			decider = getDecider(),
+			remoteLister = async ({ remoteFs, record, reporter }) => {
+				try {
+					return await remoteFs.list('/', reporter);
+				} catch (error) {
+					if (await remoteFs.exists('/')) throw error;
+					dispatch('logSync', 'Remote root deleted, recreating.');
+					await Promise.all([remoteFs.mkdir('/', true), record.clear()]);
+					return [];
+				}
+			},
+			conflictResolver = getConflictResolver(),
+			detectMoves = true,
+			needConfirmDeletion = false,
+			needConfirmTasks = false,
+			inclusionRules = settings.inclusionRules,
+			exclusionRules = settings.exclusionRules,
+		} = options;
+
+		const isCancelled = ref(false);
+		let failedCount = 0;
+		let tasks: Array<BaseTask>;
+		let terminateReason!: SyncTerminateReason;
+		const cleanup = on('syncCanceled', () => isCancelled(true));
+		try {
+			dispatch('syncStarted', { isCancelled, trigger });
+			if (isCancelled()) throw syncCancelledError;
+
+			const infras = initializeSync();
+			const { record, localFs } = infras;
+
+			const match = prepareGlobMatch(inclusionRules, exclusionRules);
+			const { reporter: localReporter, pruner: localPruner } = prepareReporter(match);
+			const { reporter: remoteReporter, pruner: remotePruner } = prepareReporter(match);
+			dispatch('syncInitialized', { ...infras, match });
+
+			const [localList, remoteList] = await Promise.all([
+				localFs.list('/', localReporter),
+				remoteLister({
+					...infras,
+					reporter: (prog) => {
+						dispatch('remoteWalkProgress', prog);
+						return remoteReporter(prog);
+					},
+				}),
+			]);
+			if (isCancelled()) throw syncCancelledError;
+			const records = new Map(await record.entries());
+			const localStats = postProcess(localList, localPruner);
+			const remoteStats = postProcess(remoteList, remotePruner);
+			dispatch(
+				'logSync',
+				`Local ${localStats.size} item(s), remote ${remoteStats.size} item(s), record ${records.size} item(s).`,
+			);
+
+			if (isCancelled()) throw syncCancelledError;
+			const taskFactory = createTaskFactory({
+				baseOptions: infras,
+				resolver: conflictResolver,
+				translate,
+			});
+			tasks = decider({
+				localStats,
+				logger: (log: string) => dispatch('logSync', log),
+				records,
+				remoteStats,
+				taskFactory,
+			});
+			if (tasks.length === 0) {
+				terminateReason = { result: 'noop' };
+				return terminateReason;
+			}
+
+			if (detectMoves) {
+				const initialTasks = tasks.length;
+				tasks = convertMoves(tasks, translate, records);
+				const convertedTasks = initialTasks - tasks.length;
+				if (convertedTasks)
+					dispatch('logSync', `Discovered and converted ${convertedTasks} move task(s).`);
+			}
+
+			dispatch('logSync', `Planning finished with ${tasks.length} task(s).`);
+
+			const [nonDisplayableTasks, displayableTasks] = partition(
+				tasks,
+				(task) => task instanceof AddRecord || task instanceof RemoveRecord,
+			);
+			if (needConfirmTasks && displayableTasks.length !== 0) {
+				const confirmResult = await confirmTasks(displayableTasks);
+				tasks = [...nonDisplayableTasks, ...confirmResult];
+			}
+
+			const [removeLocalTasks, otherTasks] = partition(
+				tasks,
+				(task) => task instanceof RemoveLocal,
+			);
+			if (needConfirmDeletion && removeLocalTasks.length !== 0) {
+				const { delete: deleted, reupload } = await confirmDeletion(removeLocalTasks);
+				tasks = [
+					...deleted,
+					...(await convertDeleteToUpload(reupload, localFs)),
+					...otherTasks,
+				];
+			}
+
+			sortTasks(tasks);
+
+			if (isCancelled()) throw syncCancelledError;
+			dispatch('executionStarted', tasks);
+			await Promise.all(
+				tasks.map(async (task) => {
+					try {
+						await task.exec();
+						dispatch('taskCompleted', toTaskInfo(task));
+					} catch (error) {
+						if (isCancelled()) return;
+						failedCount++;
+						dispatch('taskFailed', {
+							...toTaskInfo(task),
+							error: getMessage(error),
+						});
+					}
+				}),
+			);
+
+			terminateReason = isCancelled()
+				? { result: 'cancelled' }
+				: failedCount
+					? {
+							error: `Execution of ${failedCount} sync task(s) failed.`,
+							result: 'failed',
+						}
+					: { result: 'completed' };
+		} catch (error) {
+			terminateReason = isCancelled()
+				? { result: 'cancelled' }
+				: ({ error: getMessage(error), result: 'failed' } as const);
+		} finally {
+			cleanup();
+			dispatch('syncTerminated', terminateReason);
+		}
+		return terminateReason;
+	};
+
+	private readonly convertDeleteToUpload = async (tasks: Array<RemoveLocal>, localFs: Fs) => {
+		const final: Array<Upload | CreateRemoteDir> = [];
+		await Promise.all(
+			tasks.map(async (task) => {
+				const options = task.options;
+				const local = await localFs.stat(options.key);
+				if (!local) {
+					this.ctx.dispatch(
+						'logSync',
+						`Local file \`${options.key}\` not found during reupload.`,
+					);
+					return;
+				}
+				if (local.isDir) final.push(new CreateRemoteDir({ ...options, local }));
+				else final.push(new Upload({ ...options, local }));
+			}),
+		);
+		return final;
+	};
+
+	root = { executeSync: this.executeSync };
+}
+
+function toMap(stats: Array<Stat>): StatsMap {
+	const res = new Map<string, Stat>();
+	for (const stat of stats) res.set(stat.key, stat);
+	return res;
+}
+
+function createTaskFactory({
+	baseOptions,
+	translate,
+	resolver,
+}: {
+	baseOptions: Infras;
+	translate: (name: TaskNames) => string;
+	resolver: ConflictResolver;
+}): TaskFactory {
+	return (<N extends TaskNames>(name: N, options: TaskOptionsMap[N]) => {
+		const task =
+			name === 'resolveConflict'
+				? new taskMap[name]({ ...options, ...baseOptions, resolver } as never)
+				: new taskMap[name]({ ...options, ...baseOptions } as never);
+		task.name = name;
+		task.prettyName = translate(name);
+		return task;
+	}) as TaskFactory;
+}
+
+function partition<T, U extends T>(
+	items: ReadonlyArray<T>,
+	predicate: (item: T, index: number) => item is U,
+): [Array<U>, Array<Exclude<T, U>>] {
+	const truthy: Array<T> = [];
+	const falsy: Array<T> = [];
+	for (let i = 0; i < items.length; i++) (predicate(items[i], i) ? truthy : falsy).push(items[i]);
+	return [truthy as Array<U>, falsy as Array<Exclude<T, U>>];
+}
+
+function toTaskInfo({ key, name, prettyName, local, remote }: BaseTask): TaskInfo {
+	const isDir = local?.isDir ?? remote?.isDir ?? false;
+	return { isDir, key, name, prettyName };
+}
+
+function sortTasks(tasks: Array<BaseTask>) {
+	const region = (task: BaseTask) => {
+		const isFolder = task.local?.isDir === true || task.remote?.isDir === true;
+		if (task.name === 'removeLocal' || task.name === 'removeRemote') return isFolder ? 3 : 0;
+		if (task.name === 'createLocalDir' || task.name === 'createRemoteDir') return 1;
+		return task.name === 'moveLocal' || task.name === 'moveRemote' ? 2 : 4;
+	};
+	tasks.sort((a, b) => {
+		const aRegion = region(a);
+		const bRegion = region(b);
+		if (aRegion !== bRegion) return aRegion - bRegion;
+		if (aRegion === 3) return b.key.length - a.key.length;
+		if (aRegion === 1 || aRegion === 2) return a.key.length - b.key.length;
+		return 0;
+	});
+}
+
+function prepareReporter(match: (path: string) => GlobMatchResult) {
+	const probes: Array<string> = [];
+	return {
+		// Prune probe folders that need to be excluded
+		pruner: (stats: Array<Stat>) => {
+			const probeSet = new Set(probes);
+			const content = stats.filter((p) => !probeSet.has(p.key));
+			if (content.length === 0) return [];
+			const keptProbes = new Set<string>();
+			for (const probe of probeSet)
+				if (content.some((p) => isSub(probe, p.key, false))) keptProbes.add(probe);
+			return stats.filter((p) => !probeSet.has(p.key) || keptProbes.has(p.key));
+		},
+		reporter: (prog: Required<Progress>) => {
+			const result = match(prog.current);
+			if (result === 'probe') {
+				probes.push(prog.current);
+				return 'advance';
+			}
+			return result;
+		},
+	};
+}

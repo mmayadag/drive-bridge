@@ -1,0 +1,197 @@
+import type { SecretStorage } from 'obsidian';
+import { expect, mock, test } from 'bun:test';
+import type { RequestParam } from '@/sdk';
+import { testKit } from '@/sdk/dev';
+import ObsidianMock from '@/shared/obsidian-mock';
+
+const { request } = testKit;
+
+type HttpResponse = { json?: unknown; status?: number; throw?: Error };
+const requests: Array<RequestParam> = [];
+let responses: Array<HttpResponse> = [];
+
+void mock.module('obsidian', () => ({
+	...ObsidianMock,
+	requestUrl: (params: RequestParam) => {
+		requests.push(params);
+		const response = responses.shift();
+		if (!response) throw new Error('Unexpected request');
+		if (response.throw) return Promise.reject(response.throw);
+		return Promise.resolve({ json: response.json, status: response.status ?? 200 });
+	},
+}));
+
+const { TokenManager, bearerMiddleware, pollDeviceToken, startDeviceAuthorization } =
+	await import('@/gdrive/auth');
+
+function reset(...next: Array<HttpResponse>) {
+	requests.length = 0;
+	responses = [...next];
+}
+
+async function expectPollFailure(err: Error, expected: string) {
+	reset({ throw: err });
+	let caught: unknown;
+	try {
+		await pollDeviceToken({
+			authorization: {
+				deviceCode: 'device',
+				expiresIn: 60,
+				interval: 0,
+				userCode: 'code',
+				verificationUrl: 'url',
+			},
+			isCancelled: () => false,
+		});
+	} catch (error) {
+		caught = error;
+	}
+	expect(String(caught)).toContain(expected);
+}
+
+test('starts device authorization from Google response', async () => {
+	reset({
+		json: {
+			device_code: 'device',
+			expires_in: 900,
+			interval: 0,
+			user_code: 'ABCD',
+			verification_url: 'https://google.test/device',
+		},
+	});
+
+	expect(await startDeviceAuthorization()).toStrictEqual({
+		deviceCode: 'device',
+		expiresIn: 900,
+		interval: 0,
+		userCode: 'ABCD',
+		verificationUrl: 'https://google.test/device',
+	});
+	expect(requests[0]?.method).toBe('POST');
+});
+
+test('polls device authorization and extracts user id from ID token', async () => {
+	const payload = btoa(JSON.stringify({ sub: 'google-user' }))
+		.replaceAll('+', '-')
+		.replaceAll('/', '_')
+		.replaceAll('=', '');
+	reset({
+		json: {
+			access_token: 'access',
+			expires_in: 3600,
+			id_token: `header.${payload}.signature`,
+			refresh_token: 'refresh',
+		},
+	});
+
+	expect(
+		await pollDeviceToken({
+			authorization: {
+				deviceCode: 'device',
+				expiresIn: 60,
+				interval: 0,
+				userCode: 'code',
+				verificationUrl: 'url',
+			},
+			isCancelled: () => false,
+		}),
+	).toStrictEqual({
+		accessToken: 'access',
+		expiresIn: 3600,
+		refreshToken: 'refresh',
+		userId: 'google-user',
+	});
+});
+
+test('keeps polling through Android background network suspension', async () => {
+	const { Platform } = await import('obsidian');
+	const payload = btoa(JSON.stringify({ sub: 'google-user' }))
+		.replaceAll('+', '-')
+		.replaceAll('/', '_')
+		.replaceAll('=', '');
+	Platform.isAndroidApp = true;
+	try {
+		reset(
+			{
+				throw: new Error(
+					'Request failed. UnknownHostException Unable to resolve host "oauth2.googleapis.com"',
+				),
+			},
+			{
+				json: {
+					access_token: 'access',
+					expires_in: 3600,
+					id_token: `header.${payload}.signature`,
+					refresh_token: 'refresh',
+				},
+			},
+		);
+
+		expect(
+			await pollDeviceToken({
+				authorization: {
+					deviceCode: 'device',
+					expiresIn: 60,
+					interval: 0,
+					userCode: 'code',
+					verificationUrl: 'url',
+				},
+				isCancelled: () => false,
+			}),
+		).toStrictEqual({
+			accessToken: 'access',
+			expiresIn: 3600,
+			refreshToken: 'refresh',
+			userId: 'google-user',
+		});
+	} finally {
+		Platform.isAndroidApp = false;
+	}
+});
+
+test('rethrows network errors other than the Android background suspension', async () => {
+	const { Platform } = await import('obsidian');
+	Platform.isAndroidApp = true;
+	try {
+		await expectPollFailure(
+			new Error('Request failed. The network connection was lost.'),
+			'network connection was lost',
+		);
+	} finally {
+		Platform.isAndroidApp = false;
+	}
+	await expectPollFailure(
+		new Error(
+			'Request failed. UnknownHostException Unable to resolve host "oauth2.googleapis.com"',
+		),
+		'UnknownHostException',
+	);
+});
+
+test('caches tokens and retries bearer requests after a 401', async () => {
+	reset(
+		{ json: { access_token: 'first', expires_in: 3600 } },
+		{ json: { access_token: 'second', expires_in: 3600 } },
+	);
+	const secrets = new Map([['drive-bridge-gdrive-refresh-token', 'refresh']]);
+	const storage = {
+		deleteSecret: (id: string) => void secrets.delete(id),
+		getSecret: (id: string) => secrets.get(id),
+		setSecret: (id: string, value: string) => void secrets.set(id, value),
+	};
+	const manager = new TokenManager(storage as unknown as SecretStorage);
+	const seen: Array<string | undefined> = [];
+	const req = request((url, params) => {
+		seen.push(params.headers?.Authorization);
+		if (seen.length === 1) {
+			const error = new Error('Unauthorized') as Error & { status: number };
+			error.status = 401;
+			return Promise.reject(error);
+		}
+		return { status: 200 };
+	});
+
+	const wrapped = bearerMiddleware(req.request, manager);
+	expect((await wrapped('https://drive.test')).status).toBe(200);
+	expect(seen).toStrictEqual(['Bearer first', 'Bearer second']);
+});
