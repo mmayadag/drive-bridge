@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.1.11 - 2026-09-23
+
+- **Sync strategy** opens a page instead of a dropdown. Each strategy has a
+  one-line explanation and a small Vault ⇄ Drive diagram. Mirror local and
+  Mirror remote sit under _For repairs: switch back after one sync_, and the
+  entry shows a warning while one of them is selected (#21).
+- **Conflict resolve strategy** opens a page split into _Nothing lost_
+  (Rename and keep both, Smart merge, Skip) and _Replaces one version_
+  (Latest survives, Keep local, Keep remote), with an example for Rename and
+  keep both. The entry warns while a version-replacing strategy is selected.
+  Smart merge's markers moved from Advanced to _Merge markers_, shown under
+  the options while Smart merge is selected (#22).
+
 ## v0.1.10 - 2026-09-23
 
 - The end of the settings has a **Help and support** row with three icons
