@@ -6,6 +6,8 @@ export type SmartMergeTranslations = {
 	deletionMarkers: string;
 	deletionMarkersDescription: string;
 	smartMerge: string;
+	smartMergeDescription: string;
+	mergeMarkers: string;
 	start: string;
 	end: string;
 };
@@ -18,7 +20,10 @@ const en: SmartMergeTranslations = {
 	deletionMarkers: 'Deletion conflict markers',
 	deletionMarkersDescription: 'Markers around text deleted on one side and edited on the other.',
 	end: 'End',
+	mergeMarkers: 'Merge markers',
 	smartMerge: 'Smart merge',
+	smartMergeDescription:
+		'Both edits are combined; overlapping lines are kept side by side and marked. Markdown only.',
 	start: 'Start',
 };
 

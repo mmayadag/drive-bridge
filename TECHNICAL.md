@@ -304,8 +304,9 @@ Notes that matter in practice:
   turned it on, and for those it falls back to _Rename and keep both_. Binary
   files always fall back too.
 - Smart merge writes the overlapping parts wrapped in `<mark>` tags, which
-  render as highlights in Obsidian. The tags are configurable under
-  _Miscellaneous_.
+  render as highlights in Obsidian. The tags are set under _Merge markers_,
+  which shows below the options on the Conflict resolve strategy page while
+  Smart merge is selected.
 - _Skip_ is the safe choice while you investigate: it never writes, but the
   conflict is reported on every sync until the strategy changes or one side
   stops differing.
@@ -321,6 +322,12 @@ meaning:
 
 - **Match**: keep this setting the same on every device.
 - **Speed**: tuning this setting can make syncs faster.
+
+Sync strategy and Conflict resolve strategy each open a page that lists the
+options with a one-line explanation: the sync strategies with a small Vault ⇄
+Drive diagram, the conflict strategies split into _Nothing lost_ and _Replaces
+one version_. The entry shows the current choice, with a warning while a
+Mirror or a version-replacing strategy is selected.
 
 The main screen shows Last sync, Sync strategy, Conflict resolve strategy and
 the Google Drive group, and ends with [Support](#support). Everything else is

@@ -12,7 +12,9 @@ const { default: Setting } = await import('@/modules/setting');
 const { ref } = await import('@/shared/reactive');
 
 const settings = {
+	conflictResolver: 'renameAndKeepBoth',
 	customHeaders: [],
+	decider: 'bidirectional',
 	exclusionRules: [{ caseSensitive: false, expr: '.trash' }],
 	inclusionRules: [],
 	maxFileSize: { enabled: false, value: 1 },
@@ -30,8 +32,15 @@ const settings = {
 function buildTab() {
 	let tab: { getSettingDefinitions: () => Array<SettingDefinitionItem> } | undefined;
 	const setting: InstanceType<typeof Setting> = new Setting({
-		conflictResolverRegistry: new Map(),
-		deciderRegistry: new Map(),
+		conflictResolverRegistry: new Map<string, unknown>([
+			['renameAndKeepBoth', { order: 10, prettyName: () => 'rename' }],
+			['keepLocal', { lossy: true, order: 50, prettyName: () => 'keepLocal' }],
+			['skip', { order: 30, prettyName: () => 'skip' }],
+		]),
+		deciderRegistry: new Map<string, unknown>([
+			['mirrorLocal', { order: 20, prettyName: () => 'mirrorLocal', repair: true }],
+			['bidirectional', { order: 10, prettyName: () => 'bidirectional' }],
+		]),
 		isIdle: ref(true),
 		memoryDB: { getMeta: () => {}, getStore: () => new Map() },
 		on: () => () => {},
@@ -84,4 +93,31 @@ test('each sub-page holds its settings', () => {
 		'webhooks',
 		'development',
 	]);
+});
+
+type Page = Named & { displayValue: () => string; status: () => string | null };
+
+test('the strategy pages group safe and risky choices and warn on the risky ones', () => {
+	const top = buildTab() as Array<Page>;
+	const strategy = top.find((item) => item.name === 'syncStrategy');
+	const conflicts = top.find((item) => item.name === 'conflictResolveStrategy');
+	expect(strategy?.type).toBe('page');
+	expect(strategy?.items?.map((group) => [group.heading, names(group.items)])).toStrictEqual([
+		[undefined, ['bidirectional']],
+		['forRepairs', ['mirrorLocal']],
+	]);
+	expect(conflicts?.items?.map((group) => [group.heading, names(group.items)])).toStrictEqual([
+		['nothingLost', ['rename', 'skip']],
+		['replacesOneVersion', ['keepLocal']],
+	]);
+	expect(strategy?.displayValue()).toBe('bidirectional');
+	expect(strategy?.status()).toBeFalsy();
+
+	settings.decider = 'mirrorLocal';
+	settings.conflictResolver = 'keepLocal';
+	expect(strategy?.status()).toBe('warning');
+	expect(conflicts?.status()).toBe('warning');
+	expect(conflicts?.displayValue()).toBe('keepLocal');
+	settings.decider = 'bidirectional';
+	settings.conflictResolver = 'renameAndKeepBoth';
 });
