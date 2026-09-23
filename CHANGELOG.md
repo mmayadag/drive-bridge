@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.1.6 - 2026-09-23
+
+- The Google Drive section is down to three rows. A single **Google account**
+  entry replaces the OAuth client entry and the connect row. It shows the
+  connected email, or _Not connected_ with a warning. Its page holds the setup
+  tip, client ID, client secret and the token with **Connect**. Once
+  connected, only the account and **Forget on this device** remain.
+- Connect focuses the first empty field again.
+- **Last sync** now updates when a sync ends. It used to keep the previous
+  time or error until the settings were reopened.
+
 ## v0.1.5 - 2026-09-23
 
 - On phones, the refresh token field under **Connect account** was squeezed
