@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.1.7 - 2026-09-23
+
+- Every setting description is now one short sentence, so the settings fit a
+  phone screen. The Base directory warning, where secrets are stored, the
+  Clear records caveat and the Report a problem privacy note are kept. The
+  full detail stays in the settings reference.
+
 ## v0.1.6 - 2026-09-23
 
 - The Google Drive section is down to three rows. A single **Google account**
