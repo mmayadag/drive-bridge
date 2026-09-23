@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.1.9 - 2026-09-23
+
+- The settings are split into pages. The main screen keeps Last sync, the
+  sync and conflict strategies and the Google Drive group, then links to
+  **Automatic sync**, **Filter rules**, **Advanced** and **Help and
+  support**. Each entry shows a short summary, such as how many automatic
+  syncs are on (#20).
+- The Google account entry says what to do next: _Tap to connect_ (or
+  _Click to connect_), _Client secret missing_ or _Client ID missing_,
+  instead of _Connected_ with a warning (#30).
+
 ## v0.1.8 - 2026-09-23
 
 - **Bugs and requests** has two labelled buttons, **Bug** and **Request**,
