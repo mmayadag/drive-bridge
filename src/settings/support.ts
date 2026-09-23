@@ -31,50 +31,19 @@ function platformName() {
 
 export type ReportKind = 'bug' | 'request';
 
-const TEMPLATES: Record<ReportKind, { label: string; sections: Array<string> }> = {
-	bug: {
-		label: 'bug',
-		sections: [
-			'## What happened',
-			'',
-			'',
-			'## What you expected',
-			'',
-			'',
-			'## Steps',
-			'',
-			'1. ',
-		],
-	},
-	request: {
-		label: 'enhancement',
-		sections: ['## What you would like', '', '', '## Why it would help', '', ''],
-	},
-};
-
 /**
- * Opens GitHub's new-issue form with the versions already filled in. Nothing is sent from
- * here: the browser opens the form, and the report is whatever the user writes and submits.
+ * Opens the GitHub issue form for a bug or a request with the versions filled in. Nothing
+ * is sent from here: the browser opens the form, and the report is whatever the user
+ * writes and submits. The field names match the ids in .github/ISSUE_TEMPLATE/.
  */
 export function reportUrl(kind: ReportKind = 'bug'): string {
-	const { label, sections } = TEMPLATES[kind];
-	const body = [
-		...sections,
-		'',
-		'## Environment',
-		'',
-		`- Drive Bridge: ${VERSION}`,
-		`- Obsidian: ${apiVersion}`,
-		`- Platform: ${platformName()}`,
-		...(kind === 'bug'
-			? [
-					'',
-					'Logs help: Settings → Drive Bridge → Export logs to file, then read the file and',
-					'paste the relevant part here.',
-				]
-			: []),
-	].join('\n');
-	return `${ISSUES_URL}?labels=${label}&body=${encodeURIComponent(body)}`;
+	const params = new URLSearchParams({
+		obsidian: apiVersion,
+		platform: platformName(),
+		plugin: VERSION,
+		template: `${kind}.yml`,
+	});
+	return `${ISSUES_URL}?${params.toString()}`;
 }
 
 export default function supportSettings({

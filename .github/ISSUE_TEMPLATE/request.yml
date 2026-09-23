@@ -1,0 +1,26 @@
+name: Request
+description: Suggest a feature or a change.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What you would like
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it would help
+  - type: input
+    id: plugin
+    attributes:
+      label: Drive Bridge version
+  - type: input
+    id: obsidian
+    attributes:
+      label: Obsidian version
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
