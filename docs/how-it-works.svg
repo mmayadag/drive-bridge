@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300" role="img" aria-label="Your vault and Google Drive, kept in step by Drive Bridge">
+  <style>
+    .t{fill:#E6F1ED;font:700 20px -apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+    .s{fill:#9DB8B0;font:500 15px -apple-system,"Segoe UI",Helvetica,Arial,sans-serif}
+    .l{fill:#9DB8B0;font:600 13px ui-monospace,SFMono-Regular,Menlo,monospace}
+  </style>
+  <rect width="900" height="300" rx="24" fill="#1C2E2A"/>
+
+  <!-- Vault -->
+  <rect x="95" y="60" width="100" height="130" rx="16" fill="#3B7DD8"/>
+  <rect x="112" y="80" width="66" height="78" rx="8" fill="#fff"/>
+  <rect x="121" y="93" width="48" height="7" rx="3.5" fill="#3B7DD8"/>
+  <rect x="121" y="108" width="34" height="7" rx="3.5" fill="#3B7DD8"/>
+  <text x="145" y="228" text-anchor="middle" class="t">Your vault</text>
+  <text x="145" y="252" text-anchor="middle" class="s">desktop and mobile</text>
+
+  <!-- Left arrow -->
+  <text x="282" y="110" text-anchor="middle" class="l">notes</text>
+  <path d="M235 125h95" stroke="#2F9E6E" stroke-width="7" stroke-linecap="round"/>
+  <path d="M249 112l-14 13 14 13M316 112l14 13-14 13" fill="none" stroke="#2F9E6E" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Drive Bridge box -->
+  <rect x="360" y="75" width="180" height="100" rx="20" fill="#2F9E6E"/>
+  <g fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M428 118a24 24 0 0 1 42-10"/>
+    <path d="M472 96v14h-14"/>
+    <path d="M472 132a24 24 0 0 1-42 10"/>
+    <path d="M428 154v-14h14"/>
+  </g>
+  <text x="450" y="228" text-anchor="middle" class="t">Drive Bridge</text>
+  <text x="450" y="252" text-anchor="middle" class="s">two-way sync</text>
+
+  <!-- Right arrow -->
+  <text x="618" y="110" text-anchor="middle" class="l">HTTPS</text>
+  <path d="M570 125h95" stroke="#2F9E6E" stroke-width="7" stroke-linecap="round"/>
+  <path d="M584 112l-14 13 14 13M651 112l14 13-14 13" fill="none" stroke="#2F9E6E" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Cloud -->
+  <path d="M700 150a42 42 0 0 1 72-34a32 32 0 0 1 52 30a28 28 0 0 1-8 55h-112a26 26 0 0 1-4-51z" fill="#F2B632"/>
+  <rect x="733" y="148" width="64" height="40" rx="7" fill="#fff"/>
+  <rect x="742" y="158" width="46" height="6" rx="3" fill="#F2B632"/>
+  <rect x="742" y="171" width="32" height="6" rx="3" fill="#F2B632"/>
+  <text x="765" y="228" text-anchor="middle" class="t">Google Drive</text>
+  <text x="765" y="252" text-anchor="middle" class="s">your own folder</text>
+</svg>

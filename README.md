@@ -7,36 +7,30 @@
 <a href="https://obsidian.md"><img alt="Obsidian" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fmmayadag%2Fdrive-bridge%2Fmain%2Fmanifest.json&query=%24.minAppVersion&label=Obsidian&color=7c3aed&logo=obsidian&logoColor=white"></a>
 <a href="https://www.typescriptlang.org"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white"></a>
 <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/mmayadag/drive-bridge?label=license"></a>
+<a href="https://buymeacoffee.com/muratmayadag"><img alt="Buy me a coffee" src="https://img.shields.io/badge/Buy%20me%20a%20coffee-FFDD00?logo=buymeacoffee&logoColor=black"></a>
 </p>
 
 Two-way sync between your Obsidian vault and Google Drive, built for a folder
 that other apps write to as well: an AI assistant dropping notes in, a backup
 server reading them out.
 
-> **Status:** early. The full round trip works on macOS: connecting, picking a
-> Drive folder, and notes moving both ways. iOS is not tested yet, and no one
-> has run this against a large vault. Keep a backup.
+> **Status:** early. The full round trip works on macOS and iOS: connecting,
+> picking a Drive folder, and notes moving both ways. No one has run this
+> against a large vault yet.
+
+> [!WARNING]
+> **Back up your vault before you use Drive Bridge.** Sync can delete or
+> overwrite files on both sides, so keep a copy you can restore from.
 
 ## How it fits together
 
-```mermaid
-flowchart LR
-    AI["AI assistant<br/>(its own Google account)"]
-    Drive[("Google Drive folder")]
-    Mac["Obsidian on desktop"]
-    Phone["Obsidian on mobile"]
-    Backup["Backup server<br/>(read-only mirror)"]
+<p align="center"><img src="docs/how-it-works.svg" alt="Your vault and Google Drive, kept in step by Drive Bridge" width="760"></p>
 
-    AI -->|"writes notes"| Drive
-    Drive <-->|"Drive Bridge"| Mac
-    Drive <-->|"Drive Bridge"| Phone
-    Drive -->|"rclone"| Backup
-```
-
-The Drive folder is the meeting point. Drive Bridge keeps each device in step
-with it, and because the plugin can see everything in that folder, a note an
-assistant drops there arrives in your vault like any other note. Who may write
-where is decided by Google Drive's own sharing permissions, not by the plugin.
+Drive Bridge keeps your vault and one Google Drive folder in step, on every
+device you install it on. Whatever lands in that folder, from any source,
+comes into your vault on the next sync. How other apps get into the folder is
+up to them and Google Drive's sharing settings; Drive Bridge does not set that
+up.
 
 ## Why
 
