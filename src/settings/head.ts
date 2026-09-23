@@ -1,6 +1,6 @@
 import type { Events, Settings } from '@';
 import { ExtraButtonComponent, Notice, PluginSettingTab, setIcon, setTooltip } from 'obsidian';
-import type { Dispatch } from '@/modules/event-bus';
+import type { Dispatch, On } from '@/modules/event-bus';
 import type { Fragment, Snippet, Translate } from '@/modules/i18n';
 import type { LastSync } from '@/modules/observability';
 import type {
@@ -60,6 +60,7 @@ export default function headSettings(
 		matchLabel: () => LabelDefinition;
 		speedLabel: () => LabelDefinition;
 		dispatch: Dispatch<Events>;
+		on: On<Events>;
 		requestSync: (trigger: string) => unknown;
 		isIdle: Ref<boolean>;
 	},
@@ -77,6 +78,7 @@ export default function headSettings(
 		matchLabel,
 		speedLabel,
 		dispatch,
+		on,
 		requestSync,
 		isIdle,
 	} = ctx;
@@ -88,16 +90,21 @@ export default function headSettings(
 			desc: describeLastSync(settings.lastSync, translate),
 			name: translate('lastSync'),
 			render: (setting) => {
-				const { lastSync } = settings;
-				if (lastSync) {
-					const icon = setting.controlEl.createSpan({
-						cls:
-							lastSync.result === 'failed'
-								? 'drive-bridge-status-error'
-								: 'drive-bridge-status-ok',
-					});
-					setIcon(icon, lastSync.result === 'failed' ? 'x' : 'check');
-				}
+				const icon = setting.controlEl.createSpan();
+				// The tab can stay open through a sync, so the result is redrawn when one ends.
+				const show = () => {
+					const { lastSync } = settings;
+					setting.setDesc(describeLastSync(lastSync, translate));
+					if (!lastSync) return icon.hide();
+					const failed = lastSync.result === 'failed';
+					icon.className = failed
+						? 'drive-bridge-status-error'
+						: 'drive-bridge-status-ok';
+					setIcon(icon, failed ? 'x' : 'check');
+					icon.show();
+				};
+				show();
+				const off = on('syncTerminated', show);
 				let unsubscribe = () => {};
 				setting.addButton((button) => {
 					button
@@ -111,7 +118,10 @@ export default function headSettings(
 						immediate: true,
 					});
 				});
-				return () => unsubscribe();
+				return () => {
+					unsubscribe();
+					off();
+				};
 			},
 			search: false,
 		})),
