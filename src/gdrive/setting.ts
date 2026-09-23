@@ -1,11 +1,14 @@
-import type { Events } from '@';
+import type { Events, Settings } from '@';
 import type { App, SettingGroupItem, TextComponent } from 'obsidian';
 import { Notice } from 'obsidian';
 import type { Dispatch } from '@/modules/event-bus';
 import type { Fragment, Snippet, Translate } from '@/modules/i18n';
-import type { Request } from '@/modules/registrar';
+import type { CheckConnectionResult, Request } from '@/modules/registrar';
 import type { CallableOrObjectTree } from '@/modules/setting';
+import type { CheckConnectionDB, CheckConnectionTranslations } from '@/settings/check-connection';
 import type { LabelDefinition } from '@/settings/utils';
+import type { MaybePromise } from '@/types';
+import { addCheckConnection } from '@/settings/check-connection';
 import { s } from '@/settings/utils';
 import { normalizeBaseDir } from '@/shared/path';
 import type { GdriveSettings } from '.';
@@ -57,8 +60,11 @@ export default function gdriveSetting(
 		dispatch,
 		app,
 		getRequest,
+		memoryDB,
+		getCheckConnection,
+		settings: rootSettings,
 	}: {
-		translate: Translate<GdriveTranslations>;
+		translate: Translate<GdriveTranslations & CheckConnectionTranslations>;
 		saveSettings: () => Promise<void>;
 		matchLabel: () => LabelDefinition;
 		refreshSettingTab: () => void;
@@ -66,6 +72,9 @@ export default function gdriveSetting(
 		dispatch: Dispatch<Events>;
 		app: App;
 		getRequest: () => Request;
+		memoryDB: CheckConnectionDB;
+		getCheckConnection: () => () => MaybePromise<CheckConnectionResult>;
+		settings: Settings;
 	},
 	settings: GdriveSettings,
 	tokenManager: TokenManager,
@@ -235,6 +244,17 @@ export default function gdriveSetting(
 							desc: translate('accountConnectedDescription', settings.accountEmail),
 							name: translate('accountConnected'),
 							render: (setting) => {
+								const checks = addCheckConnection(
+									setting,
+									{
+										dispatch,
+										getCheckConnection,
+										memoryDB,
+										settings: rootSettings,
+										translate,
+									},
+									connected,
+								);
 								setting.addButton((button) =>
 									button
 										.setButtonText(translate('disconnect'))
@@ -250,6 +270,7 @@ export default function gdriveSetting(
 											refresh();
 										}),
 								);
+								return checks.cleanup;
 							},
 							visible: connected,
 						})),
