@@ -5,6 +5,8 @@ import type { Dispatch } from './event-bus';
 
 export type ModuleInstance = {
 	moduleSettings: object;
+	/** Resets the module's settings that Reset to defaults may change. */
+	resetSettings?: () => void;
 	dispose?: () => void;
 	start?: () => void;
 };
@@ -52,10 +54,16 @@ export default class BundledModules {
 		void saveSettings();
 	};
 
+	private readonly resetModuleSettings = () => {
+		for (const ctor of this.loadedModules.values())
+			(this.ctx.__getModule__(ctor as never) as ModuleInstance).resetSettings?.();
+	};
+
 	readonly dispose = () => this.loadedModules.clear();
 
 	readonly root = {
 		loadAllModules: this.loadAllModules,
 		loadedModules: this.loadedModules,
+		resetModuleSettings: this.resetModuleSettings,
 	};
 }

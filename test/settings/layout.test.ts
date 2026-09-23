@@ -92,6 +92,7 @@ test('each sub-page holds its settings', () => {
 		'miscellaneous',
 		'webhooks',
 		'development',
+		'group',
 	]);
 });
 

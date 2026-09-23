@@ -416,10 +416,11 @@ trust; the payload carries the vault name, not its contents.
 
 ### Development
 
-| Setting             | What it does                                                                                                                          |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Clear records       | Forgets what was synced before. The next sync treats every file present on both sides as a conflict or a new file. Only for recovery. |
-| Export logs to file | Writes the sync log into the vault for troubleshooting.                                                                               |
+| Setting             | What it does                                                                                                                                                                                                                                             |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Clear records       | Forgets what was synced before. The next sync treats every file present on both sides as a conflict or a new file. Only for recovery.                                                                                                                    |
+| Export logs to file | Writes the sync log into the vault for troubleshooting.                                                                                                                                                                                                  |
+| Reset to defaults   | At the bottom of Advanced, after a confirmation. Every setting goes back to its default, including filter rules, strategies, automatic sync, controls and webhooks. The Google account, OAuth client, base directory, backend and sync records are kept. |
 
 ## Sync behavior
 
