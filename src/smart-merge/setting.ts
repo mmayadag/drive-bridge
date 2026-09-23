@@ -37,6 +37,7 @@ export default function smartMergeSetting(
 					render: (setting) => {
 						setting
 							.setClass('drive-bridge-togglable-value')
+							.setClass('drive-bridge-marker-setting')
 							.addText(marker('conflictAStart', translate('start')))
 							.addText(marker('conflictAEnd', translate('end')));
 					},
@@ -47,6 +48,7 @@ export default function smartMergeSetting(
 					render: (setting) => {
 						setting
 							.setClass('drive-bridge-togglable-value')
+							.setClass('drive-bridge-marker-setting')
 							.addText(marker('conflictBStart', translate('start')))
 							.addText(marker('conflictBEnd', translate('end')));
 					},
@@ -57,6 +59,7 @@ export default function smartMergeSetting(
 					render: (setting) => {
 						setting
 							.setClass('drive-bridge-togglable-value')
+							.setClass('drive-bridge-marker-setting')
 							.addText(marker('deletionStart', translate('start')))
 							.addText(marker('deletionEnd', translate('end')));
 					},
