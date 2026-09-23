@@ -111,7 +111,7 @@ thinking about that limit.
 In Obsidian, install Drive Bridge (see the README), then open
 **Settings → Drive Bridge**:
 
-1. Open **Google account** under Google Drive (it reads _Not connected_) and
+1. Open **Google account** under Google Drive (it reads _Tap to connect_ or _Click to connect_) and
    paste the **OAuth client ID**.
 2. On the same page, paste the **OAuth client secret**. It is stored in the
    device's secure storage, not in synced files.
@@ -333,14 +333,14 @@ meaning:
 
 ### Google Drive
 
-| Setting             | Default       | Recommended          | What it does                                                                                                                                                       |
-| ------------------- | ------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Google account      | Not connected | your account         | Sub-page with the whole account setup. The entry shows the connected email, or a warning until connected.                                                          |
-| OAuth client ID     | none          | your client          | On the Google account page. See [Setup](#setup). Saved in plugin settings. Hidden once connected.                                                                  |
-| OAuth client secret | none          | your client          | On the Google account page. Saved in the device's secure storage. Hidden once connected.                                                                           |
-| Connect account     | none          | token from rclone    | On the Google account page. Verified before saving. Connect points at the first field still empty instead of calling Google.                                       |
-| Base directory      | vault name    | same on every device | Drive folder that holds the vault. The folder button next to it browses your Drive and can create a folder. Every device syncing this vault must use the same one. |
-| Delete to trash     | on            | on                   | Deletions go to Drive's trash (kept 30 days) instead of being permanent.                                                                                           |
+| Setting             | Default       | Recommended          | What it does                                                                                                                                                                          |
+| ------------------- | ------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Google account      | Not connected | your account         | Sub-page with the whole account setup. The entry shows the connected email, or what to do next (_Tap/Click to connect_, _Client secret missing_, _Client ID missing_) with a warning. |
+| OAuth client ID     | none          | your client          | On the Google account page. See [Setup](#setup). Saved in plugin settings. Hidden once connected.                                                                                     |
+| OAuth client secret | none          | your client          | On the Google account page. Saved in the device's secure storage. Hidden once connected.                                                                                              |
+| Connect account     | none          | token from rclone    | On the Google account page. Verified before saving. Connect points at the first field still empty instead of calling Google.                                                          |
+| Base directory      | vault name    | same on every device | Drive folder that holds the vault. The folder button next to it browses your Drive and can create a folder. Every device syncing this vault must use the same one.                    |
+| Delete to trash     | on            | on                   | Deletions go to Drive's trash (kept 30 days) instead of being permanent.                                                                                                              |
 
 ### Features
 

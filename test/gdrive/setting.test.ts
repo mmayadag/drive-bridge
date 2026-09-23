@@ -5,7 +5,7 @@ import { expect, mock, test } from 'bun:test';
 void mock.module('obsidian', () => ObsidianMock);
 
 const { TokenManager } = await import('@/gdrive/auth');
-const { default: gdriveSetting } = await import('@/gdrive/setting');
+const { default: gdriveSetting, describeAccount } = await import('@/gdrive/setting');
 
 const SECRET_ID = 'drive-bridge-gdrive-client-secret';
 const REFRESH_ID = 'drive-bridge-gdrive-refresh-token';
@@ -52,7 +52,7 @@ test('leaves three rows in the Google Drive section', () => {
 test('asks for the whole setup until an account is connected', () => {
 	const { page, shown } = setup({ clientId: 'client', secret: 'secret' });
 	expect(call(page.status)).toBe('warning');
-	expect(call(page.displayValue)).toBe('notConnected');
+	expect(call(page.displayValue)).toBe('clickToConnect');
 	expect(shown).toStrictEqual(['dummy', 'clientId', 'clientSecret', 'connectAccount']);
 });
 
@@ -72,4 +72,27 @@ test('keeps the client fields reachable when this device lacks the secret', () =
 	const { page, shown } = setup({ clientId: 'client', token: '1//token' });
 	expect(call(page.status)).toBe('warning');
 	expect(shown).toStrictEqual(['dummy', 'clientId', 'clientSecret', 'accountConnected']);
+});
+
+test('the account entry says what to do next', () => {
+	const base = {
+		clientId: 'id',
+		clientSecret: 'secret',
+		connected: true,
+		email: '',
+		mobile: false,
+	};
+	expect(describeAccount({ ...base, connected: false })).toStrictEqual({ key: 'clickToConnect' });
+	expect(describeAccount({ ...base, connected: false, mobile: true })).toStrictEqual({
+		key: 'tapToConnect',
+	});
+	expect(describeAccount({ ...base, clientSecret: '' })).toStrictEqual({
+		key: 'clientSecretMissing',
+	});
+	expect(describeAccount({ ...base, clientId: '' })).toStrictEqual({ key: 'clientIdMissing' });
+	expect(describeAccount(base)).toStrictEqual({ key: 'connected' });
+	expect(describeAccount({ ...base, email: 'me@test' })).toStrictEqual({
+		email: 'me@test',
+		key: 'connected',
+	});
 });

@@ -1,6 +1,6 @@
 import type { Events, Settings } from '@';
 import type { App, SettingGroupItem, TextComponent } from 'obsidian';
-import { Notice } from 'obsidian';
+import { Notice, Platform } from 'obsidian';
 import type { Dispatch } from '@/modules/event-bus';
 import type { Fragment, Snippet, Translate } from '@/modules/i18n';
 import type { CheckConnectionResult, Request } from '@/modules/registrar';
@@ -26,7 +26,10 @@ export type GdriveTranslations = FolderPickerTranslations & {
 	connect: string;
 	connected: string;
 	googleAccount: string;
-	notConnected: string;
+	clientIdMissing: string;
+	clientSecretMissing: string;
+	clickToConnect: string;
+	tapToConnect: string;
 	disconnect: string;
 	configureFirst: string;
 	connectSuccess: string;
@@ -49,6 +52,27 @@ export type GdriveTranslations = FolderPickerTranslations & {
 	limitedScope: string;
 	refreshTokenPlaceholder: string;
 };
+
+type AccountHintKey =
+	| 'clickToConnect'
+	| 'tapToConnect'
+	| 'clientIdMissing'
+	| 'clientSecretMissing'
+	| 'connected';
+
+/** What the Google account entry shows: the email, or what to do next. */
+export function describeAccount(state: {
+	connected: boolean;
+	clientId: string;
+	clientSecret: string;
+	email: string;
+	mobile: boolean;
+}): { key: AccountHintKey; email?: string } {
+	if (!state.connected) return { key: state.mobile ? 'tapToConnect' : 'clickToConnect' };
+	if (!state.clientId) return { key: 'clientIdMissing' };
+	if (!state.clientSecret) return { key: 'clientSecretMissing' };
+	return state.email ? { email: state.email, key: 'connected' } : { key: 'connected' };
+}
 
 export default function gdriveSetting(
 	{
@@ -158,10 +182,15 @@ export default function gdriveSetting(
 			{
 				1000: s(
 					(self) => ({
-						displayValue: () =>
-							connected()
-								? settings.accountEmail || translate('connected')
-								: translate('notConnected'),
+						displayValue: () => {
+							const hint = describeAccount({
+								...tokenManager.getCredentials(),
+								connected: connected(),
+								email: settings.accountEmail,
+								mobile: Platform.isMobile,
+							});
+							return hint.email ?? translate(hint.key);
+						},
 						items: Object.values(self).map((node) => node(node)),
 						name: translate('googleAccount'),
 						// oxlint-disable-next-line unicorn/no-null -- Obsidian's status type has no undefined
