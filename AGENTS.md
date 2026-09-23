@@ -27,6 +27,7 @@ This is the repository for Drive Bridge, an Obsidian plugin that syncs vault fil
 - `bun check`: check types, lint and format (no file change).
 - `bun tests`: run all tests (do not use `bun test`, it skips the Obsidian mock preload).
 - `bun tests <test path>`: run tests in a specific file.
+- `bun ver <x.y.z>`: prepare a release (see Releasing in `TECHNICAL.md`); `bun ver --check [tag]` checks the release files agree.
 - `bun -e '<code>'` run TS code directly, can import from codebase, use double quotes inside code.
 
 ## Layout

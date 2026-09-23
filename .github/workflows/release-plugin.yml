@@ -26,14 +26,8 @@ jobs:
       - name: Set up Bun
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
 
-      - name: Check the tag matches the manifest version
-        run: |
-          manifest=$(jq -r .version manifest.json)
-          tag="${{ github.ref_name }}"
-          if [ "$manifest" != "${tag%%-*}" ]; then
-            echo "Tag $tag does not match manifest version $manifest" >&2
-            exit 1
-          fi
+      - name: Check the tag matches the release files
+        run: bun ver --check "${{ github.ref_name }}"
 
       - name: Extract release notes
         run: bun scripts/release-notes.ts "${{ github.ref_name }}"

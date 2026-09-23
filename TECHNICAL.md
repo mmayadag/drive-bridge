@@ -512,8 +512,12 @@ Things that are easy to break and not covered by unit tests:
 
 ### Releasing
 
-1. Bump `version` in `manifest.json`, then run `bun ver`.
-2. Add a `## vX.Y.Z - YYYY-MM-DD` section to `CHANGELOG.md`.
-3. Push a `X.Y.Z` tag. CI builds the plugin, attests the build and attaches
+1. Run `bun ver X.Y.Z`. It adds an empty `## vX.Y.Z - YYYY-MM-DD` section to
+   `CHANGELOG.md` and stops; write the notes there.
+2. Run `bun ver X.Y.Z` again. It sets the version in `manifest.json` and
+   `package.json`, adds it to `versions.json` with the current
+   `minAppVersion`, and prints the commit, tag and push commands.
+3. Push the `X.Y.Z` tag. CI checks that the tag and release files agree
+   (`bun ver --check <tag>`), builds the plugin, attests the build and attaches
    `main.js`, `manifest.json` and `styles.css` to the GitHub release, which is
    what BRAT installs from. Tags containing `-` become pre-releases.
