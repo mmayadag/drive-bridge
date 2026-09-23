@@ -12,3 +12,4 @@ Drive Bridge Logs
 **/cache
 **/.env
 release-notes.md
+coverage
