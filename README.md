@@ -14,10 +14,6 @@ Two-way sync between your Obsidian vault and Google Drive, built for a folder
 that other apps write to as well: an AI assistant dropping notes in, a backup
 server reading them out.
 
-> **Status:** early. The full round trip works on macOS and iOS: connecting,
-> picking a Drive folder, and notes moving both ways. No one has run this
-> against a large vault yet.
-
 > [!WARNING]
 > **Back up your vault before you use Drive Bridge.** Sync can delete or
 > overwrite files on both sides, so keep a copy you can restore from.
