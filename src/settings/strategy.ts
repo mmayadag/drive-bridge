@@ -12,6 +12,8 @@ export type Choice = {
 };
 
 const CHECKED = 'is-checked';
+// The click handler each reused row currently has, so a re-render can replace it.
+const rowHandlers = new WeakMap<HTMLElement, () => void>();
 
 export const byOrder = (a: { order?: number }, b: { order?: number }) =>
 	(a.order ?? 100) - (b.order ?? 100);
@@ -42,6 +44,11 @@ export function choiceRows(
 		render: (setting: Setting) => {
 			const row = setting.settingEl;
 			row.addClass('drive-bridge-choice');
+			// Obsidian reuses the row when the tab re-renders; keep a single radio on it.
+			for (const old of row.querySelectorAll(
+				':scope > .drive-bridge-radio, .drive-bridge-flow, .drive-bridge-choice-example',
+			))
+				old.remove();
 			const radio = createDiv({
 				attr: { role: 'radio', tabindex: '0' },
 				cls: 'drive-bridge-radio',
@@ -54,14 +61,23 @@ export function choiceRows(
 					cls: 'drive-bridge-choice-example',
 					text: choice.example,
 				});
-			row.addEventListener('click', () => choose(choice.key));
+			const onClick = () => choose(choice.key);
+			const previous = rowHandlers.get(row);
+			if (previous) row.removeEventListener('click', previous);
+			rowHandlers.set(row, onClick);
+			row.addEventListener('click', onClick);
 			radio.addEventListener('keydown', (event) => {
 				if (event.key !== 'Enter' && event.key !== ' ') return;
 				event.preventDefault();
 				choose(choice.key);
 			});
 			mark();
-			return () => radios.delete(choice.key);
+			return () => {
+				row.removeEventListener('click', onClick);
+				if (rowHandlers.get(row) === onClick) rowHandlers.delete(row);
+				radio.remove();
+				if (radios.get(choice.key) === radio) radios.delete(choice.key);
+			};
 		},
 		search: false,
 	}));
