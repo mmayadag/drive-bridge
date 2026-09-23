@@ -38,7 +38,15 @@ function buildTab() {
 			['skip', { order: 30, prettyName: () => 'skip' }],
 		]),
 		deciderRegistry: new Map<string, unknown>([
-			['mirrorLocal', { order: 20, prettyName: () => 'mirrorLocal', repair: true }],
+			[
+				'mirrorLocal',
+				{
+					order: 20,
+					prettyName: () => 'mirrorLocal',
+					repair: true,
+					warning: () => 'deletes',
+				},
+			],
 			['bidirectional', { order: 10, prettyName: () => 'bidirectional' }],
 		]),
 		isIdle: ref(true),
@@ -121,4 +129,16 @@ test('the strategy pages group safe and risky choices and warn on the risky ones
 	expect(conflicts?.displayValue()).toBe('keepLocal');
 	settings.decider = 'bidirectional';
 	settings.conflictResolver = 'renameAndKeepBoth';
+});
+
+test('a risky strategy replaces the entry description with its warning', () => {
+	const entry = () =>
+		(buildTab() as Array<Page & { desc?: unknown }>).find(
+			(item) => item.name === 'syncStrategy',
+		);
+	expect(entry()?.desc).toBe('syncStrategyDescription');
+	settings.decider = 'mirrorLocal';
+	expect(entry()?.desc).not.toBe('syncStrategyDescription');
+	expect((entry()?.desc as { textContent?: string })?.textContent).toContain('deletes');
+	settings.decider = 'bidirectional';
 });

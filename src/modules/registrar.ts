@@ -23,7 +23,13 @@ export type RemoteFsEntry = {
 	checkConnection: (request: Request) => MaybePromise<CheckConnectionResult>;
 };
 /** Shown on the strategy pages. A lower `order` comes first. */
-type StrategyInfo = { prettyName: () => string; description?: () => string; order?: number };
+type StrategyInfo = {
+	prettyName: () => string;
+	description?: () => string;
+	order?: number;
+	/** Shown on the main-screen entry while this risky strategy is selected. */
+	warning?: () => string;
+};
 export type DeciderEntry = StrategyInfo & {
 	decider: Decider;
 	flow?: 'both' | 'toRemote' | 'toLocal';
