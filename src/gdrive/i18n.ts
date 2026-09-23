@@ -11,31 +11,28 @@ const en: GdriveTranslations = {
 	baseDirectoryDescription: () =>
 		createFragment((frag) => {
 			frag.appendText(
-				'The folder in Google Drive that holds this vault, created on the first sync. Every device syncing this vault must point at the same folder. ',
+				'Drive folder for this vault, created on the first sync. Use the same one on every device. ',
 			);
 			frag.createSpan({
 				cls: 'drive-bridge-warning-text',
-				text: 'Sync goes both ways: files already in the folder are downloaded into this vault, and deleting a note here deletes it in Drive. Use a folder that belongs to this vault alone, not your whole Drive.',
+				text: 'Sync goes both ways, so use a folder for this vault only.',
 			});
 		}),
 	baseDirectoryPlaceholder: 'my-vault/',
 	cancel: 'Cancel',
 	clientId: 'OAuth client ID',
-	clientIdDescription:
-		"From your own Google Cloud project. Saved in this vault's plugin settings.",
+	clientIdDescription: 'From your Google Cloud project. Saved in plugin settings.',
 	clientSecret: 'OAuth client secret',
 	clientSecretDescription:
-		"From the same OAuth client. Kept in this device's secure storage, never in synced files.",
+		"From the same client. Kept in this device's secure storage, never synced.",
 	configureFirst: 'Enter the OAuth client ID and client secret first.',
 	connect: 'Connect',
 	connectAccount: 'Connect account',
 	connectAccountDescription: () =>
 		createFragment((frag) => {
-			frag.appendText('On a computer, run ');
+			frag.appendText('Run ');
 			frag.createEl('code', { text: 'rclone authorize "drive" <client ID> <client secret>' });
-			frag.appendText(
-				" and paste the token it prints. Stored in this device's secure storage.",
-			);
+			frag.appendText(' on a computer and paste the token. Kept in secure storage.');
 		}),
 	connectFirst: 'Connect your Google account first.',
 	connectSuccess: 'Connected to Google Drive.',
@@ -64,20 +61,17 @@ const en: GdriveTranslations = {
 	setupSteps: () =>
 		createFragment((frag) => {
 			frag.appendText(
-				'Drive Bridge uses your own Google Cloud OAuth client, so your vault is not shared with anyone else. Two one-time steps: create a "Desktop app" OAuth client with the Drive API enabled, then get a refresh token for it. The ',
+				'Drive Bridge uses your own Google Cloud OAuth client. Create a "Desktop app" client with the Drive API enabled and get a refresh token for it (see the ',
 			);
 			frag.createEl('a', {
 				attr: { href: SETUP_GUIDE_URL },
 				text: 'setup guide',
 			});
-			frag.appendText(
-				' walks through both, with three ways to get the token. Enter the client and paste the token below.',
-			);
+			frag.appendText('), then fill in the fields below.');
 		}),
 	useThisFolder: 'Use this folder',
 	useTrash: 'Delete to trash',
-	useTrashDescription:
-		'Move deleted files to the Google Drive trash instead of deleting them permanently. Drive clears its trash after 30 days.',
+	useTrashDescription: "Deleted files go to Drive's trash for 30 days instead of being removed.",
 };
 
 export default en;
