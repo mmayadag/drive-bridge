@@ -393,3 +393,10 @@ input[type='password'].drive-bridge-invalid-input {
 	padding: 0.5rem;
 	color: var(--text-muted);
 }
+
+.drive-bridge-icon-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--size-4-2);
+}

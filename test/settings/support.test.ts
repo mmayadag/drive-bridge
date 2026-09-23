@@ -22,3 +22,16 @@ test('the report link opens a GitHub issue with the versions filled in', () => {
 	expect(body.toLowerCase()).not.toContain('vault');
 	expect(body.toLowerCase()).not.toContain('token');
 });
+
+test('bug and request links carry their own template and label', () => {
+	const bug = new URL(reportUrl('bug'));
+	expect(bug.searchParams.get('labels')).toBe('bug');
+
+	const request = new URL(reportUrl('request'));
+	expect(request.searchParams.get('labels')).toBe('enhancement');
+	const body = request.searchParams.get('body') ?? '';
+	expect(body).toContain('## What you would like');
+	expect(body).toContain('- Platform: macOS');
+	expect(body).not.toContain('## What happened');
+	expect(body).not.toContain('Export logs');
+});
