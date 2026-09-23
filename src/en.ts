@@ -154,15 +154,6 @@ const en: Translations = {
 	scheduledSyncDescription: 'Sync at the interval in the field.',
 	scheduledSyncPlaceholder: 'Enter interval (e.g. 10min, 0.5h)',
 	selectAll: 'Select all',
-	settingTips: ({ labels, addLabel }) =>
-		createFragment((frag) => {
-			const line = frag.createDiv('drive-bridge-label-legend');
-			for (const label of labels) {
-				const item = line.createSpan();
-				addLabel(item, label);
-				item.appendText(` ${label.tooltip}`);
-			}
-		}),
 	showProgress: 'Show progress',
 	skip: 'Skip',
 	speed: 'Speed',

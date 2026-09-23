@@ -316,6 +316,12 @@ Defaults are what a fresh install uses. _Recommended_ is for a vault that
 other apps also write to (for example an AI assistant writing into an inbox
 folder); for a vault only you edit, the defaults are fine except where noted.
 
+Two labels appear next to some setting names; hold or hover one to see its
+meaning:
+
+- **Match**: keep this setting the same on every device.
+- **Speed**: tuning this setting can make syncs faster.
+
 ### General
 
 | Setting                   | Default              | Recommended          | What it does                                                                                                                                                                                                                  |

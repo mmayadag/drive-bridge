@@ -350,16 +350,6 @@ input[type='password'].drive-bridge-invalid-input {
 	color: var(--text-warning);
 }
 
-.drive-bridge-label-legend {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.25rem 1rem;
-
-	.flair {
-		margin-right: 0.35rem;
-	}
-}
-
 .drive-bridge-pre-wrap {
 	white-space: pre-wrap;
 }
