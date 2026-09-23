@@ -39,14 +39,16 @@ const en: GdriveTranslations = {
 		}),
 	connectFirst: 'Connect your Google account first.',
 	connectSuccess: 'Connected to Google Drive.',
+	connected: 'Connected',
 	create: 'Create',
 	disconnect: 'Forget on this device',
-	enterClientId: 'Open OAuth client and enter the client ID first.',
-	enterClientSecret: 'Open OAuth client and enter the client secret first.',
+	enterClientId: 'Enter the OAuth client ID first.',
+	enterClientSecret: 'Enter the OAuth client secret first.',
 	enterRefreshToken: 'Paste a refresh token first.',
 	folderListFailed: 'Could not read Drive folders',
 	folderNameSlash: 'A folder name cannot contain a slash.',
 	gdrive: 'Google Drive',
+	googleAccount: 'Google account',
 	invalidRefreshToken: 'That does not look like a refresh token or rclone token output.',
 	limitedScope:
 		'This token only has limited Drive access (drive.file). Create it with rclone\'s default "drive" scope.',
@@ -54,11 +56,7 @@ const en: GdriveTranslations = {
 	newFolder: 'Create folder',
 	newFolderPrompt: 'New folder name',
 	noSubfolders: 'No folders here yet.',
-	oauthClient: 'OAuth client',
-	oauthClientDescription:
-		'The client ID and secret from your own Google Cloud project, set once per device.',
-	oauthClientMissing: 'Not set',
-	oauthClientSet: 'Configured',
+	notConnected: 'Not connected',
 	pickFolder: 'Browse Drive folders',
 	pickFolderTitle: 'Choose a Drive folder',
 	pickSubfolder: 'Open a folder first; the whole Drive cannot be the vault folder.',
@@ -73,7 +71,7 @@ const en: GdriveTranslations = {
 				text: 'setup guide',
 			});
 			frag.appendText(
-				' walks through both, with three ways to get the token. Enter the client below, then paste the token under Connect account.',
+				' walks through both, with three ways to get the token. Enter the client and paste the token below.',
 			);
 		}),
 	useThisFolder: 'Use this folder',
