@@ -161,11 +161,17 @@ const en: Translations = {
 	requestFeature: 'Request a feature. Nothing is sent until you submit it on GitHub.',
 	reservedHeader:
 		'That header is set by the plugin itself; overriding it would break every request.',
+	resetToDefaults: 'Reset to defaults',
+	resetToDefaultsConfirm:
+		'Every setting goes back to its default, including filter rules, strategies, automatic sync, controls and webhooks. The Google account, OAuth client, base directory and sync records are kept.',
+	resetToDefaultsDescription:
+		'Everything except the Google account, OAuth client and base directory goes back to its default.',
 	resolveConflict: 'Resolve conflict',
 	scheduledSync: 'Scheduled sync',
 	scheduledSyncDescription: 'Sync at the interval in the field.',
 	scheduledSyncPlaceholder: 'Enter interval (e.g. 10min, 0.5h)',
 	selectAll: 'Select all',
+	settingsReset: 'Settings reset to defaults',
 	showProgress: 'Show progress',
 	skip: 'Skip',
 	skipDescription: 'Nothing changes; the conflict comes back on the next sync.',

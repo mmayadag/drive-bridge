@@ -15,6 +15,7 @@ import Storage from '@/modules/storage';
 import Sync from '@/modules/sync';
 import Webhooks from '@/modules/webhooks';
 import { createContext } from '@/shared/module-context';
+import { defaultSettings } from './defaults';
 
 const internalModules = [
 	EventBus,
@@ -58,49 +59,7 @@ export default class DriveBridge extends Plugin {
 
 	async onload() {
 		const settings: Settings = {
-			avoidAutoSyncWhenOffline: true,
-			confirmDeleteInAutoSync: true,
-			confirmTasksInSync: true,
-			conflictResolver: 'renameAndKeepBoth',
-			customHeaders: [],
-			decider: 'bidirectional',
-			exclusionRules: [
-				'.git',
-				'.github',
-				'.gitlab',
-				'.svn',
-				'node_modules',
-				'.DS_Store',
-				'__MACOSX',
-				'desktop.ini',
-				'Thumbs.db',
-				'~$*.doc',
-				'~$*.docx',
-				'~$*.ppt',
-				'~$*.pptx',
-				'~$*.xls',
-				'~$*.xlsx',
-				'.trash',
-				'Drive Bridge Logs',
-				this.app.vault.configDir,
-			].map((expr) => ({ caseSensitive: false, expr })),
-			exportLogsDirectory: 'Drive Bridge Logs/',
-			inclusionRules: [],
-			maxFileSize: { enabled: false, value: 31_457_280 },
-			maxMemoryConsumption: { enabled: true, value: 100 * 1024 ** 2 },
-			maxRequestConcurrency: { enabled: true, value: 50 },
-			minRequestInterval: { enabled: false, value: 0 },
-			modules: {},
-			noticeStatusOnMobile: true,
-			realtimeSync: { enabled: false, value: 5000 },
-			realtimeSyncFastMode: true,
-			remoteFs: 'gdrive',
-			scheduledSync: { enabled: true, value: 15 * 60 * 1000 },
-			startupSync: { enabled: true, value: 5000 },
-			syncOnLeave: true,
-			webhookOnFinish: '',
-			webhookOnStart: '',
-			webhookOnlyWhenChanged: true,
+			...defaultSettings(this.app.vault.configDir),
 			...((await this.loadData()) as Record<string, unknown>),
 		};
 		void this.saveSettings();

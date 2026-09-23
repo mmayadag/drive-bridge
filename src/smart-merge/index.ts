@@ -18,6 +18,14 @@ export type SmartMergeDatabase = DatabaseAsync<SmartMergeStoreSchema, SmartMerge
 export type BaseTextStore = StoreAsync<string>;
 
 const RESOLVER_ID = 'smartMerge';
+const DEFAULT_MARKERS: SmartMergeSettings = {
+	conflictAEnd: '</mark>',
+	conflictAStart: '<mark class="conflict ours">',
+	conflictBEnd: '</mark>',
+	conflictBStart: '<mark class="conflict theirs">',
+	deletionEnd: '</mark>',
+	deletionStart: '<mark class="conflict deleted">',
+};
 
 export default class SmartMerge {
 	private readonly cleanup: Array<() => void> = [];
@@ -40,14 +48,9 @@ export default class SmartMerge {
 	// Reads the core setting so base texts are only captured when they can be used.
 	declare readonly settings: { conflictResolver: string };
 
-	readonly moduleSettings: SmartMergeSettings = {
-		conflictAEnd: '</mark>',
-		conflictAStart: '<mark class="conflict ours">',
-		conflictBEnd: '</mark>',
-		conflictBStart: '<mark class="conflict theirs">',
-		deletionEnd: '</mark>',
-		deletionStart: '<mark class="conflict deleted">',
-	};
+	readonly moduleSettings: SmartMergeSettings = { ...DEFAULT_MARKERS };
+
+	readonly resetSettings = () => Object.assign(this.moduleSettings, DEFAULT_MARKERS);
 
 	readonly start = () => {
 		const {

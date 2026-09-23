@@ -5,6 +5,7 @@ import type { Translate } from '@/modules/i18n';
 import type { CallableOrObjectTree } from '@/modules/setting';
 import type { MaybePromise } from '@/types';
 import ConfirmModal from '@/components/confirm-modal';
+import { resetSettings } from '@/defaults';
 import { normalizeBaseDir } from '@/shared/path';
 import { ADVANCED, MORE, PAGE } from './layout';
 import { s } from './utils';
@@ -16,6 +17,10 @@ export type DevelopmentSettingTranslations = {
 	clear: string;
 	clearRecordsDescription: string;
 	clearRecordsConfirm: string;
+	resetToDefaults: string;
+	resetToDefaultsDescription: string;
+	resetToDefaultsConfirm: string;
+	settingsReset: string;
 	cancel: string;
 	export: string;
 	exportLogsDescription: string;
@@ -26,6 +31,11 @@ export type DevelopmentSettingTranslations = {
 
 export default function developmentSettings({
 	app,
+	memoryDB,
+	rerenderSettingTab,
+	resetModuleSettings,
+	startScheduledSync,
+	stopScheduledSync,
 	translate,
 	exportLogs,
 	deleteRecordStore,
@@ -33,6 +43,11 @@ export default function developmentSettings({
 	saveSettings,
 }: {
 	app: App;
+	memoryDB: { getStore: (name: 'ephemeralEditableLists') => { clear: () => void } };
+	rerenderSettingTab: () => void;
+	resetModuleSettings: () => void;
+	startScheduledSync: () => void;
+	stopScheduledSync: () => void;
 	translate: Translate<DevelopmentSettingTranslations>;
 	deleteRecordStore: (namespace?: string) => MaybePromise<void>;
 	exportLogs: () => Promise<void>;
@@ -99,6 +114,47 @@ export default function developmentSettings({
 											.setButtonText(translate('export'))
 											.onClick(exportLogs);
 									});
+							},
+						})),
+					},
+				),
+				[ADVANCED.reset]: s(
+					(self) => ({
+						items: Object.values(self).map((node) => node(node)) as never,
+						type: 'group',
+					}),
+					{
+						1000: s(() => ({
+							desc: translate('resetToDefaultsDescription'),
+							name: translate('resetToDefaults'),
+							render: (setting) => {
+								setting.addButton((button) =>
+									button
+										.setButtonText(translate('resetToDefaults'))
+										.setDestructive()
+										.onClick(() =>
+											new ConfirmModal(app, {
+												cancel: translate('cancel'),
+												confirm: translate('resetToDefaults'),
+												message: translate('resetToDefaultsConfirm'),
+												onConfirm: async () => {
+													resetSettings(settings, app.vault.configDir);
+													resetModuleSettings();
+													// Editable lists keep a working copy; drop it so they show the defaults.
+													memoryDB
+														.getStore('ephemeralEditableLists')
+														.clear();
+													stopScheduledSync();
+													if (settings.scheduledSync.enabled)
+														startScheduledSync();
+													await saveSettings();
+													new Notice(translate('settingsReset'));
+													rerenderSettingTab();
+												},
+												title: translate('resetToDefaults'),
+											}).open(),
+										),
+								);
 							},
 						})),
 					},
