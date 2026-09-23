@@ -58,19 +58,18 @@ test('the main screen keeps daily settings and links to the sub-pages', () => {
 		'syncStrategy',
 		'conflictResolveStrategy',
 		'group',
+		'group',
+		'group',
 	]);
-	const more = top.at(-1);
-	expect(names(more?.items)).toStrictEqual([
-		'automaticSync',
-		'filterRules',
-		'advanced',
-		'helpAndSupport',
-	]);
+	const [more, help, coffee] = top.slice(-3);
+	expect(names(more.items)).toStrictEqual(['automaticSync', 'filterRules', 'advanced']);
+	expect(names(help.items)).toStrictEqual(['helpAndSupport']);
+	expect(names(coffee.items)).toStrictEqual(['buyMeACoffee']);
 });
 
 test('each sub-page holds its settings', () => {
-	const pages = (buildTab().at(-1) as Named).items ?? [];
-	const [automatic, filters, advanced, help] = pages;
+	const pages = (buildTab().at(-3) as Named).items ?? [];
+	const [automatic, filters, advanced] = pages;
 	expect(names(automatic.items)).toStrictEqual([
 		'realtimeSync',
 		'startupSync',
@@ -85,5 +84,4 @@ test('each sub-page holds its settings', () => {
 		'webhooks',
 		'development',
 	]);
-	expect(names(help.items)).toStrictEqual(['help', 'reportProblem', 'buyMeACoffee']);
 });

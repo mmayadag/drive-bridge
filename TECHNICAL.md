@@ -323,14 +323,14 @@ meaning:
 - **Speed**: tuning this setting can make syncs faster.
 
 The main screen shows Last sync, Sync strategy, Conflict resolve strategy and
-the Google Drive group. Everything else is one tap away:
+the Google Drive group, and ends with [Support](#support). Everything else is
+one tap away:
 
-| Entry            | Holds                                                                                                                   |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Automatic sync   | [Features](#features); the entry shows how many are on                                                                  |
-| Filter rules     | [Filter rules](#filter-rules); the entry shows the rule count                                                           |
-| Advanced         | [Controls](#controls), [Miscellaneous](#miscellaneous), Smart merge, [Webhooks](#webhooks), [Development](#development) |
-| Help and support | Help, [Support](#support)                                                                                               |
+| Entry          | Holds                                                                                                                   |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Automatic sync | [Features](#features); the entry shows how many are on                                                                  |
+| Filter rules   | [Filter rules](#filter-rules); the entry shows the rule count                                                           |
+| Advanced       | [Controls](#controls), [Miscellaneous](#miscellaneous), Smart merge, [Webhooks](#webhooks), [Development](#development) |
 
 ### General
 
@@ -402,10 +402,10 @@ trust; the payload carries the vault name, not its contents.
 
 ### Support
 
-| Setting          | What it does                                                                                                                                                  |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Report a problem | Opens GitHub's new-issue form with the plugin version, Obsidian version and platform filled in. Nothing leaves the device until you submit the form yourself. |
-| Buy me a coffee  | Opens the donation page.                                                                                                                                      |
+| Setting          | What it does                                                                                                                                                                                                                            |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Help and support | Three icons: the setup guide, a bug report and a feature request. Both reports open GitHub's issue form with the plugin version, Obsidian version and platform filled in. Nothing leaves the device until you submit the form yourself. |
+| Buy me a coffee  | The yellow footer at the bottom of the settings; opens the donation page. The version below it is the installed plugin version.                                                                                                         |
 
 ### Development
 

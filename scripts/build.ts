@@ -17,6 +17,8 @@ const options: BuildOptions = {
 	entryPoints: { main: 'src/index.ts', styles: 'src/global.css' },
 	external: ['obsidian'],
 	format: 'cjs',
+	// The coffee footer's font is inlined into styles.css; nothing is fetched at runtime.
+	loader: { '.woff2': 'dataurl' },
 	logLevel: 'info',
 	mainFields: ['browser', 'module', 'main'],
 	minify: !watch,
