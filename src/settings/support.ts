@@ -1,15 +1,15 @@
-import type { SettingGroupItem, ButtonComponent } from 'obsidian';
+import type { ButtonComponent } from 'obsidian';
 import { apiVersion, Platform, setIcon } from 'obsidian';
 import type { Translate } from '@/modules/i18n';
 import type { CallableOrObjectTree } from '@/modules/setting';
 import { VERSION } from '@/modules/event-bus';
+import { MORE, PAGE } from './layout';
 import { s } from './utils';
 
 const ISSUES_URL = 'https://github.com/mmayadag/drive-bridge/issues/new';
 const COFFEE_URL = 'https://buymeacoffee.com/muratmayadag';
 
 export type SupportSettingTranslations = {
-	support: string;
 	reportProblem: string;
 	reportProblemDescription: string;
 	reportBug: string;
@@ -91,13 +91,8 @@ export default function supportSettings({
 	translate: Translate<SupportSettingTranslations>;
 }): CallableOrObjectTree {
 	return {
-		6000: s(
-			(self) => ({
-				heading: translate('support'),
-				items: Object.values(self).map((node) => node(node) as SettingGroupItem),
-				type: 'group',
-			}),
-			{
+		[MORE]: {
+			[PAGE.helpAndSupport]: {
 				1000: s(() => ({
 					desc: translate('reportProblemDescription'),
 					name: translate('reportProblem'),
@@ -129,6 +124,6 @@ export default function supportSettings({
 					},
 				})),
 			},
-		),
+		},
 	};
 }

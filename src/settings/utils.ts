@@ -5,9 +5,10 @@ import type {
 	SettingDefinitionGroup,
 	SettingDefinitionList,
 	SettingDefinitionPage,
+	SettingGroup,
 	TextComponent,
 } from 'obsidian';
-import { setIcon } from 'obsidian';
+import { setIcon, setTooltip } from 'obsidian';
 import type { CallableOrObjectTree, SettingTree } from '@/modules/setting';
 import type { DatabaseSync } from '@/shared/key-value-store';
 import type { TogglableValue } from '@/types';
@@ -35,11 +36,46 @@ export type LabelDefinition = {
 	textColor?: string;
 };
 
+const LABEL = 'drive-bridge-label';
+
+/** Adds a label badge after a setting name, once per label text. */
+export function addLabel(
+	element: Element,
+	{
+		text,
+		tooltip,
+		color = 'var(--interactive-accent)',
+		textColor = 'var(--text-on-accent)',
+	}: LabelDefinition,
+) {
+	for (const existing of element.querySelectorAll(`.${LABEL}`))
+		if (existing.textContent === text) return;
+	const tag = element.createSpan({ cls: ['flair', LABEL], text });
+	setTooltip(tag, tooltip);
+	tag.style.setProperty('--flair-color', textColor);
+	tag.style.setProperty('--flair-background', color);
+}
+
+// Rows that render themselves draw their own labels, so labels also show on
+// sub-pages, which render after the main screen.
+function withLabels(item: AugmentedSettingDefinitionItem): AugmentedSettingDefinitionItem {
+	if (!('labels' in item) || !item.labels || !('render' in item) || !item.render) return item;
+	const { labels, render } = item;
+	return {
+		...item,
+		render: (setting: Setting, group: SettingGroup) => {
+			for (const label of labels) addLabel(setting.nameEl, label);
+			return render(setting, group);
+		},
+	};
+}
+
 export function s(
 	parent: (self: SettingTree) => AugmentedSettingDefinitionItem,
 	children?: CallableOrObjectTree,
 ): CallableOrObjectTree {
-	return children ? Object.assign(parent, children) : (parent as never);
+	const wrapped = (self: SettingTree) => withLabels(parent(self));
+	return children ? Object.assign(wrapped, children) : (wrapped as never);
 }
 
 function setWarningIfNotExist(): void {

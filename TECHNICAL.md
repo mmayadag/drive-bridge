@@ -322,6 +322,16 @@ meaning:
 - **Match**: keep this setting the same on every device.
 - **Speed**: tuning this setting can make syncs faster.
 
+The main screen shows Last sync, Sync strategy, Conflict resolve strategy and
+the Google Drive group. Everything else is one tap away:
+
+| Entry            | Holds                                                                                                                   |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Automatic sync   | [Features](#features); the entry shows how many are on                                                                  |
+| Filter rules     | [Filter rules](#filter-rules); the entry shows the rule count                                                           |
+| Advanced         | [Controls](#controls), [Miscellaneous](#miscellaneous), Smart merge, [Webhooks](#webhooks), [Development](#development) |
+| Help and support | Help, [Support](#support)                                                                                               |
+
 ### General
 
 | Setting                   | Default              | Recommended          | What it does                                                                                                                                                                                                                  |

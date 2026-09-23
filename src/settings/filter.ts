@@ -1,11 +1,10 @@
 import type { Settings } from '@';
-import type { SettingGroupItem } from 'obsidian';
 import type { Fragment, Snippet, Translate } from '@/modules/i18n';
 import type { CallableOrObjectTree } from '@/modules/setting';
 import type { DatabaseSync } from '@/shared/key-value-store';
 import type { GlobMatchRule } from '@/types';
 import { normalizeGlob } from '@/utils/glob-match';
-import type { LabelDefinition } from './utils';
+import { MORE, PAGE } from './layout';
 import { generateEditableList, reactivelyValidate, s } from './utils';
 
 export type FilterSettingTranslations = {
@@ -28,30 +27,22 @@ export default function filterSettings({
 	settings,
 	memoryDB,
 	rerenderSettingTab,
-	speedLabel,
 }: {
 	translate: Translate<FilterSettingTranslations>;
 	saveSettings: () => Promise<void>;
 	settings: Settings;
 	memoryDB: DatabaseSync;
 	rerenderSettingTab: () => void;
-	speedLabel: () => LabelDefinition;
 }): CallableOrObjectTree {
 	return {
-		3000: s(
-			(self) => ({
-				heading: translate('filterRules'),
-				items: Object.values(self).map((node) => node(node) as SettingGroupItem),
-				type: 'group',
-			}),
-			{
+		[MORE]: {
+			[PAGE.filters]: {
 				1000: s(
 					(self) => ({
 						desc: translate('inclusionRulesDescription'),
 						displayValue: () =>
 							translate('xConfigured', settings.inclusionRules.length),
 						items: Object.values(self).map((node) => node(node)),
-						labels: [speedLabel()],
 						name: translate('inclusionRules'),
 						type: 'page',
 					}),
@@ -72,7 +63,6 @@ export default function filterSettings({
 						displayValue: () =>
 							translate('xConfigured', settings.exclusionRules.length),
 						items: Object.values(self).map((node) => node(node)),
-						labels: [speedLabel()],
 						name: translate('exclusionRules'),
 						type: 'page',
 					}),
@@ -88,7 +78,7 @@ export default function filterSettings({
 					},
 				),
 			},
-		),
+		},
 	};
 
 	function generateRuleList({

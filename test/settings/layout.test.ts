@@ -1,0 +1,89 @@
+import type { SettingDefinitionItem } from 'obsidian';
+import ObsidianMock from '$/support/obsidian-mock';
+import { expect, mock, test } from 'bun:test';
+
+class FakeTab {
+	containerEl = { addClass: () => {} };
+}
+
+void mock.module('obsidian', () => ({ ...ObsidianMock, PluginSettingTab: FakeTab }));
+
+const { default: Setting } = await import('@/modules/setting');
+const { ref } = await import('@/shared/reactive');
+
+const settings = {
+	customHeaders: [],
+	exclusionRules: [{ caseSensitive: false, expr: '.trash' }],
+	inclusionRules: [],
+	maxFileSize: { enabled: false, value: 1 },
+	maxMemoryConsumption: { enabled: true, value: 1 },
+	maxRequestConcurrency: { enabled: true, value: 1 },
+	minRequestInterval: { enabled: false, value: 0 },
+	realtimeSync: { enabled: false, value: 5000 },
+	realtimeSyncFastMode: true,
+	remoteFs: 'gdrive',
+	scheduledSync: { enabled: true, value: 1 },
+	startupSync: { enabled: true, value: 1 },
+	syncOnLeave: true,
+};
+
+function buildTab() {
+	let tab: { getSettingDefinitions: () => Array<SettingDefinitionItem> } | undefined;
+	const setting: InstanceType<typeof Setting> = new Setting({
+		conflictResolverRegistry: new Map(),
+		deciderRegistry: new Map(),
+		isIdle: ref(true),
+		memoryDB: { getMeta: () => {}, getStore: () => new Map() },
+		on: () => () => {},
+		registerSetting: (entry: never) => setting.root.registerSetting(entry),
+		remoteFsRegistry: new Map([['gdrive', { prettyName: () => 'Google Drive' }]]),
+		settings,
+		translate: (key: string) => key,
+	} as never);
+	Object.assign(setting['ctx' as never], setting.root);
+	setting.start();
+	setting.root.addSettingTab({ addSettingTab: (created: never) => (tab = created) } as never);
+	return tab?.getSettingDefinitions() ?? [];
+}
+
+type Named = { name?: string; heading?: string; type?: string; items?: Array<Named> };
+const names = (items: Array<Named> | undefined) =>
+	(items ?? []).map((item) => item.name ?? item.heading ?? item.type);
+
+test('the main screen keeps daily settings and links to the sub-pages', () => {
+	const top = buildTab() as Array<Named>;
+	expect(names(top)).toStrictEqual([
+		'lastSync',
+		'backend',
+		'syncStrategy',
+		'conflictResolveStrategy',
+		'group',
+	]);
+	const more = top.at(-1);
+	expect(names(more?.items)).toStrictEqual([
+		'automaticSync',
+		'filterRules',
+		'advanced',
+		'helpAndSupport',
+	]);
+});
+
+test('each sub-page holds its settings', () => {
+	const pages = (buildTab().at(-1) as Named).items ?? [];
+	const [automatic, filters, advanced, help] = pages;
+	expect(names(automatic.items)).toStrictEqual([
+		'realtimeSync',
+		'startupSync',
+		'scheduledSync',
+		'syncOnLeave',
+		'realtimeSyncFastMode',
+	]);
+	expect(names(filters.items)).toStrictEqual(['inclusionRules', 'exclusionRules']);
+	expect(names(advanced.items)).toStrictEqual([
+		'controls',
+		'miscellaneous',
+		'webhooks',
+		'development',
+	]);
+	expect(names(help.items)).toStrictEqual(['help', 'reportProblem', 'buyMeACoffee']);
+});

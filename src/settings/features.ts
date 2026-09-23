@@ -1,12 +1,11 @@
 import type { Settings } from '@';
-import type { SettingGroupItem } from 'obsidian';
 import type { Translate } from '@/modules/i18n';
 import type { CallableOrObjectTree } from '@/modules/setting';
 import type { LabelDefinition } from './utils';
+import { MORE, PAGE } from './layout';
 import { renderTogglableValue, s } from './utils';
 
 export type FeaturesSettingTranslations = {
-	features: string;
 	realtimeSyncFastMode: string;
 	realtimeSyncFastModeDescription: string;
 	realtimeSync: string;
@@ -33,13 +32,8 @@ export default function featuresSettings(ctx: {
 	const { translate, saveSettings, startScheduledSync, stopScheduledSync, settings, speedLabel } =
 		ctx;
 	return {
-		1000: s(
-			(self) => ({
-				heading: translate('features'),
-				items: Object.values(self).map((node) => node(node) as SettingGroupItem),
-				type: 'group',
-			}),
-			{
+		[MORE]: {
+			[PAGE.automaticSync]: {
 				1000: s(() => ({
 					desc: translate('realtimeSyncDescription'),
 					name: translate('realtimeSync'),
@@ -94,6 +88,6 @@ export default function featuresSettings(ctx: {
 					name: translate('realtimeSyncFastMode'),
 				})),
 			},
-		),
+		},
 	};
 }
