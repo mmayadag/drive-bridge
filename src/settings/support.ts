@@ -1,5 +1,8 @@
+import type { Events } from '@';
 import { apiVersion, Platform } from 'obsidian';
+import type { On } from '@/modules/event-bus';
 import type { Translate } from '@/modules/i18n';
+import type { LastSync } from '@/modules/observability';
 import type { CallableOrObjectTree } from '@/modules/setting';
 import { VERSION } from '@/modules/event-bus';
 import { COFFEE, HELP } from './layout';
@@ -16,6 +19,9 @@ export type SupportSettingTranslations = {
 	reportBug: string;
 	requestFeature: string;
 	coffeeQuestion: string;
+	coffeeWorks: string;
+	coffeeSetUp: string;
+	coffeeFailed: string;
 	buyMeACoffee: string;
 	pluginVersion: (version: string) => string;
 };
@@ -46,10 +52,24 @@ export function reportUrl(kind: ReportKind = 'bug'): string {
 	return `${ISSUES_URL}?${params.toString()}`;
 }
 
+export type CoffeeQuestion = 'coffeeWorks' | 'coffeeSetUp' | 'coffeeFailed' | 'coffeeQuestion';
+
+/** The line above the coffee button, following how the last sync on this device ended. */
+export function coffeeQuestion(lastSync?: LastSync): CoffeeQuestion {
+	if (!lastSync) return 'coffeeSetUp';
+	if (lastSync.result === 'failed') return 'coffeeFailed';
+	if (lastSync.result === 'cancelled') return 'coffeeQuestion';
+	return 'coffeeWorks';
+}
+
 export default function supportSettings({
 	translate,
+	settings,
+	on,
 }: {
 	translate: Translate<SupportSettingTranslations>;
+	settings: { lastSync?: LastSync };
+	on: On<Events>;
 }): CallableOrObjectTree {
 	return {
 		[HELP]: s(
@@ -97,10 +117,10 @@ export default function supportSettings({
 					render: (setting) => {
 						setting.settingEl.addClass('drive-bridge-coffee');
 						const el = setting.controlEl;
-						el.createDiv({
-							cls: 'drive-bridge-coffee-question',
-							text: translate('coffeeQuestion'),
-						});
+						const question = el.createDiv({ cls: 'drive-bridge-coffee-question' });
+						const ask = () =>
+							question.setText(translate(coffeeQuestion(settings.lastSync)));
+						ask();
 						const link = el.createEl('a', {
 							attr: { href: COFFEE_URL, rel: 'noopener' },
 							cls: 'drive-bridge-coffee-button',
@@ -111,6 +131,7 @@ export default function supportSettings({
 							cls: 'drive-bridge-coffee-version',
 							text: translate('pluginVersion', VERSION),
 						});
+						return on('syncTerminated', ask);
 					},
 					search: false,
 				})),

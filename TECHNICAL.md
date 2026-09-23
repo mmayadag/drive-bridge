@@ -409,10 +409,10 @@ trust; the payload carries the vault name, not its contents.
 
 ### Support
 
-| Setting          | What it does                                                                                                                                                                                                                            |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Help and support | Three icons: the setup guide, a bug report and a feature request. Both reports open GitHub's issue form with the plugin version, Obsidian version and platform filled in. Nothing leaves the device until you submit the form yourself. |
-| Buy me a coffee  | The yellow footer at the bottom of the settings; opens the donation page. The version below it is the installed plugin version.                                                                                                         |
+| Setting          | What it does                                                                                                                                                                                                                                                                                             |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Help and support | Three icons: the setup guide, a bug report and a feature request. Both reports open GitHub's issue form with the plugin version, Obsidian version and platform filled in. Nothing leaves the device until you submit the form yourself.                                                                  |
+| Buy me a coffee  | The yellow footer at the bottom of the settings; opens the donation page. The line above it follows the last sync: _It works! Coffee time?_ after a good sync, a setup hint before the first one, and a pointer to the bug report after a failure. The version below it is the installed plugin version. |
 
 ### Development
 

@@ -7,7 +7,7 @@ void mock.module('obsidian', () => ({
 	apiVersion: '1.13.7',
 }));
 
-const { reportUrl } = await import('@/settings/support');
+const { coffeeQuestion, reportUrl } = await import('@/settings/support');
 
 test('the report links open the matching issue form with the versions filled in', () => {
 	for (const kind of ['bug', 'request'] as const) {
@@ -32,4 +32,12 @@ test('the form field names in the link exist in both issue forms', async () => {
 		const yaml = await Bun.file(`.github/ISSUE_TEMPLATE/${form}.yml`).text();
 		for (const field of fields) expect(yaml).toContain(`id: ${field}\n`);
 	}
+});
+
+test('the coffee line follows the last sync', () => {
+	expect(coffeeQuestion()).toBe('coffeeSetUp');
+	expect(coffeeQuestion({ at: 1, result: 'completed' })).toBe('coffeeWorks');
+	expect(coffeeQuestion({ at: 1, result: 'noop' })).toBe('coffeeWorks');
+	expect(coffeeQuestion({ at: 1, error: 'offline', result: 'failed' })).toBe('coffeeFailed');
+	expect(coffeeQuestion({ at: 1, result: 'cancelled' })).toBe('coffeeQuestion');
 });
