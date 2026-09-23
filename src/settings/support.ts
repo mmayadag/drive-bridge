@@ -123,7 +123,6 @@ export default function supportSettings({
 					render: (setting) => {
 						setting.addButton((button) =>
 							button
-								.setCta()
 								.setButtonText(translate('openPage'))
 								.onClick(() => window.open(COFFEE_URL)),
 						);
