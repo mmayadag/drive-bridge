@@ -41,8 +41,8 @@ const en: GdriveTranslations = {
 	connectSuccess: 'Connected to Google Drive.',
 	create: 'Create',
 	disconnect: 'Forget on this device',
-	enterClientId: 'Enter the OAuth client ID first.',
-	enterClientSecret: 'Enter the OAuth client secret first.',
+	enterClientId: 'Open OAuth client and enter the client ID first.',
+	enterClientSecret: 'Open OAuth client and enter the client secret first.',
 	enterRefreshToken: 'Paste a refresh token first.',
 	folderListFailed: 'Could not read Drive folders',
 	folderNameSlash: 'A folder name cannot contain a slash.',
@@ -54,6 +54,11 @@ const en: GdriveTranslations = {
 	newFolder: 'Create folder',
 	newFolderPrompt: 'New folder name',
 	noSubfolders: 'No folders here yet.',
+	oauthClient: 'OAuth client',
+	oauthClientDescription:
+		'The client ID and secret from your own Google Cloud project, set once per device.',
+	oauthClientMissing: 'Not set',
+	oauthClientSet: 'Configured',
 	pickFolder: 'Browse Drive folders',
 	pickFolderTitle: 'Choose a Drive folder',
 	pickSubfolder: 'Open a folder first; the whole Drive cannot be the vault folder.',
@@ -68,7 +73,7 @@ const en: GdriveTranslations = {
 				text: 'setup guide',
 			});
 			frag.appendText(
-				' walks through both, with three ways to get the token. Paste the results below.',
+				' walks through both, with three ways to get the token. Enter the client below, then paste the token under Connect account.',
 			);
 		}),
 	useThisFolder: 'Use this folder',

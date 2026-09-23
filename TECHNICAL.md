@@ -111,10 +111,11 @@ thinking about that limit.
 In Obsidian, install Drive Bridge (see the README), then open
 **Settings → Drive Bridge**:
 
-1. **OAuth client ID**: paste the client ID. (**Storage backend** is already
-   on Google Drive.)
-2. **OAuth client secret**: paste the client secret. It is stored in the
-   device's secure storage, not in synced files.
+1. Open **OAuth client** under Google Drive and paste the **OAuth client
+   ID**. (**Storage backend** is already on Google Drive.)
+2. On the same page, paste the **OAuth client secret**. It is stored in the
+   device's secure storage, not in synced files. Go back; the entry now reads
+   _Configured_.
 3. **Connect account**: paste the token from step 3 above (the `eyJ…` string, the
    JSON, or only its `refresh_token` value) and press **Connect**.
 4. **Base directory**: the Drive folder for this vault. It defaults to the
@@ -327,9 +328,10 @@ folder); for a vault only you edit, the defaults are fine except where noted.
 
 | Setting             | Default    | Recommended          | What it does                                                                                                                                                       |
 | ------------------- | ---------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| OAuth client ID     | none       | your client          | See [Setup](#setup). Saved in plugin settings.                                                                                                                     |
-| OAuth client secret | none       | your client          | Saved in the device's secure storage.                                                                                                                              |
-| Connect account     | none       | token from rclone    | Verified before saving. Connect points at the first field still empty instead of calling Google.                                                                   |
+| OAuth client        | Not set    | Configured           | Sub-page holding the setup tip, client ID and client secret. The entry shows a warning until both are set.                                                         |
+| OAuth client ID     | none       | your client          | On the OAuth client page. See [Setup](#setup). Saved in plugin settings.                                                                                           |
+| OAuth client secret | none       | your client          | On the OAuth client page. Saved in the device's secure storage.                                                                                                    |
+| Connect account     | none       | token from rclone    | Verified before saving. Connect names the first input still empty instead of calling Google.                                                                       |
 | Base directory      | vault name | same on every device | Drive folder that holds the vault. The folder button next to it browses your Drive and can create a folder. Every device syncing this vault must use the same one. |
 | Delete to trash     | on         | on                   | Deletions go to Drive's trash (kept 30 days) instead of being permanent.                                                                                           |
 
