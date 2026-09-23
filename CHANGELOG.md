@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.1.13 - 2026-09-23
+
+- While a risky strategy is selected, the Sync strategy or Conflict resolve
+  strategy entry says why it shows a warning, for example _Files only on
+  Drive are deleted. Switch back to Bidirectional after one sync._ (#49)
+
 ## v0.1.12 - 2026-09-23
 
 - **Reset to defaults** at the bottom of Advanced puts every setting back to
