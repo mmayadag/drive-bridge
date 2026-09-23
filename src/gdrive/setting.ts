@@ -41,6 +41,10 @@ export type GdriveTranslations = FolderPickerTranslations & {
 	enterRefreshToken: string;
 	invalidRefreshToken: string;
 	limitedScope: string;
+	oauthClient: string;
+	oauthClientDescription: string;
+	oauthClientMissing: string;
+	oauthClientSet: string;
 	refreshTokenPlaceholder: string;
 };
 
@@ -50,6 +54,7 @@ export default function gdriveSetting(
 		saveSettings,
 		matchLabel,
 		refreshSettingTab,
+		rerenderSettingTab,
 		dispatch,
 		app,
 		getRequest,
@@ -58,6 +63,7 @@ export default function gdriveSetting(
 		saveSettings: () => Promise<void>;
 		matchLabel: () => LabelDefinition;
 		refreshSettingTab: () => void;
+		rerenderSettingTab: () => void;
 		dispatch: Dispatch<Events>;
 		app: App;
 		getRequest: () => Request;
@@ -65,10 +71,6 @@ export default function gdriveSetting(
 	settings: GdriveSettings,
 	tokenManager: TokenManager,
 ): CallableOrObjectTree {
-	// The three fields Connect needs. Kept here so Connect can point at whichever
-	// One is still empty instead of spending a round trip to Google to find out.
-	let clientIdField: TextComponent | undefined;
-	let clientSecretField: TextComponent | undefined;
 	let tokenField: TextComponent | undefined;
 
 	const INVALID = 'drive-bridge-invalid-input';
@@ -84,21 +86,12 @@ export default function gdriveSetting(
 		field?.inputEl.focus();
 	};
 
-	// Reads what is on screen: the fields save on blur, and a click on Connect
-	// Blurs first, but a keyboard activation may not.
-	const entered = (field: TextComponent | undefined, stored: string) =>
-		(field ? field.getValue() : stored).trim();
-
 	const connect = async (input: string) => {
-		const credentials = tokenManager.getCredentials();
-		const missing = findMissingInput({
-			clientId: entered(clientIdField, credentials.clientId),
-			clientSecret: entered(clientSecretField, credentials.clientSecret),
-			token: input,
-		});
-		if (missing === 'clientId') return demand(clientIdField, translate('enterClientId'));
-		if (missing === 'clientSecret')
-			return demand(clientSecretField, translate('enterClientSecret'));
+		// The client fields live on the OAuth client page and save on blur, so the
+		// Stored values are what is entered.
+		const missing = findMissingInput({ ...tokenManager.getCredentials(), token: input });
+		if (missing === 'clientId') return void new Notice(translate('enterClientId'));
+		if (missing === 'clientSecret') return void new Notice(translate('enterClientSecret'));
 		if (missing === 'token') return demand(tokenField, translate('enterRefreshToken'));
 
 		const result = await connectWithToken(tokenManager, input);
@@ -131,47 +124,68 @@ export default function gdriveSetting(
 				type: 'group',
 			}),
 			{
-				100: s(() => ({
-					desc: translate('setupSteps'),
-					name: 'dummy',
-					render: (setting) => setting.settingEl.addClass('drive-bridge-setting-tip'),
-					search: false,
-				})),
-				1000: s(() => ({
-					desc: translate('clientIdDescription'),
-					name: translate('clientId'),
-					render: (setting) => {
-						setting.addText((text) => {
-							clientIdField = markValid(text);
-							text.setValue(settings.clientId).inputEl.addEventListener(
-								'blur',
-								() => {
-									const value = text.getValue().trim();
-									text.setValue(value);
-									if (value === settings.clientId) return;
-									settings.clientId = value;
-									void saveSettings();
-								},
-							);
-						});
+				1000: s(
+					(self) => ({
+						desc: translate('oauthClientDescription'),
+						displayValue: () =>
+							translate(
+								tokenManager.hasCredentials()
+									? 'oauthClientSet'
+									: 'oauthClientMissing',
+							),
+						items: Object.values(self).map((node) => node(node)),
+						name: translate('oauthClient'),
+						// oxlint-disable-next-line unicorn/no-null -- Obsidian's status type has no undefined
+						status: () => (tokenManager.hasCredentials() ? null : 'warning'),
+						type: 'page',
+					}),
+					{
+						100: s(() => ({
+							desc: translate('setupSteps'),
+							name: 'dummy',
+							render: (setting) =>
+								setting.settingEl.addClass('drive-bridge-setting-tip'),
+							search: false,
+						})),
+						1000: s(() => ({
+							desc: translate('clientIdDescription'),
+							name: translate('clientId'),
+							render: (setting) => {
+								setting.addText((text) => {
+									text.setValue(settings.clientId).inputEl.addEventListener(
+										'blur',
+										() => {
+											const value = text.getValue().trim();
+											text.setValue(value);
+											if (value === settings.clientId) return;
+											settings.clientId = value;
+											void saveSettings();
+											rerenderSettingTab();
+										},
+									);
+								});
+							},
+						})),
+						1010: s(() => ({
+							desc: translate('clientSecretDescription'),
+							name: translate('clientSecret'),
+							render: (setting) => {
+								setting.addText((text) => {
+									text.inputEl.type = 'password';
+									text.setValue(tokenManager.getCredentials().clientSecret);
+									text.inputEl.addEventListener('blur', () => {
+										const value = text.getValue().trim();
+										text.setValue(value);
+										if (value === tokenManager.getCredentials().clientSecret)
+											return;
+										tokenManager.setClientSecret(value);
+										rerenderSettingTab();
+									});
+								});
+							},
+						})),
 					},
-				})),
-				1010: s(() => ({
-					desc: translate('clientSecretDescription'),
-					name: translate('clientSecret'),
-					render: (setting) => {
-						setting.addText((text) => {
-							clientSecretField = markValid(text);
-							text.inputEl.type = 'password';
-							text.setValue(tokenManager.getCredentials().clientSecret);
-							text.inputEl.addEventListener('blur', () => {
-								const value = text.getValue().trim();
-								text.setValue(value);
-								tokenManager.setClientSecret(value);
-							});
-						});
-					},
-				})),
+				),
 				1020: s(() => ({
 					desc: translate('connectAccountDescription'),
 					name: translate('connectAccount'),
