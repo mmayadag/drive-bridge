@@ -128,7 +128,6 @@ const en: Translations = {
 	noticeStatusOnMobileDescription:
 		'Show sync progress as a notice on mobile, where there is no status bar.',
 	open: 'Open',
-	openGithub: 'Open GitHub',
 	openPage: 'Open',
 	realtimeSync: 'Realtime sync',
 	realtimeSyncDescription: 'Sync after a file changes, once the delay in the field passes.',
@@ -141,9 +140,11 @@ const en: Translations = {
 	removeRecord: 'Remove record',
 	removeRemote: 'Remove remote',
 	renameAndKeepBoth: 'Rename and keep both',
-	reportProblem: 'Report a problem',
+	reportBug: 'Bug',
+	reportProblem: 'Bugs and requests',
 	reportProblemDescription:
-		'Opens a GitHub issue with versions filled in. Nothing is sent until you submit it.',
+		'Opens a GitHub issue form with versions filled in. Nothing is sent until you submit it.',
+	requestFeature: 'Request',
 	reservedHeader:
 		'That header is set by the plugin itself; overriding it would break every request.',
 	resolveConflict: 'Resolve conflict',
