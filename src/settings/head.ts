@@ -1,7 +1,7 @@
 import type { Events, Settings } from '@';
 import { PluginSettingTab, setIcon, setTooltip } from 'obsidian';
 import type { Dispatch, On } from '@/modules/event-bus';
-import type { Fragment, Snippet, Translate } from '@/modules/i18n';
+import type { Snippet, Translate } from '@/modules/i18n';
 import type { LastSync } from '@/modules/observability';
 import type {
 	CheckConnectionResult,
@@ -41,7 +41,6 @@ export type HeadSettingTranslations = {
 	conflictResolveStrategy: string;
 	conflictResolveStrategyDescription: string;
 	startSync: string;
-	settingTips: Fragment<{ labels: Array<LabelDefinition>; addLabel: typeof addLabel }>;
 };
 
 export default function headSettings(
@@ -55,7 +54,6 @@ export default function headSettings(
 		getCheckConnection: () => () => MaybePromise<CheckConnectionResult>;
 		memoryDB: CheckConnectionDB;
 		matchLabel: () => LabelDefinition;
-		speedLabel: () => LabelDefinition;
 		dispatch: Dispatch<Events>;
 		on: On<Events>;
 		requestSync: (trigger: string) => unknown;
@@ -71,7 +69,6 @@ export default function headSettings(
 		deciderRegistry,
 		conflictResolverRegistry,
 		matchLabel,
-		speedLabel,
 		on,
 		requestSync,
 		isIdle,
@@ -99,6 +96,23 @@ export default function headSettings(
 				};
 				show();
 				const off = on('syncTerminated', show);
+				// Labels are drawn once the whole tab has rendered; this row always renders first.
+				queueMicrotask(() => {
+					const tab = getSettingTab();
+					if (!tab) return;
+					const recurseLabel = (items: Array<AugmentedSettingDefinitionItem>) => {
+						for (const item of items) {
+							if ('labels' in item && item.labels) {
+								const name = tab
+									.getElementForDefinition(item)
+									?.querySelector('.setting-item-name');
+								if (name) for (const label of item.labels) addLabel(name, label);
+							}
+							if ('items' in item) recurseLabel(item.items as never);
+						}
+					};
+					recurseLabel(tab.settingItems);
+				});
 				let unsubscribe = () => {};
 				setting.addButton((button) => {
 					button
@@ -172,33 +186,6 @@ export default function headSettings(
 				setting.addButton((button) =>
 					button.setButtonText(translate('open')).onClick(() => window.open(GUIDE_URL)),
 				);
-			},
-			search: false,
-		})),
-		// The legend for the Match and Speed labels. It sits just above Development
-		// because the labels it explains are scattered through the groups above.
-		4900: s(() => ({
-			desc: translate('settingTips', { addLabel, labels: [matchLabel(), speedLabel()] }),
-			name: 'dummy',
-			render: (setting) => {
-				setting.settingEl.addClass('drive-bridge-setting-tip');
-				queueMicrotask(() => {
-					const tab = getSettingTab();
-					if (!tab) return;
-					const recurseLabel = (items: Array<AugmentedSettingDefinitionItem>) => {
-						for (const item of items) {
-							if ('labels' in item && item.labels) {
-								const name = tab
-									.getElementForDefinition(item)
-									?.querySelector('.setting-item-name');
-								if (!name) return;
-								for (const label of item.labels) addLabel(name, label);
-							}
-							if ('items' in item) recurseLabel(item.items as never);
-						}
-					};
-					recurseLabel(tab.settingItems);
-				});
 			},
 			search: false,
 		})),
