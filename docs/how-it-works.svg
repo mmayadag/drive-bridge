@@ -36,10 +36,12 @@
   <path d="M584 112l-14 13 14 13M651 112l14 13-14 13" fill="none" stroke="#2F9E6E" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
 
   <!-- Cloud -->
-  <path d="M700 150a42 42 0 0 1 72-34a32 32 0 0 1 52 30a28 28 0 0 1-8 55h-112a26 26 0 0 1-4-51z" fill="#F2B632"/>
-  <rect x="733" y="148" width="64" height="40" rx="7" fill="#fff"/>
-  <rect x="742" y="158" width="46" height="6" rx="3" fill="#F2B632"/>
-  <rect x="742" y="171" width="32" height="6" rx="3" fill="#F2B632"/>
-  <text x="765" y="228" text-anchor="middle" class="t">Google Drive</text>
-  <text x="765" y="252" text-anchor="middle" class="s">your own folder</text>
+  <g transform="translate(5.4 -27)">
+    <path d="M700 150a42 42 0 0 1 72-34a32 32 0 0 1 52 30a28 28 0 0 1-8 55h-112a26 26 0 0 1-4-51z" fill="#F2B632"/>
+    <rect x="733" y="148" width="64" height="40" rx="7" fill="#fff"/>
+    <rect x="742" y="158" width="46" height="6" rx="3" fill="#F2B632"/>
+    <rect x="742" y="171" width="32" height="6" rx="3" fill="#F2B632"/>
+  </g>
+  <text x="768" y="228" text-anchor="middle" class="t">Google Drive</text>
+  <text x="768" y="252" text-anchor="middle" class="s">your own folder</text>
 </svg>
