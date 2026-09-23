@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.1.4 - 2026-09-23
+
+- The OAuth client ID, client secret and setup tip moved to an **OAuth
+  client** page under Google Drive. The entry reads _Configured_ or _Not set_
+  and shows a warning until both are entered, so the section stays short once
+  a device is set up. Stored values and where they live are unchanged.
+- Connect with a missing client ID or secret now points to that page.
+
 ## v0.1.3 - 2026-09-23
 
 Internal only; nothing changes in how the plugin syncs.
