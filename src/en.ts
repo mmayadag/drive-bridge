@@ -29,6 +29,8 @@ const en: Translations = {
 	checkConnectionSuccess: 'Check connection succeeded',
 	clear: 'Clear',
 	clearRecords: 'Clear records',
+	clearRecordsConfirm:
+		'Drive Bridge forgets what it knew about the last sync. The next sync compares everything again and may upload, download or flag conflicts it would otherwise skip. Your files are not changed now.',
 	clearRecordsDescription: 'Forget the stored sync state. The next sync may decide differently.',
 	completed: 'Completed',
 	completedNoop: 'Already synced',

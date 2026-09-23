@@ -1,9 +1,10 @@
 import type { Settings } from '@';
-import type { SettingGroupItem } from 'obsidian';
+import type { App, SettingGroupItem } from 'obsidian';
 import { Notice } from 'obsidian';
 import type { Translate } from '@/modules/i18n';
 import type { CallableOrObjectTree } from '@/modules/setting';
 import type { MaybePromise } from '@/types';
+import ConfirmModal from '@/components/confirm-modal';
 import { normalizeBaseDir } from '@/shared/path';
 import { s } from './utils';
 
@@ -13,6 +14,8 @@ export type DevelopmentSettingTranslations = {
 	recordsCleared: string;
 	clear: string;
 	clearRecordsDescription: string;
+	clearRecordsConfirm: string;
+	cancel: string;
 	export: string;
 	exportLogsDescription: string;
 	exportLogsDirectoryPlaceholder: string;
@@ -21,12 +24,14 @@ export type DevelopmentSettingTranslations = {
 };
 
 export default function developmentSettings({
+	app,
 	translate,
 	exportLogs,
 	deleteRecordStore,
 	settings,
 	saveSettings,
 }: {
+	app: App;
 	translate: Translate<DevelopmentSettingTranslations>;
 	deleteRecordStore: (namespace?: string) => MaybePromise<void>;
 	exportLogs: () => Promise<void>;
@@ -49,10 +54,18 @@ export default function developmentSettings({
 							button
 								.setButtonText(translate('clearRecords'))
 								.setDestructive()
-								.onClick(async () => {
-									await deleteRecordStore();
-									new Notice(translate('recordsCleared'));
-								}),
+								.onClick(() =>
+									new ConfirmModal(app, {
+										cancel: translate('cancel'),
+										confirm: translate('clearRecords'),
+										message: translate('clearRecordsConfirm'),
+										onConfirm: async () => {
+											await deleteRecordStore();
+											new Notice(translate('recordsCleared'));
+										},
+										title: translate('clearRecords'),
+									}).open(),
+								),
 						);
 					},
 				})),
