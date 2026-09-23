@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.1.10 - 2026-09-23
+
+- The end of the settings has a **Help and support** row with three icons
+  (setup guide, report a bug, request a feature) and a yellow **Buy me a
+  coffee** footer in its own style, with the installed version below it. The
+  Help and support page is gone (#39).
+- **Bug** and **Request** open GitHub issue forms that label themselves, with
+  the Drive Bridge version, Obsidian version and platform already filled in
+  (#33).
+- The how-it-works diagram in the README has the Google Drive cloud level
+  with the other shapes (#37).
+
+For maintainers:
+
+- `bun ver X.Y.Z` prepares a release: it opens the CHANGELOG section, then
+  updates `manifest.json`, `package.json` and `versions.json`.
+  `bun ver --check [tag]` runs in CI and in the release job (#34).
+- `bun changelog <milestone>` drafts release notes from the milestone (#35).
+- `versions.json` lists every release for the Obsidian community store (#36).
+
 ## v0.1.9 - 2026-09-23
 
 - The settings are split into pages. The main screen keeps Last sync, the

@@ -1,7 +1,7 @@
 {
 	"id": "drive-bridge",
 	"name": "Drive Bridge",
-	"version": "0.1.9",
+	"version": "0.1.10",
 	"minAppVersion": "1.13.0",
 	"authorUrl": "https://github.com/mmayadag",
 	"fundingUrl": "https://buymeacoffee.com/muratmayadag",
