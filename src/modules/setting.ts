@@ -60,7 +60,7 @@ export default class Setting {
 		registerSetting({ apply: miscellaneousSettings(this.ctx as Context), priority: 4000 });
 		registerSetting({ apply: webhooksSettings(this.ctx as Context), priority: 4500 });
 		registerSetting({ apply: developmentSettings(this.ctx as Context), priority: 5000 });
-		registerSetting({ apply: supportSettings(this.ctx), priority: 6000 });
+		registerSetting({ apply: supportSettings(this.ctx as Context), priority: 6000 });
 	};
 
 	private readonly matchLabel = () => ({
