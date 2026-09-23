@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.1.5 - 2026-09-23
+
+- On phones, the refresh token field under **Connect account** was squeezed
+  into a tiny pill next to the Connect button. It now has a full-width line of
+  its own, with the Connect button below it.
+
 ## v0.1.4 - 2026-09-23
 
 - The OAuth client ID, client secret and setup tip moved to an **OAuth
