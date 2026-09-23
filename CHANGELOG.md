@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.1.8 - 2026-09-23
+
+- **Bugs and requests** has two labelled buttons, **Bug** and **Request**,
+  each opening a GitHub issue form with its own template and the versions
+  filled in. The old button showed only a bug icon (#14).
+- **Clear records** asks for confirmation before forgetting the sync state
+  (#15).
+- On phones, the Smart merge marker fields are stacked and show the whole
+  marker instead of a cut-off one (#16).
+- The **Storage backend** row is hidden while Google Drive is the only
+  backend. The connection check icon moved to the _Connected as_ row on the
+  Google account page (#17).
+- The Match and Speed legend card is gone; the labels keep their tooltips
+  and the settings reference explains them. Labels after an off-screen item
+  are no longer skipped (#18).
+- **Buy me a coffee** is a plain button, so the accent colour marks only
+  Start sync and Connect (#19).
+
 ## v0.1.7 - 2026-09-23
 
 - Every setting description is now one short sentence, so the settings fit a
