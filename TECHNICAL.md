@@ -112,8 +112,7 @@ In Obsidian, install Drive Bridge (see the README), then open
 **Settings → Drive Bridge**:
 
 1. Open **Google account** under Google Drive (it reads _Not connected_) and
-   paste the **OAuth client ID**. (**Storage backend** is already on Google
-   Drive.)
+   paste the **OAuth client ID**.
 2. On the same page, paste the **OAuth client secret**. It is stored in the
    device's secure storage, not in synced files.
 3. **Connect account**, also on that page: paste the token from step 3 above
@@ -130,7 +129,7 @@ with your client, checks that the grant is full `drive` rather than
 `drive.file`, and reads the account. On success the **Google account** entry
 shows the email, and its page keeps only _Connected as <email>_ and
 **Forget on this device**; the client fields return after forgetting. The
-check button next to **Backend** keeps testing access afterwards.
+check icon on the _Connected as_ row keeps testing access afterwards.
 
 The same token can be used on every device. **Forget on this device** only
 removes it locally. To revoke it everywhere, remove the app under
@@ -322,7 +321,7 @@ folder); for a vault only you edit, the defaults are fine except where noted.
 | Setting                   | Default              | Recommended          | What it does                                                                                                                                                                                                                  |
 | ------------------------- | -------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Last sync                 | none                 | none                 | When this device last synced and how it ended, with a **Start sync** button that runs one now (greyed out while a sync is running).                                                                                           |
-| Storage backend           | Google Drive         | Google Drive         | The only backend, selected out of the box. The icon next to it checks the connection.                                                                                                                                         |
+| Storage backend           | Google Drive         | Google Drive         | The only backend, so the row is hidden. It appears once a second backend exists. The connection check is on the Google account page.                                                                                          |
 | Sync strategy             | Bidirectional        | Bidirectional        | Which direction files move in. _Mirror local_ / _Mirror remote_ make one side an exact copy of the other and delete the rest, so keep them for repairs. See [Sync strategies](#sync-strategies).                              |
 | Conflict resolve strategy | Rename and keep both | Rename and keep both | What happens when both sides changed the same file. The default keeps both versions; _Latest survives_, _Keep local_ and _Keep remote_ silently discard one. See [Conflict resolve strategies](#conflict-resolve-strategies). |
 
@@ -482,7 +481,8 @@ Things that are easy to break and not covered by unit tests:
   client shows a notice; a malformed token is rejected; a `drive.file` token
   is rejected with a clear message; a good token shows _Connected as_;
   **Forget on this device** returns to the Connect row.
-- **Connection check**: the icon next to **Backend** spins, then turns green,
+- **Connection check**: the icon on the _Connected as_ row (Google account
+  page) spins, then turns green,
   or red when offline.
 - **Confirm dialog**: the file tree renders with icons and indentation;
   **Select all** toggles everything and shows a mixed state when partly

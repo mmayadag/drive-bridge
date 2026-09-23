@@ -1,5 +1,5 @@
 import type { Events, Settings } from '@';
-import { ExtraButtonComponent, Notice, PluginSettingTab, setIcon, setTooltip } from 'obsidian';
+import { PluginSettingTab, setIcon, setTooltip } from 'obsidian';
 import type { Dispatch, On } from '@/modules/event-bus';
 import type { Fragment, Snippet, Translate } from '@/modules/i18n';
 import type { LastSync } from '@/modules/observability';
@@ -10,15 +10,14 @@ import type {
 	RemoteFsEntry,
 } from '@/modules/registrar';
 import type { CallableOrObjectTree } from '@/modules/setting';
-import type { DatabaseSync } from '@/shared/key-value-store';
 import type { Ref } from '@/shared/reactive';
 import type { MaybePromise } from '@/types';
-import { getMessage } from '@/shared/error';
 import formatDateTime from '@/utils/format-date';
+import type { CheckConnectionDB } from './check-connection';
 import type { AugmentedSettingDefinitionItem, LabelDefinition } from './utils';
+import { addCheckConnection } from './check-connection';
 import { s } from './utils';
 
-const CHECK_CONNECTION_INTERVAL = 10_000;
 const GUIDE_URL = 'https://github.com/mmayadag/drive-bridge#readme';
 
 export type HeadSettingTranslations = {
@@ -45,8 +44,6 @@ export type HeadSettingTranslations = {
 	settingTips: Fragment<{ labels: Array<LabelDefinition>; addLabel: typeof addLabel }>;
 };
 
-type CheckConnectionDB = DatabaseSync<Record<string, unknown>, { lastCheckedFs: string }>;
-
 export default function headSettings(
 	ctx: {
 		translate: Translate<HeadSettingTranslations>;
@@ -72,12 +69,9 @@ export default function headSettings(
 		settings,
 		remoteFsRegistry,
 		deciderRegistry,
-		getCheckConnection,
-		memoryDB,
 		conflictResolverRegistry,
 		matchLabel,
 		speedLabel,
-		dispatch,
 		on,
 		requestSync,
 		isIdle,
@@ -130,32 +124,21 @@ export default function headSettings(
 			labels: [matchLabel()],
 			name: translate('backend'),
 			render: (setting) => {
-				let checks!: ReturnType<typeof setupCheckConnection>;
-				setting
-					.addExtraButton((button) => {
-						checks = setupCheckConnection({
-							button: button
-								.setTooltip(translate('checkConnection'))
-								.onClick(() => void checks.check(true)),
-							getCheckConnection,
-							log: (str: string) => dispatch('errorGeneral', str),
-							memoryDB,
-							settings,
-							translate,
-						});
-						void checks.check(false);
-					})
-					.addDropdown((dropdown) => {
-						for (const [key, { prettyName }] of remoteFsRegistry)
-							dropdown.addOption(key, prettyName());
-						dropdown.setValue(settings.remoteFs).onChange((value) => {
-							settings.remoteFs = value;
-							void checks.check();
-							void saveSettings();
-						});
+				const checks = addCheckConnection(setting, ctx);
+				setting.addDropdown((dropdown) => {
+					for (const [key, { prettyName }] of remoteFsRegistry)
+						dropdown.addOption(key, prettyName());
+					dropdown.setValue(settings.remoteFs).onChange((value) => {
+						settings.remoteFs = value;
+						void checks.check();
+						void saveSettings();
 					});
+				});
 				return checks.cleanup;
 			},
+			// With a single backend there is nothing to choose; its module shows the
+			// connection check instead.
+			visible: () => remoteFsRegistry.size > 1,
 		})),
 		50: s(() => ({
 			control: {
@@ -220,84 +203,6 @@ export default function headSettings(
 			search: false,
 		})),
 	};
-}
-
-function setupCheckConnection({
-	memoryDB,
-	getCheckConnection,
-	settings,
-	translate,
-	button,
-	log,
-}: {
-	memoryDB: CheckConnectionDB;
-	getCheckConnection: () => () => MaybePromise<CheckConnectionResult>;
-	settings: Settings;
-	translate: Translate<HeadSettingTranslations>;
-	button: ExtraButtonComponent;
-	log: (str: string) => void;
-}) {
-	let timeout: number | undefined;
-	const possibleClasses = [
-		'drive-bridge-status-ok',
-		'drive-bridge-status-error',
-		'drive-bridge-status-pending',
-		'drive-bridge-spin',
-	];
-	const setChecking = () => {
-		button.setIcon('loader-circle');
-		const ele = button.extraSettingsEl.firstElementChild;
-		if (!ele) return;
-		ele.removeClasses(possibleClasses);
-		ele.addClasses(['drive-bridge-spin', 'drive-bridge-status-pending']);
-	};
-	const setSuccess = () => {
-		button.setIcon('check');
-		const ele = button.extraSettingsEl.firstElementChild;
-		if (!ele) return;
-		ele.removeClasses(possibleClasses);
-		ele.addClass('drive-bridge-status-ok');
-	};
-	const setError = () => {
-		button.setIcon('cloud-off');
-		const ele = button.extraSettingsEl.firstElementChild;
-		if (!ele) return;
-		ele.removeClasses(possibleClasses);
-		ele.addClass('drive-bridge-status-error');
-	};
-	const scheduleCheckConnection = () =>
-		(timeout = window.setTimeout(() => void check(), CHECK_CONNECTION_INTERVAL));
-
-	const check = async (force = false) => {
-		if (memoryDB.getMeta('lastCheckedFs') === settings.remoteFs && !force) {
-			setSuccess();
-			return;
-		}
-		if (!settings.remoteFs) {
-			setError();
-			return;
-		}
-		const onFailure = (message: string) => {
-			setError();
-			log(`Check connection to \`${settings.remoteFs}\` failed: \`${message}\`.`);
-			if (force) new Notice(`${translate('checkConnectionFailed')}: ${message}`, 5000);
-			else scheduleCheckConnection();
-		};
-
-		try {
-			setChecking();
-			const result = await getCheckConnection()();
-			if (result.success) {
-				memoryDB.setMeta('lastCheckedFs', settings.remoteFs);
-				setSuccess();
-				if (force) new Notice(translate('checkConnectionSuccess'));
-			} else onFailure(result.reason);
-		} catch (error) {
-			onFailure(getMessage(error));
-		}
-	};
-
-	return { check, cleanup: () => window.clearTimeout(timeout) };
 }
 
 function addLabel(
