@@ -28,3 +28,13 @@ SOFTWARE.
 
 Individual files that came from other projects carry their own notices in the
 file header, for example `src/smart-merge/diff3/`.
+
+## Cookie font
+
+The Buy me a coffee footer in the settings uses the Cookie typeface,
+Copyright (c) 2011 by Ania Kruk, with Reserved Font Name Cookie, licensed
+under the SIL Open Font License 1.1. The latin subset from Fontsource 5.3.0
+is kept unmodified in `src/assets/fonts/` next to its licence (`OFL.txt`) and
+is inlined into `styles.css` at build time. The plugin refers to it as
+_Drive Bridge Script_.
+

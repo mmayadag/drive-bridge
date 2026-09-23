@@ -4,18 +4,18 @@ import type { CallableOrObjectTree, SettingTree } from '@/modules/setting';
 import type { LabelDefinition } from './utils';
 import { s } from './utils';
 
-const GUIDE_URL = 'https://github.com/mmayadag/drive-bridge#readme';
-
 /**
  * Keys of the sub-pages under the main screen. Settings files place their rows at
  * `{ [MORE]: { [page]: { ... } } }`.
  */
 export const MORE = 7000;
+/** Help row and the coffee footer, after the sub-pages. */
+export const HELP = 8000;
+export const COFFEE = 9000;
 export const PAGE = {
 	advanced: 3000,
 	automaticSync: 1000,
 	filters: 2000,
-	helpAndSupport: 4000,
 } as const;
 export const ADVANCED = {
 	controls: 1000,
@@ -29,10 +29,6 @@ export type LayoutSettingTranslations = {
 	advanced: string;
 	automaticSync: string;
 	filterRules: string;
-	help: string;
-	helpAndSupport: string;
-	helpDescription: string;
-	open: string;
 	xConfigured: (count: number) => string;
 	xOfYOn: (count: { on: number; total: number }) => string;
 };
@@ -79,28 +75,6 @@ export default function layoutSettings(ctx: {
 				name: translate('advanced'),
 				type: 'page',
 			})),
-			[PAGE.helpAndSupport]: s(
-				(self) => ({
-					items: items(self),
-					name: translate('helpAndSupport'),
-					type: 'page',
-				}),
-				{
-					// Before the support rows, which use 1000 and up.
-					500: s(() => ({
-						desc: translate('helpDescription'),
-						name: translate('help'),
-						render: (setting) => {
-							setting.addButton((button) =>
-								button
-									.setButtonText(translate('open'))
-									.onClick(() => window.open(GUIDE_URL)),
-							);
-						},
-						search: false,
-					})),
-				},
-			),
 		}),
 	};
 }

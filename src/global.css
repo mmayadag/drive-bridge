@@ -396,9 +396,130 @@ input[type='password'].drive-bridge-invalid-input {
 	color: var(--text-muted);
 }
 
-.drive-bridge-icon-button {
-	display: inline-flex;
+/* Buy me a coffee footer. The script font is Cookie (SIL OFL 1.1, see
+   src/assets/fonts/OFL.txt), bundled into this file at build time. */
+@font-face {
+	font-family: 'Drive Bridge Script';
+	src: url('./assets/fonts/cookie-latin-400.woff2') format('woff2');
+	font-display: swap;
+}
+
+.setting-item.drive-bridge-coffee {
+	--drive-bridge-coffee-yellow: #ffdd00;
+	--drive-bridge-coffee-ink: #0d0c22;
+	--drive-bridge-coffee-question: var(--drive-bridge-coffee-yellow);
+	flex-direction: column;
+	align-items: stretch;
+	border-top: none;
+
+	.setting-item-info {
+		display: none;
+	}
+
+	.setting-item-control {
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		gap: var(--size-4-3);
+	}
+}
+
+.theme-light .setting-item.drive-bridge-coffee {
+	--drive-bridge-coffee-question: var(--drive-bridge-coffee-ink);
+}
+
+.drive-bridge-coffee-question {
+	font-family: 'Drive Bridge Script', cursive;
+	font-size: 1.7em;
+	line-height: 1.1;
+	color: var(--drive-bridge-coffee-question);
+	text-align: center;
+}
+
+a.drive-bridge-coffee-button {
+	display: flex;
 	align-items: center;
 	justify-content: center;
-	gap: var(--size-4-2);
+	gap: var(--size-4-3);
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 22rem;
+	min-height: 3.75rem;
+	padding: 0 var(--size-4-4);
+	border: 2px solid var(--drive-bridge-coffee-ink);
+	border-radius: 14px;
+	background: var(--drive-bridge-coffee-yellow);
+	color: var(--drive-bridge-coffee-ink);
+	font-family: 'Drive Bridge Script', cursive;
+	font-size: 2.1em;
+	text-decoration: none;
+	box-shadow: 0 3px 0 color-mix(in srgb, var(--drive-bridge-coffee-yellow) 35%, transparent);
+}
+
+a.drive-bridge-coffee-button:hover {
+	color: var(--drive-bridge-coffee-ink);
+	filter: brightness(1.04);
+}
+
+.drive-bridge-coffee-cup {
+	flex: none;
+	width: 1.75rem;
+	height: 2.35rem;
+	transform-origin: 50% 90%;
+	animation: drive-bridge-cup-wiggle 0.9s ease-in-out 0.4s 2;
+}
+
+a.drive-bridge-coffee-button:hover .drive-bridge-coffee-cup {
+	animation: drive-bridge-cup-wiggle-again 0.9s ease-in-out;
+}
+
+.drive-bridge-coffee-line {
+	fill: none;
+	stroke: var(--drive-bridge-coffee-ink);
+	stroke-width: 3;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.drive-bridge-coffee-milk {
+	fill: #fff;
+}
+
+.drive-bridge-coffee-version {
+	color: var(--text-faint);
+	font-size: var(--font-ui-smaller);
+}
+
+@keyframes drive-bridge-cup-wiggle {
+	0%,
+	100% {
+		transform: rotate(0);
+	}
+	25% {
+		transform: rotate(-8deg);
+	}
+	75% {
+		transform: rotate(8deg);
+	}
+}
+
+@keyframes drive-bridge-cup-wiggle-again {
+	0%,
+	100% {
+		transform: rotate(0);
+	}
+	25% {
+		transform: rotate(-8deg);
+	}
+	75% {
+		transform: rotate(8deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.drive-bridge-coffee-cup,
+	a.drive-bridge-coffee-button:hover .drive-bridge-coffee-cup {
+		animation: none;
+	}
 }
