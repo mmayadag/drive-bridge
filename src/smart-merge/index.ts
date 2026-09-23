@@ -73,11 +73,20 @@ export default class SmartMerge {
 				priority: 20_098,
 			}),
 			registerConflictResolver(RESOLVER_ID, {
+				description: () => translate('smartMergeDescription'),
+				order: 20,
 				prettyName: () => translate('smartMerge'),
 				resolver: smartMergeResolver(this.moduleSettings, indexedDB, getNamespace),
 			}),
 			registerSetting({
-				apply: smartMergeSetting({ saveSettings, translate }, this.moduleSettings),
+				apply: smartMergeSetting(
+					{
+						isSelected: () => this.settings.conflictResolver === RESOLVER_ID,
+						saveSettings,
+						translate,
+					},
+					this.moduleSettings,
+				),
 				priority: 4048,
 			}),
 		);

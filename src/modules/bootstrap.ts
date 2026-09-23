@@ -78,13 +78,22 @@ export default class Bootstrap {
 
 	declare readonly i18n: {
 		bidirectional: string;
+		bidirectionalDescription: string;
 		mirrorLocal: string;
+		mirrorLocalDescription: string;
 		mirrorRemote: string;
+		mirrorRemoteDescription: string;
 		latestSurvive: string;
+		latestSurviveDescription: string;
 		keepLocal: string;
+		keepLocalDescription: string;
 		keepRemote: string;
+		keepRemoteDescription: string;
 		renameAndKeepBoth: string;
+		renameAndKeepBothDescription: string;
+		renameAndKeepBothExample: string;
 		skip: string;
+		skipDescription: string;
 	} & ControlsSettingTranslations &
 		DevelopmentSettingTranslations &
 		FeaturesSettingTranslations &
@@ -337,34 +346,59 @@ export default class Bootstrap {
 
 		registerDecider('bidirectional', {
 			decider: bidirectionalDecider,
+			description: () => t('bidirectionalDescription'),
+			flow: 'both',
+			order: 10,
 			prettyName: () => t('bidirectional'),
 		});
 		registerDecider('mirrorLocal', {
 			decider: mirrorLocalDecider,
+			description: () => t('mirrorLocalDescription'),
+			flow: 'toRemote',
+			order: 20,
 			prettyName: () => t('mirrorLocal'),
+			repair: true,
 		});
 		registerDecider('mirrorRemote', {
 			decider: mirrorRemoteDecider,
+			description: () => t('mirrorRemoteDescription'),
+			flow: 'toLocal',
+			order: 30,
 			prettyName: () => t('mirrorRemote'),
+			repair: true,
 		});
 
 		registerConflictResolver('renameAndKeepBoth', {
+			description: () => t('renameAndKeepBothDescription'),
+			example: () => t('renameAndKeepBothExample'),
+			order: 10,
 			prettyName: () => t('renameAndKeepBoth'),
 			resolver: renameAndKeepBothResolver,
 		});
 		registerConflictResolver('latestSurvive', {
+			description: () => t('latestSurviveDescription'),
+			lossy: true,
+			order: 40,
 			prettyName: () => t('latestSurvive'),
 			resolver: latestSurviveResolver,
 		});
 		registerConflictResolver('keepLocal', {
+			description: () => t('keepLocalDescription'),
+			lossy: true,
+			order: 50,
 			prettyName: () => t('keepLocal'),
 			resolver: keepLocalResolver,
 		});
 		registerConflictResolver('keepRemote', {
+			description: () => t('keepRemoteDescription'),
+			lossy: true,
+			order: 60,
 			prettyName: () => t('keepRemote'),
 			resolver: keepRemoteResolver,
 		});
 		registerConflictResolver('skip', {
+			description: () => t('skipDescription'),
+			order: 30,
 			prettyName: () => t('skip'),
 			resolver: () => {},
 		});

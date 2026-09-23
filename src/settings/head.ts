@@ -16,6 +16,8 @@ import formatDateTime from '@/utils/format-date';
 import type { CheckConnectionDB } from './check-connection';
 import type { AugmentedSettingDefinitionItem, LabelDefinition } from './utils';
 import { addCheckConnection } from './check-connection';
+import { CONFLICTS, SYNC_STRATEGY } from './layout';
+import { choiceRows } from './strategy';
 import { addLabel, s } from './utils';
 
 export type HeadSettingTranslations = {
@@ -35,6 +37,9 @@ export type HeadSettingTranslations = {
 	checkConnection: string;
 	conflictResolveStrategy: string;
 	conflictResolveStrategyDescription: string;
+	forRepairs: string;
+	nothingLost: string;
+	replacesOneVersion: string;
 	startSync: string;
 };
 
@@ -53,6 +58,8 @@ export default function headSettings(
 		on: On<Events>;
 		requestSync: (trigger: string) => unknown;
 		isIdle: Ref<boolean>;
+		rerenderSettingTab: () => void;
+		refreshSettingTab: () => void;
 	},
 	getSettingTab: () => PluginSettingTab | undefined,
 ): CallableOrObjectTree {
@@ -67,7 +74,16 @@ export default function headSettings(
 		on,
 		requestSync,
 		isIdle,
+		rerenderSettingTab,
+		refreshSettingTab,
 	} = ctx;
+	const choose = (key: 'decider' | 'conflictResolver', value: string) => {
+		settings[key] = value;
+		void saveSettings();
+		// Updates the entry's value and warning, and rows that depend on the choice.
+		rerenderSettingTab();
+		refreshSettingTab();
+	};
 	// Keys are render priorities and read in numeric order.
 	// Sorted as strings, which is what the rule below does, 4900 precedes 50.
 	// oxlint-disable-next-line sort-keys
@@ -149,31 +165,80 @@ export default function headSettings(
 			// connection check instead.
 			visible: () => remoteFsRegistry.size > 1,
 		})),
-		50: s(() => ({
-			control: {
-				key: 'decider',
-				options: Object.fromEntries(
-					[...deciderRegistry].map(([key, { prettyName }]) => [key, prettyName()]),
-				),
-				type: 'dropdown',
-			},
-			desc: translate('syncStrategyDescription'),
-			name: translate('syncStrategy'),
-		})),
-		60: s(() => ({
-			control: {
-				key: 'conflictResolver',
-				options: Object.fromEntries(
-					[...conflictResolverRegistry].map(([key, { prettyName }]) => [
-						key,
-						prettyName(),
-					]),
-				),
-				type: 'dropdown',
-			},
-			desc: translate('conflictResolveStrategyDescription'),
-			name: translate('conflictResolveStrategy'),
-		})),
+		[SYNC_STRATEGY]: s(() => {
+			const entries = [...deciderRegistry].map(([key, entry]) => ({ entry, key }));
+			const choices = (repair: boolean) =>
+				choiceRows(
+					entries
+						.filter(({ entry }) => Boolean(entry.repair) === repair)
+						.map(({ entry, key }) => ({
+							description: entry.description?.(),
+							flow: entry.flow,
+							key,
+							name: entry.prettyName(),
+							order: entry.order,
+						})),
+					() => settings.decider,
+					(key) => choose('decider', key),
+				);
+			return {
+				desc: translate('syncStrategyDescription'),
+				displayValue: () => deciderRegistry.get(settings.decider)?.prettyName() ?? '',
+				items: [
+					{ items: choices(false), type: 'group' },
+					{ heading: translate('forRepairs'), items: choices(true), type: 'group' },
+				],
+				name: translate('syncStrategy'),
+				// oxlint-disable-next-line unicorn/no-null -- Obsidian's status type has no undefined
+				status: () => (deciderRegistry.get(settings.decider)?.repair ? 'warning' : null),
+				type: 'page',
+			};
+		}),
+		[CONFLICTS]: s((self) => {
+			const entries = [...conflictResolverRegistry].map(([key, entry]) => ({ entry, key }));
+			const choices = (lossy: boolean) =>
+				choiceRows(
+					entries
+						.filter(({ entry }) => Boolean(entry.lossy) === lossy)
+						.map(({ entry, key }) => ({
+							description: entry.description?.(),
+							example: entry.example?.(),
+							key,
+							name: entry.prettyName(),
+							order: entry.order,
+						})),
+					() => settings.conflictResolver,
+					(key) => choose('conflictResolver', key),
+				);
+			return {
+				desc: translate('conflictResolveStrategyDescription'),
+				displayValue: () =>
+					conflictResolverRegistry.get(settings.conflictResolver)?.prettyName() ?? '',
+				items: [
+					{
+						heading: translate('nothingLost'),
+						// Modules add their options' extra rows here, such as Smart merge's markers.
+						items: [
+							...choices(false),
+							...Object.values(self).map((node) => node(node)),
+						],
+						type: 'group',
+					},
+					{
+						heading: translate('replacesOneVersion'),
+						items: choices(true),
+						type: 'group',
+					},
+				] as never,
+				name: translate('conflictResolveStrategy'),
+				status: () => {
+					const lossy = conflictResolverRegistry.get(settings.conflictResolver)?.lossy;
+					// oxlint-disable-next-line unicorn/no-null -- Obsidian's status type has no undefined
+					return lossy ? 'warning' : null;
+				},
+				type: 'page',
+			};
+		}),
 	};
 }
 

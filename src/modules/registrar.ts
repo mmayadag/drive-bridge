@@ -22,8 +22,20 @@ export type RemoteFsEntry = {
 	prettyName: () => string;
 	checkConnection: (request: Request) => MaybePromise<CheckConnectionResult>;
 };
-export type DeciderEntry = { decider: Decider; prettyName: () => string };
-export type ConflictResolverEntry = { prettyName: () => string; resolver: ConflictResolver };
+/** Shown on the strategy pages. A lower `order` comes first. */
+type StrategyInfo = { prettyName: () => string; description?: () => string; order?: number };
+export type DeciderEntry = StrategyInfo & {
+	decider: Decider;
+	flow?: 'both' | 'toRemote' | 'toLocal';
+	/** Meant for one repair sync, not everyday use. */
+	repair?: boolean;
+};
+export type ConflictResolverEntry = StrategyInfo & {
+	resolver: ConflictResolver;
+	example?: () => string;
+	/** Replaces one of the two versions. */
+	lossy?: boolean;
+};
 
 type GeneralFn = (...args: ReadonlyArray<never>) => unknown;
 type RejectableApply<F extends GeneralFn> = (...input: Parameters<F>) => ReturnType<F> | undefined;

@@ -8,6 +8,9 @@ import { s } from './utils';
  * Keys of the sub-pages under the main screen. Settings files place their rows at
  * `{ [MORE]: { [page]: { ... } } }`.
  */
+/** Strategy pages on the main screen; modules add rows under the conflict page. */
+export const SYNC_STRATEGY = 50;
+export const CONFLICTS = 60;
 export const MORE = 7000;
 /** Help row and the coffee footer, after the sub-pages. */
 export const HELP = 8000;
@@ -21,7 +24,6 @@ export const ADVANCED = {
 	controls: 1000,
 	development: 5000,
 	miscellaneous: 2000,
-	smartMerge: 3000,
 	webhooks: 4000,
 } as const;
 
