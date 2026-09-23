@@ -20,11 +20,14 @@ const en: GdriveTranslations = {
 		}),
 	baseDirectoryPlaceholder: 'my-vault/',
 	cancel: 'Cancel',
+	clickToConnect: 'Click to connect',
 	clientId: 'OAuth client ID',
 	clientIdDescription: 'From your Google Cloud project. Saved in plugin settings.',
+	clientIdMissing: 'Client ID missing',
 	clientSecret: 'OAuth client secret',
 	clientSecretDescription:
 		"From the same client. Kept in this device's secure storage, never synced.",
+	clientSecretMissing: 'Client secret missing',
 	configureFirst: 'Enter the OAuth client ID and client secret first.',
 	connect: 'Connect',
 	connectAccount: 'Connect account',
@@ -53,7 +56,6 @@ const en: GdriveTranslations = {
 	newFolder: 'Create folder',
 	newFolderPrompt: 'New folder name',
 	noSubfolders: 'No folders here yet.',
-	notConnected: 'Not connected',
 	pickFolder: 'Browse Drive folders',
 	pickFolderTitle: 'Choose a Drive folder',
 	pickSubfolder: 'Open a folder first; the whole Drive cannot be the vault folder.',
@@ -69,6 +71,7 @@ const en: GdriveTranslations = {
 			});
 			frag.appendText('), then fill in the fields below.');
 		}),
+	tapToConnect: 'Tap to connect',
 	useThisFolder: 'Use this folder',
 	useTrash: 'Delete to trash',
 	useTrashDescription: "Deleted files go to Drive's trash for 30 days instead of being removed.",
