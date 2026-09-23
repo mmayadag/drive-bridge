@@ -15,6 +15,7 @@
 	"scripts": {
 		"dev": "bun scripts/build.ts --watch",
 		"build": "bun scripts/build.ts",
+		"changelog": "bun scripts/draft-changelog.ts",
 		"check": "tsc && oxlint && oxfmt --check",
 		"fix": "oxlint --silent --fix && oxfmt",
 		"tests": "bun --preload=./test/support/setup.ts test",

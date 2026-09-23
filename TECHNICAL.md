@@ -513,7 +513,8 @@ Things that are easy to break and not covered by unit tests:
 ### Releasing
 
 1. Run `bun ver X.Y.Z`. It adds an empty `## vX.Y.Z - YYYY-MM-DD` section to
-   `CHANGELOG.md` and stops; write the notes there.
+   `CHANGELOG.md` and stops; write the notes there. `bun changelog X.Y.Z`
+   prints a draft from the milestone's closed issues (needs the GitHub CLI).
 2. Run `bun ver X.Y.Z` again. It sets the version in `manifest.json` and
    `package.json`, adds it to `versions.json` with the current
    `minAppVersion`, and prints the commit, tag and push commands.
