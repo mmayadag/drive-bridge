@@ -3,6 +3,7 @@ import type { SettingGroupItem } from 'obsidian';
 import type { Translate } from '@/modules/i18n';
 import type { CallableOrObjectTree } from '@/modules/setting';
 import type { LabelDefinition } from './utils';
+import { ADVANCED, MORE, PAGE } from './layout';
 import { renderTogglableValue, s } from './utils';
 
 export type ControlsSettingTranslations = {
@@ -33,60 +34,64 @@ export default function controlsSettings({
 	speedLabel: () => LabelDefinition;
 }): CallableOrObjectTree {
 	return {
-		2000: s(
-			(self) => ({
-				heading: translate('controls'),
-				items: Object.values(self).map((node) => node(node) as SettingGroupItem),
-				type: 'group',
-			}),
-			{
-				1000: s(() => ({
-					desc: translate('maxFileSizeDescription'),
-					name: translate('maxFileSize'),
-					render: renderTogglableValue({
-						field: settings.maxFileSize,
-						placeholder: translate('maxFileSizePlaceholder'),
-						rejectZero: true,
-						saveSettings,
-						type: 'fileSize',
+		[MORE]: {
+			[PAGE.advanced]: {
+				[ADVANCED.controls]: s(
+					(self) => ({
+						heading: translate('controls'),
+						items: Object.values(self).map((node) => node(node) as SettingGroupItem),
+						type: 'group',
 					}),
-				})),
-				2000: s(() => ({
-					desc: translate('maxRequestConcurrencyDescription'),
-					labels: [speedLabel()],
-					name: translate('maxRequestConcurrency'),
-					render: renderTogglableValue({
-						field: settings.maxRequestConcurrency,
-						placeholder: translate('maxRequestConcurrencyPlaceholder'),
-						rejectZero: true,
-						saveSettings,
-						type: 'number',
-					}),
-				})),
-				3000: s(() => ({
-					desc: translate('minRequestIntervalDescription'),
-					labels: [speedLabel()],
-					name: translate('minRequestInterval'),
-					render: renderTogglableValue({
-						field: settings.minRequestInterval,
-						placeholder: translate('minRequestIntervalPlaceholder'),
-						saveSettings,
-						type: 'time',
-					}),
-				})),
-				4000: s(() => ({
-					desc: translate('maxMemoryConsumptionDescription'),
-					labels: [speedLabel()],
-					name: translate('maxMemoryConsumption'),
-					render: renderTogglableValue({
-						field: settings.maxMemoryConsumption,
-						placeholder: translate('maxMemoryConsumptionPlaceholder'),
-						rejectZero: true,
-						saveSettings,
-						type: 'fileSize',
-					}),
-				})),
+					{
+						1000: s(() => ({
+							desc: translate('maxFileSizeDescription'),
+							name: translate('maxFileSize'),
+							render: renderTogglableValue({
+								field: settings.maxFileSize,
+								placeholder: translate('maxFileSizePlaceholder'),
+								rejectZero: true,
+								saveSettings,
+								type: 'fileSize',
+							}),
+						})),
+						2000: s(() => ({
+							desc: translate('maxRequestConcurrencyDescription'),
+							labels: [speedLabel()],
+							name: translate('maxRequestConcurrency'),
+							render: renderTogglableValue({
+								field: settings.maxRequestConcurrency,
+								placeholder: translate('maxRequestConcurrencyPlaceholder'),
+								rejectZero: true,
+								saveSettings,
+								type: 'number',
+							}),
+						})),
+						3000: s(() => ({
+							desc: translate('minRequestIntervalDescription'),
+							labels: [speedLabel()],
+							name: translate('minRequestInterval'),
+							render: renderTogglableValue({
+								field: settings.minRequestInterval,
+								placeholder: translate('minRequestIntervalPlaceholder'),
+								saveSettings,
+								type: 'time',
+							}),
+						})),
+						4000: s(() => ({
+							desc: translate('maxMemoryConsumptionDescription'),
+							labels: [speedLabel()],
+							name: translate('maxMemoryConsumption'),
+							render: renderTogglableValue({
+								field: settings.maxMemoryConsumption,
+								placeholder: translate('maxMemoryConsumptionPlaceholder'),
+								rejectZero: true,
+								saveSettings,
+								type: 'fileSize',
+							}),
+						})),
+					},
+				),
 			},
-		),
+		},
 	};
 }

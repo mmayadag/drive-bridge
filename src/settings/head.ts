@@ -1,5 +1,5 @@
 import type { Events, Settings } from '@';
-import { PluginSettingTab, setIcon, setTooltip } from 'obsidian';
+import { PluginSettingTab, setIcon } from 'obsidian';
 import type { Dispatch, On } from '@/modules/event-bus';
 import type { Snippet, Translate } from '@/modules/i18n';
 import type { LastSync } from '@/modules/observability';
@@ -16,18 +16,13 @@ import formatDateTime from '@/utils/format-date';
 import type { CheckConnectionDB } from './check-connection';
 import type { AugmentedSettingDefinitionItem, LabelDefinition } from './utils';
 import { addCheckConnection } from './check-connection';
-import { s } from './utils';
-
-const GUIDE_URL = 'https://github.com/mmayadag/drive-bridge#readme';
+import { addLabel, s } from './utils';
 
 export type HeadSettingTranslations = {
 	backend: string;
 	backendDescription: string;
 	syncStrategy: string;
 	syncStrategyDescription: string;
-	help: string;
-	helpDescription: string;
-	open: string;
 	lastSync: string;
 	lastSyncNever: string;
 	lastSyncValue: Snippet<{ time: string; result: string }>;
@@ -179,33 +174,7 @@ export default function headSettings(
 			desc: translate('conflictResolveStrategyDescription'),
 			name: translate('conflictResolveStrategy'),
 		})),
-		70: s(() => ({
-			desc: translate('helpDescription'),
-			name: translate('help'),
-			render: (setting) => {
-				setting.addButton((button) =>
-					button.setButtonText(translate('open')).onClick(() => window.open(GUIDE_URL)),
-				);
-			},
-			search: false,
-		})),
 	};
-}
-
-function addLabel(
-	element: Element,
-	{
-		text,
-		tooltip,
-		color = 'var(--interactive-accent)',
-		textColor = 'var(--text-on-accent)',
-	}: LabelDefinition,
-) {
-	const tag = element.createSpan({ cls: 'flair', text });
-	setTooltip(tag, tooltip);
-	tag.style.setProperty('--flair-color', textColor);
-	tag.style.setProperty('--flair-background', color);
-	return tag;
 }
 
 const RESULT_KEYS = {

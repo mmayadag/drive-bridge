@@ -7,6 +7,7 @@ import type { DevelopmentSettingTranslations } from '@/settings/development';
 import type { FeaturesSettingTranslations } from '@/settings/features';
 import type { FilterSettingTranslations } from '@/settings/filter';
 import type { HeadSettingTranslations } from '@/settings/head';
+import type { LayoutSettingTranslations } from '@/settings/layout';
 import type { MiscellaneousSettingTranslations } from '@/settings/miscellaneous';
 import type { SupportSettingTranslations } from '@/settings/support';
 import type { WebhooksSettingTranslations } from '@/settings/webhooks';
@@ -89,6 +90,7 @@ export default class Bootstrap {
 		FeaturesSettingTranslations &
 		FilterSettingTranslations &
 		HeadSettingTranslations &
+		LayoutSettingTranslations &
 		MiscellaneousSettingTranslations &
 		WebhooksSettingTranslations &
 		SupportSettingTranslations &

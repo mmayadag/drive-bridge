@@ -6,6 +6,7 @@ import developmentSettings from '@/settings/development';
 import featuresSettings from '@/settings/features';
 import filterSettings from '@/settings/filter';
 import headSettings from '@/settings/head';
+import layoutSettings from '@/settings/layout';
 import miscellaneousSettings from '@/settings/miscellaneous';
 import supportSettings from '@/settings/support';
 import webhooksSettings from '@/settings/webhooks';
@@ -52,6 +53,7 @@ export default class Setting {
 			apply: headSettings(this.ctx as Context, () => this.settingTab),
 			priority: 0,
 		});
+		registerSetting({ apply: layoutSettings(this.ctx as Context), priority: 500 });
 		registerSetting({ apply: featuresSettings(this.ctx as Context), priority: 1000 });
 		registerSetting({ apply: controlsSettings(this.ctx as Context), priority: 2000 });
 		registerSetting({ apply: filterSettings(this.ctx as Context), priority: 3000 });

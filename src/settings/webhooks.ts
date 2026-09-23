@@ -3,6 +3,7 @@ import type { SettingGroupItem } from 'obsidian';
 import type { Translate } from '@/modules/i18n';
 import type { CallableOrObjectTree } from '@/modules/setting';
 import { normalizeUrl } from '@/shared/path';
+import { ADVANCED, MORE, PAGE } from './layout';
 import { reactivelyValidate, s } from './utils';
 
 /**
@@ -61,21 +62,25 @@ export default function webhooksSettings({
 		}));
 
 	return {
-		4500: s(
-			(self) => ({
-				heading: translate('webhooks'),
-				items: Object.values(self).map((node) => node(node) as SettingGroupItem),
-				type: 'group',
-			}),
-			{
-				1000: urlSetting('webhookOnStart'),
-				2000: urlSetting('webhookOnFinish'),
-				3000: s(() => ({
-					control: { key: 'webhookOnlyWhenChanged', type: 'toggle' },
-					desc: translate('webhookOnlyWhenChangedDescription'),
-					name: translate('webhookOnlyWhenChanged'),
-				})),
+		[MORE]: {
+			[PAGE.advanced]: {
+				[ADVANCED.webhooks]: s(
+					(self) => ({
+						heading: translate('webhooks'),
+						items: Object.values(self).map((node) => node(node) as SettingGroupItem),
+						type: 'group',
+					}),
+					{
+						1000: urlSetting('webhookOnStart'),
+						2000: urlSetting('webhookOnFinish'),
+						3000: s(() => ({
+							control: { key: 'webhookOnlyWhenChanged', type: 'toggle' },
+							desc: translate('webhookOnlyWhenChangedDescription'),
+							name: translate('webhookOnlyWhenChanged'),
+						})),
+					},
+				),
 			},
-		),
+		},
 	};
 }

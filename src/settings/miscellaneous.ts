@@ -4,6 +4,7 @@ import { Notice, SecretComponent } from 'obsidian';
 import type { Snippet, Translate } from '@/modules/i18n';
 import type { CallableOrObjectTree } from '@/modules/setting';
 import type { DatabaseSync } from '@/shared/key-value-store';
+import { ADVANCED, MORE, PAGE } from './layout';
 import { generateEditableList, reactivelyValidate, s } from './utils';
 
 const RESERVED_HEADERS = new Set(['authorization', 'content-type', 'content-length', 'host']);
@@ -54,132 +55,148 @@ export default function miscellaneousSettings({
 	app: App;
 }): CallableOrObjectTree {
 	return {
-		4000: s(
-			(self) => ({
-				heading: translate('miscellaneous'),
-				items: Object.values(self).map((node) => node(node) as SettingGroupItem),
-				type: 'group',
-			}),
-			{
-				1000: s(
+		[MORE]: {
+			[PAGE.advanced]: {
+				[ADVANCED.miscellaneous]: s(
 					(self) => ({
-						desc: translate('customHeadersDescription'),
-						displayValue: () => translate('xConfigured', settings.customHeaders.length),
-						items: Object.values(self).map((node) => node(node)),
-						name: translate('customHeaders'),
-						type: 'page',
+						heading: translate('miscellaneous'),
+						items: Object.values(self).map((node) => node(node) as SettingGroupItem),
+						type: 'group',
 					}),
 					{
-						1000: s(() =>
-							generateEditableList({
-								defaultValue: { key: '', type: 'plaintext', value: '' },
-								extraButtons: [
-									(button, list) => {
-										button
-											.setIcon('key-round')
-											.setTooltip(translate('addSecretHeader'))
-											.onClick(() => {
-												list.push({
-													new: true,
-													valid: false,
-													value: { key: '', type: 'secret', value: '' },
-												});
-												rerenderSettingTab();
-											});
-									},
-								],
-								identifier: 'customHeaders',
-								items: settings.customHeaders,
-								memoryDB,
-								render: (setting, item, save) => {
-									setting.addText((text) => {
-										text.setValue(item.value.key).setPlaceholder(
-											translate('headerKeyPlaceholder'),
-										);
-										reactivelyValidate<string>({
-											immediate: true,
-											onSave: (value) => {
-												item.value.key = value;
-												save();
-											},
-											parse: (value) => {
-												item.value.key = value;
-												const trimmed = value.trim();
-												if (!trimmed) {
-													item.valid = false;
-													save();
-													return;
-												}
-												// Google Drive is authorized by the plugin itself;
-												// Overriding that header breaks every request.
-												if (isReservedHeader(trimmed)) {
-													new Notice(translate('reservedHeader'), 5000);
-													item.valid = false;
-													save();
-													return;
-												}
-												item.valid = true;
-												return trimmed;
-											},
-											text,
-										});
-										if (item.new) {
-											item.new = false;
-											text.inputEl.focus();
-										}
-									});
-									if (item.value.type === 'plaintext')
-										setting.addText((text) =>
-											text
-												.setValue(item.value.value)
-												.setPlaceholder(translate('headerValuePlaceholder'))
-												.inputEl.addEventListener('blur', () => {
-													item.value.value = text.getValue().trim();
-													text.setValue(item.value.value);
-													save();
-												}),
-										);
-									else
-										setting.addComponent((element) =>
-											new SecretComponent(app, element)
-												.setValue(item.value.value)
-												.onChange((value) => {
-													item.value.value = value ?? '';
-													save();
-												}),
-										);
-								},
-								rerenderSettingTab,
-								saveSettings,
-								translations: {
-									add: translate('addHeader'),
-									empty: translate('noHeaderConfigured'),
-								},
+						1000: s(
+							(self) => ({
+								desc: translate('customHeadersDescription'),
+								displayValue: () =>
+									translate('xConfigured', settings.customHeaders.length),
+								items: Object.values(self).map((node) => node(node)),
+								name: translate('customHeaders'),
+								type: 'page',
 							}),
+							{
+								1000: s(() =>
+									generateEditableList({
+										defaultValue: { key: '', type: 'plaintext', value: '' },
+										extraButtons: [
+											(button, list) => {
+												button
+													.setIcon('key-round')
+													.setTooltip(translate('addSecretHeader'))
+													.onClick(() => {
+														list.push({
+															new: true,
+															valid: false,
+															value: {
+																key: '',
+																type: 'secret',
+																value: '',
+															},
+														});
+														rerenderSettingTab();
+													});
+											},
+										],
+										identifier: 'customHeaders',
+										items: settings.customHeaders,
+										memoryDB,
+										render: (setting, item, save) => {
+											setting.addText((text) => {
+												text.setValue(item.value.key).setPlaceholder(
+													translate('headerKeyPlaceholder'),
+												);
+												reactivelyValidate<string>({
+													immediate: true,
+													onSave: (value) => {
+														item.value.key = value;
+														save();
+													},
+													parse: (value) => {
+														item.value.key = value;
+														const trimmed = value.trim();
+														if (!trimmed) {
+															item.valid = false;
+															save();
+															return;
+														}
+														// Google Drive is authorized by the plugin itself;
+														// Overriding that header breaks every request.
+														if (isReservedHeader(trimmed)) {
+															new Notice(
+																translate('reservedHeader'),
+																5000,
+															);
+															item.valid = false;
+															save();
+															return;
+														}
+														item.valid = true;
+														return trimmed;
+													},
+													text,
+												});
+												if (item.new) {
+													item.new = false;
+													text.inputEl.focus();
+												}
+											});
+											if (item.value.type === 'plaintext')
+												setting.addText((text) =>
+													text
+														.setValue(item.value.value)
+														.setPlaceholder(
+															translate('headerValuePlaceholder'),
+														)
+														.inputEl.addEventListener('blur', () => {
+															item.value.value = text
+																.getValue()
+																.trim();
+															text.setValue(item.value.value);
+															save();
+														}),
+												);
+											else
+												setting.addComponent((element) =>
+													new SecretComponent(app, element)
+														.setValue(item.value.value)
+														.onChange((value) => {
+															item.value.value = value ?? '';
+															save();
+														}),
+												);
+										},
+										rerenderSettingTab,
+										saveSettings,
+										translations: {
+											add: translate('addHeader'),
+											empty: translate('noHeaderConfigured'),
+										},
+									}),
+								),
+							},
 						),
+						2000: s(() => ({
+							control: { key: 'noticeStatusOnMobile', type: 'toggle' },
+							desc: translate('noticeStatusOnMobileDescription'),
+							name: translate('noticeStatusOnMobile'),
+						})),
+						3000: s(() => ({
+							control: { key: 'avoidAutoSyncWhenOffline', type: 'toggle' },
+							desc: translate('avoidAutoSyncWhenOfflineDescription'),
+							name: translate('avoidAutoSyncWhenOffline'),
+						})),
+						4000: s(() => ({
+							control: { key: 'confirmTasksInSync', type: 'toggle' },
+							desc: translate('confirmTasksInSyncDescription'),
+							name: translate('confirmTasksInSync'),
+						})),
+						5000: s(() => ({
+							control: { key: 'confirmDeleteInAutoSync', type: 'toggle' },
+							desc: translate('confirmDeleteInAutoSyncDescription'),
+							name: translate('confirmDeleteInAutoSync'),
+						})),
 					},
 				),
-				2000: s(() => ({
-					control: { key: 'noticeStatusOnMobile', type: 'toggle' },
-					desc: translate('noticeStatusOnMobileDescription'),
-					name: translate('noticeStatusOnMobile'),
-				})),
-				3000: s(() => ({
-					control: { key: 'avoidAutoSyncWhenOffline', type: 'toggle' },
-					desc: translate('avoidAutoSyncWhenOfflineDescription'),
-					name: translate('avoidAutoSyncWhenOffline'),
-				})),
-				4000: s(() => ({
-					control: { key: 'confirmTasksInSync', type: 'toggle' },
-					desc: translate('confirmTasksInSyncDescription'),
-					name: translate('confirmTasksInSync'),
-				})),
-				5000: s(() => ({
-					control: { key: 'confirmDeleteInAutoSync', type: 'toggle' },
-					desc: translate('confirmDeleteInAutoSyncDescription'),
-					name: translate('confirmDeleteInAutoSync'),
-				})),
 			},
-		),
+		},
 	};
 }
