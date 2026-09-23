@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.1.3 - 2026-09-23
+
+Internal only; nothing changes in how the plugin syncs.
+
+- The shared `any` alias is gone. Function and constructor constraints take
+  `never` parameters, and the event bus root and memory database are typed
+  `never`, which fits every module's own event map and schema.
+- Turned off a lint rule that capitalised the first word of every comment
+  line. It had been rewriting the MIT notice carried in
+  `src/smart-merge/diff3/`, which is a block comment again and reads as
+  written.
+
 ## v0.1.2 - 2026-09-23
 
 - Google Drive is selected as the storage backend out of the box, so a fresh

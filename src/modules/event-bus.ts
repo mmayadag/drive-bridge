@@ -1,6 +1,5 @@
 import type { Events } from '@';
 import { apiVersion, Platform } from 'obsidian';
-import type { General } from '@/types';
 import { ref } from '@/shared/reactive';
 import formatDateTime from '@/utils/format-date';
 import { formatTime } from '@/utils/unit-converter';
@@ -180,10 +179,14 @@ export default class EventBus {
 		if (!this.isIdle()) this.dispatch('syncCanceled');
 	};
 
+	// The root is the one open hub.
+	// Every module declares its own event map and reads dispatch/on through this
+	// object structurally, so what sits here must fit all of those maps at once.
+	// Only `never` does, and each module still sees its own typed view.
 	readonly root = {
-		dispatch: this.dispatch as Dispatch<General>,
+		dispatch: this.dispatch as never,
 		getLogs: this.getLogs,
 		isIdle: this.isIdle,
-		on: this.on as On<General>,
+		on: this.on as never,
 	};
 }

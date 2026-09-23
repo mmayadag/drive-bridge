@@ -1,27 +1,26 @@
-// Copyright (c) 2006, 2008 Tony Garnock-Jones <tonyg@lshift.net>
-// Copyright (c) 2006, 2008 LShift Ltd. <query@lshift.net>
-// Copyright (c) 2016, 2022 Axosoft, LLC (www.gitkraken.com)
-// Copyright (c) 2026, Hēsperus
-//
-// Permission is hereby granted, free of charge, to any person
-// Obtaining a copy of this software and associated documentation files
-// (the "Software"), to deal in the Software without restriction,
-// Including without limitation the rights to use, copy, modify, merge,
-// Publish, distribute, sublicense, and/or sell copies of the Software,
-// And to permit persons to whom the Software is furnished to do so,
-// Subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be
-// Included in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
-// BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
-// ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-// CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+/*
+ * Copyright (c) 2006, 2008 Tony Garnock-Jones <tonyg@lshift.net>
+ * Copyright (c) 2006, 2008 LShift Ltd. <query@lshift.net>
+ * Copyright (c) 2016, 2022 Axosoft, LLC (www.gitkraken.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
 import type { DiffHunk } from './onp';
 import Onp from './onp';
@@ -110,13 +109,13 @@ function diff3MergeIndices<T>(
 	b: ReadonlyArray<T>,
 ): Array<MergeIndex> {
 	// Given three files, A, O, and B, where both A and B are
-	// Independently derived from O, returns a fairly complicated
-	// Internal representation of merge decisions it's taken. The
-	// Interested reader may wish to consult
+	// independently derived from O, returns a fairly complicated
+	// internal representation of merge decisions it's taken. The
+	// interested reader may wish to consult
 	//
 	// Sanjeev Khanna, Keshav Kunal, and Benjamin C. Pierce. "A
 	// Formal Investigation of Diff3." In Arvind and Prasad,
-	// Editors, Foundations of Software Technology and Theoretical
+	// editors, Foundations of Software Technology and Theoretical
 	// Computer Science (FSTTCS), December 2007.
 	//
 	// (http://www.cis.upenn.edu/~bcpierce/papers/diff3-short.pdf)
@@ -228,8 +227,8 @@ export function diffMerge<T>(
 	b: ReadonlyArray<T>,
 ): Array<MergeChunk<T>> {
 	// Applies the output of diff3MergeIndices to actually
-	// Construct the merged file; the returned result alternates
-	// Between "ok" and "conflict" blocks.
+	// construct the merged file; the returned result alternates
+	// between "ok" and "conflict" blocks.
 	const result: Array<MergeChunk<T>> = [];
 	const indices = diff3MergeIndices(a, o, b);
 

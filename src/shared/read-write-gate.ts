@@ -1,5 +1,5 @@
 // A lock that lets many readers share a database connection but gives a writer exclusive
-// Use. Creating or deleting an object store needs a version upgrade, which must run alone.
+// use. Creating or deleting an object store needs a version upgrade, which must run alone.
 
 export default class ReadWriteGate {
 	private readers = 0;

@@ -1,12 +1,15 @@
-import type { General, MaybePromise } from '@/types';
+import type { MaybePromise } from '@/types';
 
 type RateLimiterOptions = { maxConcurrency: number; minInterval: number };
 
-export default function rateLimiterMiddleware<
-	T extends (...args: ReadonlyArray<General>) => Promise<General>,
->(request: T, options: RateLimiterOptions): T {
+export default function rateLimiterMiddleware<T extends (...args: never) => Promise<unknown>>(
+	request: T,
+	options: RateLimiterOptions,
+): NoInfer<T> {
 	const limiter = new ApiLimiter(options);
-	return limiter.wrap(request) as T;
+	return limiter.wrap(
+		request as unknown as (...args: Array<unknown>) => Promise<unknown>,
+	) as unknown as T;
 }
 
 /**

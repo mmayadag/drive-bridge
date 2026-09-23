@@ -12,7 +12,7 @@ import type {
 import type { CallableOrObjectTree } from '@/modules/setting';
 import type { DatabaseSync } from '@/shared/key-value-store';
 import type { Ref } from '@/shared/reactive';
-import type { General, MaybePromise } from '@/types';
+import type { MaybePromise } from '@/types';
 import { getMessage } from '@/shared/error';
 import formatDateTime from '@/utils/format-date';
 import type { AugmentedSettingDefinitionItem, LabelDefinition } from './utils';
@@ -45,7 +45,7 @@ export type HeadSettingTranslations = {
 	settingTips: Fragment<{ labels: Array<LabelDefinition>; addLabel: typeof addLabel }>;
 };
 
-type CheckConnectionDB = DatabaseSync<General, { lastCheckedFs: string }>;
+type CheckConnectionDB = DatabaseSync<Record<string, unknown>, { lastCheckedFs: string }>;
 
 export default function headSettings(
 	ctx: {
@@ -183,7 +183,7 @@ export default function headSettings(
 			search: false,
 		})),
 		// The legend for the Match and Speed labels. It sits just above Development
-		// Because the labels it explains are scattered through the groups above.
+		// because the labels it explains are scattered through the groups above.
 		4900: s(() => ({
 			desc: translate('settingTips', { addLabel, labels: [matchLabel(), speedLabel()] }),
 			name: 'dummy',

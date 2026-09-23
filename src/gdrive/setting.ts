@@ -88,7 +88,7 @@ export default function gdriveSetting(
 
 	const connect = async (input: string) => {
 		// The client fields live on the OAuth client page and save on blur, so the
-		// Stored values are what is entered.
+		// stored values are what is entered.
 		const missing = findMissingInput({ ...tokenManager.getCredentials(), token: input });
 		if (missing === 'clientId') return void new Notice(translate('enterClientId'));
 		if (missing === 'clientSecret') return void new Notice(translate('enterClientSecret'));
@@ -192,8 +192,8 @@ export default function gdriveSetting(
 					render: (setting) => {
 						let input = '';
 						// The token is long. This row gives the field and the button a line
-						// Of their own under the description, instead of squeezing both
-						// Into the control column.
+						// of their own under the description, instead of squeezing both
+						// into the control column.
 						setting.settingEl.addClass('drive-bridge-stacked-setting');
 						setting
 							.addText((text) => {

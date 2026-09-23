@@ -88,7 +88,7 @@ export default class Scheduler {
 	};
 
 	// Leaving Obsidian (switching apps on mobile, another window on desktop) is the last
-	// Chance to push what was just written before the device may go to sleep.
+	// chance to push what was just written before the device may go to sleep.
 	private readonly listenForLeaving = () => {
 		const onLeave = () => {
 			if (!this.settings.syncOnLeave || !this.hasLocalChanges) return;
