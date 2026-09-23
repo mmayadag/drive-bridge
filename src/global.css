@@ -88,6 +88,19 @@ input[type='password'].drive-bridge-invalid-input {
 	min-width: 0;
 }
 
+/* Phones have no room for the long field and the button side by side. */
+.is-mobile .setting-item.drive-bridge-stacked-setting .setting-item-control {
+	flex-wrap: wrap;
+	gap: var(--size-4-2);
+}
+
+.is-mobile .setting-item.drive-bridge-stacked-setting .setting-item-control input,
+.is-mobile .setting-item.drive-bridge-stacked-setting .setting-item-control button {
+	flex: 1 1 100%;
+	width: 100%;
+	margin: 0;
+}
+
 .drive-bridge-prominent {
 	--flair-background: var(--color-accent);
 	--flair-color: var(--text-on-accent);
