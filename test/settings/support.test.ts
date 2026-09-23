@@ -9,29 +9,27 @@ void mock.module('obsidian', () => ({
 
 const { reportUrl } = await import('@/settings/support');
 
-test('the report link opens a GitHub issue with the versions filled in', () => {
-	const url = new URL(reportUrl());
-	expect(url.origin + url.pathname).toBe('https://github.com/mmayadag/drive-bridge/issues/new');
-
-	const body = url.searchParams.get('body') ?? '';
-	expect(body).toContain('## What happened');
-	expect(body).toContain('- Obsidian: 1.13.7');
-	expect(body).toContain('- Platform: macOS');
-	expect(body).toContain('Export logs to file');
-	// The report says nothing about the vault or its owner.
-	expect(body.toLowerCase()).not.toContain('vault');
-	expect(body.toLowerCase()).not.toContain('token');
+test('the report links open the matching issue form with the versions filled in', () => {
+	for (const kind of ['bug', 'request'] as const) {
+		const url = new URL(reportUrl(kind));
+		expect(url.origin + url.pathname).toBe(
+			'https://github.com/mmayadag/drive-bridge/issues/new',
+		);
+		expect(url.searchParams.get('template')).toBe(`${kind}.yml`);
+		expect(url.searchParams.get('obsidian')).toBe('1.13.7');
+		expect(url.searchParams.get('platform')).toBe('macOS');
+		expect(url.searchParams.get('plugin')).toBeTruthy();
+		// The report says nothing about the vault or its owner.
+		expect(url.href.toLowerCase()).not.toContain('vault');
+		expect(url.href.toLowerCase()).not.toContain('token');
+	}
 });
 
-test('bug and request links carry their own template and label', () => {
-	const bug = new URL(reportUrl('bug'));
-	expect(bug.searchParams.get('labels')).toBe('bug');
-
-	const request = new URL(reportUrl('request'));
-	expect(request.searchParams.get('labels')).toBe('enhancement');
-	const body = request.searchParams.get('body') ?? '';
-	expect(body).toContain('## What you would like');
-	expect(body).toContain('- Platform: macOS');
-	expect(body).not.toContain('## What happened');
-	expect(body).not.toContain('Export logs');
+test('the form field names in the link exist in both issue forms', async () => {
+	const url = new URL(reportUrl('bug'));
+	const fields = [...url.searchParams.keys()].filter((key) => key !== 'template');
+	for (const form of ['bug', 'request']) {
+		const yaml = await Bun.file(`.github/ISSUE_TEMPLATE/${form}.yml`).text();
+		for (const field of fields) expect(yaml).toContain(`id: ${field}\n`);
+	}
 });

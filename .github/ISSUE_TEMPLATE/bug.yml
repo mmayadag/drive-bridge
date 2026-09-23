@@ -1,0 +1,40 @@
+name: Bug
+description: Something in Drive Bridge does not work as expected.
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps
+      placeholder: '1. '
+  - type: input
+    id: plugin
+    attributes:
+      label: Drive Bridge version
+    validations:
+      required: true
+  - type: input
+    id: obsidian
+    attributes:
+      label: Obsidian version
+  - type: input
+    id: platform
+    attributes:
+      label: Platform
+      placeholder: macOS, Windows, Linux, iOS or Android
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Settings → Drive Bridge → Advanced → Export logs to file. Paste the relevant part and remove anything private, such as note names.
+      render: text
