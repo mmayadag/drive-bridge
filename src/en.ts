@@ -103,14 +103,17 @@ const en: Translations = {
 		}),
 	keepLocal: 'Keep local',
 	keepLocalDescription: 'The vault version overwrites Drive.',
+	keepLocalWarning: 'The Drive version is replaced without asking.',
 	keepRemote: 'Keep remote',
 	keepRemoteDescription: 'The Drive version overwrites the vault.',
+	keepRemoteWarning: 'The vault version is replaced without asking.',
 	lastSync: 'Last sync',
 	lastSyncNever: 'No sync on this device yet.',
 	lastSyncValue: ({ time, result }) => `${time} · ${result}`,
 	latestSurvive: 'Latest survives',
 	latestSurviveDescription:
 		'The newer modified time wins. A device with a wrong clock can pick the old edit.',
+	latestSurviveWarning: 'The older edit is replaced without asking.',
 	match: 'Match',
 	matchLabelDescription: 'This setting must be kept the same on all devices.',
 	maxFileSize: 'Max file size',
@@ -128,9 +131,13 @@ const en: Translations = {
 	minRequestIntervalPlaceholder: 'Enter interval (e.g. 1s, 500ms)',
 	mirrorLocal: 'Mirror local',
 	mirrorLocalDescription: 'Drive becomes a copy of this vault. Files only on Drive are deleted.',
+	mirrorLocalWarning:
+		'Files only on Drive are deleted. Switch back to Bidirectional after one sync.',
 	mirrorRemote: 'Mirror remote',
 	mirrorRemoteDescription:
 		'This vault becomes a copy of Drive. Files only in the vault are deleted.',
+	mirrorRemoteWarning:
+		'Files only in this vault are deleted. Switch back to Bidirectional after one sync.',
 	miscellaneous: 'Miscellaneous',
 	moveLocal: 'Move local',
 	moveRemote: 'Move remote',

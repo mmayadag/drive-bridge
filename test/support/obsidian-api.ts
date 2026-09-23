@@ -45,7 +45,24 @@ export function requireApiVersion() {
 
 export const apiVersion = '1.12.7';
 
+// Records the text written into a fragment; enough for code that builds plain text.
+function createFragment(build?: (fragment: object) => void) {
+	const parts: Array<string> = [];
+	const fragment = {
+		appendText: (text: string) => void parts.push(text),
+		createEl: (_tag: string, options?: { text?: string }) =>
+			void parts.push(options?.text ?? ''),
+		createSpan: (options?: { text?: string }) => void parts.push(options?.text ?? ''),
+		get textContent() {
+			return parts.join('');
+		},
+	};
+	build?.(fragment);
+	return fragment;
+}
+
 Object.assign(globalThis, {
+	createFragment,
 	sleep: (milliseconds: number) =>
 		new Promise<void>((resolve) => {
 			setTimeout(resolve, milliseconds);

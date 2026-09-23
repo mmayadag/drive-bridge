@@ -182,7 +182,10 @@ export default function headSettings(
 					(key) => choose('decider', key),
 				);
 			return {
-				desc: translate('syncStrategyDescription'),
+				desc: warningOr(
+					deciderRegistry.get(settings.decider),
+					translate('syncStrategyDescription'),
+				),
 				displayValue: () => deciderRegistry.get(settings.decider)?.prettyName() ?? '',
 				items: [
 					{ items: choices(false), type: 'group' },
@@ -211,7 +214,10 @@ export default function headSettings(
 					(key) => choose('conflictResolver', key),
 				);
 			return {
-				desc: translate('conflictResolveStrategyDescription'),
+				desc: warningOr(
+					conflictResolverRegistry.get(settings.conflictResolver),
+					translate('conflictResolveStrategyDescription'),
+				),
 				displayValue: () =>
 					conflictResolverRegistry.get(settings.conflictResolver)?.prettyName() ?? '',
 				items: [
@@ -240,6 +246,15 @@ export default function headSettings(
 			};
 		}),
 	};
+}
+
+/** The selected strategy's warning in the warning colour, or the usual description. */
+function warningOr(entry: { warning?: () => string } | undefined, description: string) {
+	const warning = entry?.warning?.();
+	if (!warning) return description;
+	return createFragment((frag) =>
+		frag.createSpan({ cls: 'drive-bridge-warning-text', text: warning }),
+	);
 }
 
 const RESULT_KEYS = {

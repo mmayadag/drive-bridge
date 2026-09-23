@@ -81,14 +81,19 @@ export default class Bootstrap {
 		bidirectionalDescription: string;
 		mirrorLocal: string;
 		mirrorLocalDescription: string;
+		mirrorLocalWarning: string;
 		mirrorRemote: string;
 		mirrorRemoteDescription: string;
+		mirrorRemoteWarning: string;
 		latestSurvive: string;
 		latestSurviveDescription: string;
+		latestSurviveWarning: string;
 		keepLocal: string;
 		keepLocalDescription: string;
+		keepLocalWarning: string;
 		keepRemote: string;
 		keepRemoteDescription: string;
+		keepRemoteWarning: string;
 		renameAndKeepBoth: string;
 		renameAndKeepBothDescription: string;
 		renameAndKeepBothExample: string;
@@ -358,6 +363,7 @@ export default class Bootstrap {
 			order: 20,
 			prettyName: () => t('mirrorLocal'),
 			repair: true,
+			warning: () => t('mirrorLocalWarning'),
 		});
 		registerDecider('mirrorRemote', {
 			decider: mirrorRemoteDecider,
@@ -366,6 +372,7 @@ export default class Bootstrap {
 			order: 30,
 			prettyName: () => t('mirrorRemote'),
 			repair: true,
+			warning: () => t('mirrorRemoteWarning'),
 		});
 
 		registerConflictResolver('renameAndKeepBoth', {
@@ -381,6 +388,7 @@ export default class Bootstrap {
 			order: 40,
 			prettyName: () => t('latestSurvive'),
 			resolver: latestSurviveResolver,
+			warning: () => t('latestSurviveWarning'),
 		});
 		registerConflictResolver('keepLocal', {
 			description: () => t('keepLocalDescription'),
@@ -388,6 +396,7 @@ export default class Bootstrap {
 			order: 50,
 			prettyName: () => t('keepLocal'),
 			resolver: keepLocalResolver,
+			warning: () => t('keepLocalWarning'),
 		});
 		registerConflictResolver('keepRemote', {
 			description: () => t('keepRemoteDescription'),
@@ -395,6 +404,7 @@ export default class Bootstrap {
 			order: 60,
 			prettyName: () => t('keepRemote'),
 			resolver: keepRemoteResolver,
+			warning: () => t('keepRemoteWarning'),
 		});
 		registerConflictResolver('skip', {
 			description: () => t('skipDescription'),
