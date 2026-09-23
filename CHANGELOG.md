@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.1.12 - 2026-09-23
+
+- **Reset to defaults** at the bottom of Advanced puts every setting back to
+  what a fresh install uses, after a confirmation. The Google account, OAuth
+  client, base directory and sync records are kept (#23).
+
+Fixes:
+
+- Choosing a strategy no longer adds another radio button in front of every
+  row on the Sync strategy and Conflict resolve strategy pages (#46).
+
 ## v0.1.11 - 2026-09-23
 
 - **Sync strategy** opens a page instead of a dropdown. Each strategy has a
