@@ -14,11 +14,10 @@ const en: Translations = {
 	addRecord: 'Add record',
 	addSecretHeader: 'Add secret header',
 	avoidAutoSyncWhenOffline: 'Avoid auto sync when offline',
-	avoidAutoSyncWhenOfflineDescription:
-		"Silently skip non-manual sync runs when there's no internet connection.",
+	avoidAutoSyncWhenOfflineDescription: 'Skip automatic syncs when there is no internet.',
 	awaitingConfirmation: 'Awaiting confirmation',
 	backend: 'Storage backend',
-	backendDescription: 'Select the cloud service to use.',
+	backendDescription: 'Where this vault syncs to.',
 	bidirectional: 'Bidirectional',
 	buyMeACoffee: 'Buy me a coffee',
 	buyMeACoffeeDescription: 'If the plugin saves you a headache, this is where to say thanks.',
@@ -30,8 +29,7 @@ const en: Translations = {
 	checkConnectionSuccess: 'Check connection succeeded',
 	clear: 'Clear',
 	clearRecords: 'Clear records',
-	clearRecordsDescription:
-		'Drive Bridge records sync states to resolve sync operations between local and remote files. This option allows you to clear records. Warning: this action is likely to cause changes in sync decisions.',
+	clearRecordsDescription: 'Forget the stored sync state. The next sync may decide differently.',
 	completed: 'Completed',
 	completedNoop: 'Already synced',
 	confirm: 'Confirm',
@@ -39,7 +37,7 @@ const en: Translations = {
 		`Please confirm the ${count} local ${pItem(count)} that will be deleted; unselected items will be re-uploaded.`,
 	confirmDeleteInAutoSync: 'Confirm deletions during auto-sync',
 	confirmDeleteInAutoSyncDescription:
-		'Show a confirmation of local files that will be deleted during auto-triggered syncs. You can choose to delete or re-upload them.',
+		'Review local deletions in automatic syncs: delete or re-upload them.',
 	confirmTasksDescription: ({ total, conflict, deleteLocal, deleteRemote }) => {
 		const deleteOr = deleteLocal + deleteRemote !== 0;
 		let result = `Sync will execute ${pcOperations(total)} in total`;
@@ -54,17 +52,15 @@ const en: Translations = {
 		return result;
 	},
 	confirmTasksInSync: 'Confirm operations in manual sync',
-	confirmTasksInSyncDescription:
-		'Show pending operations and execute after confirmation (does not affect auto-sync).',
+	confirmTasksInSyncDescription: 'Review pending operations before a manual sync runs.',
 	conflictResolveStrategy: 'Conflict resolve strategy',
-	conflictResolveStrategyDescription:
-		'Select how to resolve the conflict when both remote and local have been modified since last sync.',
+	conflictResolveStrategyDescription: 'What to do when a file changed on both sides.',
 	controls: 'Controls',
 	createLocalDir: 'Create local folder',
 	createRemoteDir: 'Create remote folder',
 	customHeaders: 'Custom headers',
 	customHeadersDescription:
-		'Extra HTTP headers added to every request this plugin makes to Google Drive, stored either in plaintext or in the OS keychain. Google Drive needs none of these.',
+		'Extra HTTP headers on every Drive request, in plain text or the OS keychain. Drive needs none.',
 	development: 'Development',
 	diffMatchPatch: 'Merge',
 	done: 'Done',
@@ -73,16 +69,13 @@ const en: Translations = {
 	exclusionRules: 'Exclusion rules',
 	exclusionRulesDescription: () =>
 		createFragment((frag) => {
-			frag.appendText(
-				'Files / folders matching these Glob patterns will not be synced. Please remember to add file extensions (E.g. ',
-			);
+			frag.appendText('Glob patterns to skip. Include the extension for files, e.g. ');
 			frag.createEl('code', { text: '.md' });
-			frag.appendText(') if you want to exclude files.');
+			frag.appendText('.');
 		}),
 	executing: 'Executing',
 	export: 'Export',
-	exportLogsDescription:
-		'Export plugin logs to a file in the vault. Set the log export directory in the field.',
+	exportLogsDescription: 'Save plugin logs to the vault folder in the field.',
 	exportLogsDirectoryPlaceholder: 'Set the directory to export logs to',
 	exportLogsFailed: 'Failed to export logs',
 	exportLogsToFile: 'Export logs to file',
@@ -94,15 +87,13 @@ const en: Translations = {
 	headerKeyPlaceholder: 'Header key',
 	headerValuePlaceholder: 'Header value',
 	help: 'Help',
-	helpDescription: 'Setup guide, every setting explained, and how to recover from mistakes.',
+	helpDescription: 'Setup guide, every setting, and recovery steps.',
 	hide: 'Hide',
 	idle: 'Idle',
 	inclusionRules: 'Inclusion rules',
 	inclusionRulesDescription: () =>
 		createFragment((frag) => {
-			frag.appendText(
-				'Files / folders matching exclusion rules but also matching these glob patterns will still be synced.',
-			);
+			frag.appendText('Glob patterns that sync even when an exclusion rule matches.');
 		}),
 	keepLocal: 'Keep local',
 	keepRemote: 'Keep remote',
@@ -113,20 +104,17 @@ const en: Translations = {
 	match: 'Match',
 	matchLabelDescription: 'This setting must be kept the same on all devices.',
 	maxFileSize: 'Max file size',
-	maxFileSizeDescription:
-		'Skip files exceeding this size during synchronization. This option is useful for services with storage space limitations. Alter the size limit in the field.',
+	maxFileSizeDescription: 'Skip files larger than this.',
 	maxFileSizePlaceholder: 'Enter size limit (e.g. 10MB, 0.5GB)',
 	maxMemoryConsumption: 'Max memory consumption',
-	maxMemoryConsumptionDescription:
-		'Limit the amount of memory used during synchronization. This option is useful for devices with memory limitations. Alter the memory limit in the field.',
+	maxMemoryConsumptionDescription: 'Memory limit during sync, for devices with little memory.',
 	maxMemoryConsumptionPlaceholder: 'Enter memory limit (e.g. 1GB, 200MB)',
 	maxRequestConcurrency: 'Max request concurrency',
-	maxRequestConcurrencyDescription:
-		'Limit the number of simultaneous requests during synchronization. This option is useful for services with request rate limits. Alter the concurrency limit in the field.',
+	maxRequestConcurrencyDescription: 'Most requests at once. Lower it if Drive rate-limits you.',
 	maxRequestConcurrencyPlaceholder: 'Enter concurrency limit',
 	minRequestInterval: 'Min request interval',
 	minRequestIntervalDescription:
-		'Limit the minimum time between consecutive requests during synchronization. This option is useful for services with request rate limits. Alter the interval in the field.',
+		'Least time between requests. Raise it if Drive rate-limits you.',
 	minRequestIntervalPlaceholder: 'Enter interval (e.g. 1s, 500ms)',
 	mirrorLocal: 'Mirror local',
 	mirrorRemote: 'Mirror remote',
@@ -138,16 +126,15 @@ const en: Translations = {
 	none: 'None',
 	noticeStatusOnMobile: 'Notice sync status on mobile',
 	noticeStatusOnMobileDescription:
-		'Display a notice on mobile devices when synchronization is in progress. Replaces the status bar on desktop.',
+		'Show sync progress as a notice on mobile, where there is no status bar.',
 	open: 'Open',
 	openGithub: 'Open GitHub',
 	openPage: 'Open',
 	realtimeSync: 'Realtime sync',
-	realtimeSyncDescription:
-		'Trigger syncs automatically as soon as files are modified. Alter the delay between a file being modified and the sync being triggered in the field.',
+	realtimeSyncDescription: 'Sync after a file changes, once the delay in the field passes.',
 	realtimeSyncFastMode: 'Realtime sync fast mode',
 	realtimeSyncFastModeDescription:
-		'Reuse cached data and avoid unnecessary remote discovery during real-time sync to accelerate sync.',
+		'Use cached data instead of a full Drive scan on realtime syncs.',
 	realtimeSyncPlaceholder: 'Enter sync delay (e.g. 500ms, 5s)',
 	recordsCleared: 'Records cleared',
 	removeLocal: 'Remove local',
@@ -156,13 +143,12 @@ const en: Translations = {
 	renameAndKeepBoth: 'Rename and keep both',
 	reportProblem: 'Report a problem',
 	reportProblemDescription:
-		'Opens a GitHub issue with the versions filled in. Nothing is sent until you write the report and submit it yourself.',
+		'Opens a GitHub issue with versions filled in. Nothing is sent until you submit it.',
 	reservedHeader:
 		'That header is set by the plugin itself; overriding it would break every request.',
 	resolveConflict: 'Resolve conflict',
 	scheduledSync: 'Scheduled sync',
-	scheduledSyncDescription:
-		'Periodically trigger synchronizations over specified intervals. Alter the interval in the field.',
+	scheduledSyncDescription: 'Sync at the interval in the field.',
 	scheduledSyncPlaceholder: 'Enter interval (e.g. 10min, 0.5h)',
 	selectAll: 'Select all',
 	settingTips: ({ labels, addLabel }) =>
@@ -181,28 +167,24 @@ const en: Translations = {
 	startNonInteractiveSync: 'Start non-interactive sync',
 	startSync: 'Start sync',
 	startupSync: 'Startup sync',
-	startupSyncDescription:
-		'Automatically trigger a sync at plugin startup after specified delay. Alter the delay in the field.',
+	startupSyncDescription: 'Sync when Obsidian opens, after the delay in the field.',
 	startupSyncPlaceholder: 'Enter delay (e.g. 5s, 1min)',
 	stopSync: 'Stop sync',
 	support: 'Support',
 	syncOnLeave: 'Sync when leaving Obsidian',
-	syncOnLeaveDescription:
-		'Sync as soon as Obsidian goes to the background or loses focus, if files changed since the last sync.',
+	syncOnLeaveDescription: 'Sync when Obsidian goes to the background, if files changed.',
 	syncProgress: 'Sync progress',
 	syncStrategy: 'Sync strategy',
-	syncStrategyDescription: 'Select the synchronization strategy to resolve file changes.',
+	syncStrategyDescription: 'How changes flow between this vault and Drive.',
 	upload: 'Upload',
 	walkingRemote: 'Discovering remote files',
 	webhookOnFinish: 'After a sync',
-	webhookOnFinishDescription:
-		'POST the result of a sync to this URL, with the number of completed and failed operations. Leave empty to send nothing.',
+	webhookOnFinishDescription: 'POST the result here when a sync ends. Empty sends nothing.',
 	webhookOnStart: 'Before a sync',
 	webhookOnStartDescription:
-		'POST a small JSON body to this URL when a sync starts. Leave empty to send nothing.',
+		'POST a small JSON body here when a sync starts. Empty sends nothing.',
 	webhookOnlyWhenChanged: 'Only when files change',
-	webhookOnlyWhenChangedDescription:
-		'Skip both webhooks when a sync finds nothing to do. With this off, every scheduled sync sends a request.',
+	webhookOnlyWhenChangedDescription: 'Skip both webhooks when there was nothing to sync.',
 	webhookPlaceholder: 'https://example.com/hook',
 	webhooks: 'Webhooks',
 	xConfigured: (count) => `${count} configured`,

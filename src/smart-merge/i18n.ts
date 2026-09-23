@@ -12,14 +12,11 @@ export type SmartMergeTranslations = {
 
 const en: SmartMergeTranslations = {
 	conflictOursMarkers: '"Ours" conflict markers',
-	conflictOursMarkersDescription:
-		'Set the markers before and after the region in a merge conflict that shows local changes.',
+	conflictOursMarkersDescription: 'Markers around local changes in a merge conflict.',
 	conflictTheirsMarkers: '"Theirs" conflict markers',
-	conflictTheirsMarkersDescription:
-		'Set the markers before and after the region in a merge conflict that shows remote changes.',
+	conflictTheirsMarkersDescription: 'Markers around remote changes in a merge conflict.',
 	deletionMarkers: 'Deletion conflict markers',
-	deletionMarkersDescription:
-		'Set the markers before and after the region that is deleted by one side, but modified by the other side.',
+	deletionMarkersDescription: 'Markers around text deleted on one side and edited on the other.',
 	end: 'End',
 	smartMerge: 'Smart merge',
 	start: 'Start',
