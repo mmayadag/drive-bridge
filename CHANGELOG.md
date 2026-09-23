@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.1.14 - 2026-09-23
+
+- The line above the coffee button follows the last sync on this device:
+  _It works! Coffee time?_ after a good sync, _Set it up, then let's talk
+  coffee._ before the first one, and _Not working yet? Report it above._
+  after a failure. It updates as soon as a sync ends (#51).
+
 ## v0.1.13 - 2026-09-23
 
 - While a risky strategy is selected, the Sync strategy or Conflict resolve
