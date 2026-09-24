@@ -12,6 +12,13 @@ const db: GdriveDB = openMemoryDB<{ gdriveIds: string }, { gdriveIdsMarker?: str
 	'gdrive-fs-test',
 );
 
+/** What a promise rejected with, or undefined when it resolved. */
+const failure = (promise: Promise<unknown>) =>
+	promise.then(
+		() => {},
+		(error: unknown) => error as Error & { status?: number },
+	);
+
 type Control = (url: string, params: RequestParam) => MaybePromise<Partial<RequestResponse>>;
 
 function response(value: unknown = {}, status = 200, headers: Record<string, string> = {}) {
@@ -144,4 +151,193 @@ test('uploads streamed files in ascending contiguous chunks over one resumable s
 		`bytes ${chunkSize}-${chunkSize * 2 - 1}/${total}`,
 		`bytes ${chunkSize * 2}-${total - 1}/${total}`,
 	]);
+});
+
+const note = (id: string, name: string, parent: string, modified = 1000) => ({
+	id,
+	md5Checksum: `${id}-uid`,
+	mimeType: 'text/markdown',
+	modifiedTime: new Date(modified).toISOString(),
+	name,
+	parents: [parent],
+	size: '1',
+});
+const folder = (id: string, name: string, parent: string) => ({
+	id,
+	mimeType: FOLDER_MIME,
+	name,
+	parents: [parent],
+});
+
+test('a missing key is a 404, not a crash', async () => {
+	const { fs } = createFs(() => response({ files: [] }));
+	for (const run of [
+		() => fs.read('nope.md'),
+		() => fs.move('nope.md', 'other.md'),
+		() => fs.stat('missing/nope.md'),
+		() => fs.stat('nope.md'),
+	])
+		expect((await failure(run()))?.status).toBe(404);
+	expect(() => fs.readStream('nope.md', file('nope.md', { size: 1 }))).toThrow('does not exist');
+	expect((await failure(fs.list('missing/', () => 'advance')))?.status).toBe(404);
+});
+
+test('deleting moves to the trash by default, or deletes for good', async () => {
+	const listing = response({ files: [note('file-1', 'a.md', 'root')] });
+	for (const useTrash of [true, false]) {
+		const harness = request((_url, params) =>
+			params.method === 'GET' ? listing : response({ id: 'file-1' }),
+		);
+		const fs = new GdriveFs(harness.request, { useTrash, userId: 'user-1' }, db);
+		await fs.list('/', () => 'advance');
+		await fs.delete('a.md');
+		const call = harness.calls.at(-1);
+		expect(call?.method).toBe(useTrash ? 'PATCH' : 'DELETE');
+		if (useTrash)
+			expect(new TextDecoder().decode(call?.body as Binary)).toBe('{"trashed":true}');
+		// The id is forgotten, so a second delete sends nothing.
+		await fs.delete('a.md');
+		expect(harness.calls.at(-1)).toBe(call);
+	}
+});
+
+test('deleting a file Drive already lost is fine; other errors are not', async () => {
+	let status = 404;
+	const { fs } = createFs((_url, params) =>
+		params.method === 'GET'
+			? response({
+					files: [
+						folder('folder-1', 'notes', 'root'),
+						note('file-1', 'a.md', 'folder-1'),
+					],
+				})
+			: response({ error: { message: 'Nope' } }, status),
+	);
+	await fs.list('/', () => 'advance');
+	await fs.delete('notes/');
+	// Deleting the folder also forgot the files inside it.
+	expect((await failure(fs.read('notes/a.md')))?.status).toBe(404);
+	await fs.list('/', () => 'advance');
+	status = 403;
+	expect((await failure(fs.delete('notes/a.md')))?.status).toBe(403);
+});
+
+test('moving to another folder changes its parents', async () => {
+	const { calls, fs } = createFs((_url, params) =>
+		params.method === 'GET'
+			? response({
+					files: [
+						folder('folder-a', 'a', 'root'),
+						folder('folder-b', 'b', 'root'),
+						note('file-1', 'x.md', 'folder-a'),
+					],
+				})
+			: response({ id: 'file-1' }),
+	);
+	await fs.list('/', () => 'advance');
+	await fs.move('a/x.md', 'b/y.md');
+	const url = new URL(calls.at(-1)?.url ?? '');
+	expect(url.searchParams.get('addParents')).toBe('folder-b');
+	expect(url.searchParams.get('removeParents')).toBe('folder-a');
+	await fs.list('/', () => 'advance');
+	expect((await failure(fs.move('a/x.md', 'c/y.md')))?.message).toContain('Parent not created');
+});
+
+test('exists asks Drive along the path instead of trusting the cache', async () => {
+	const { calls, fs } = createFs((url) => {
+		const query = new URL(url).searchParams.get('q') ?? '';
+		if (query.includes("'root' in parents and name = 'notes'"))
+			return response({ files: [{ id: 'folder-1' }] });
+		if (query.includes("'folder-1' in parents and name = 'a.md'"))
+			return response({ files: [{ id: 'file-1' }] });
+		return response({ files: [] });
+	});
+	expect(await fs.exists('/')).toBe(true);
+	expect(await fs.exists('notes/a.md')).toBe(true);
+	expect(await fs.exists('notes/b.md')).toBe(false);
+	expect(await fs.exists('gone/a.md')).toBe(false);
+	expect(calls).toHaveLength(5);
+	// What exists found is cached, so it can be read.
+	expect(new URL(calls[1]?.url ?? '').searchParams.get('q')).toContain("mimeType != '");
+	expect(new URL(calls[0]?.url ?? '').searchParams.get('q')).toContain(
+		`mimeType = '${FOLDER_MIME}'`,
+	);
+});
+
+test('stat finds the newest file with that name in its folder', async () => {
+	const { calls, fs } = createFs(() =>
+		response({ files: [note('file-1', 'a.md', 'root', 5000)] }),
+	);
+	expect(await fs.stat('a.md')).toMatchObject({ isDir: false, key: 'a.md', mtime: 5000 });
+	expect(new URL(calls[0]?.url ?? '').searchParams.get('orderBy')).toBe('modifiedTime desc');
+});
+
+test('reads a large file in ranges', async () => {
+	const { calls, fs } = createFs((url, params) =>
+		params.method === 'GET' && url.includes('alt=media')
+			? binaryResponse(bytes('abc'))
+			: response({ files: [note('file-1', 'a.md', 'root')] }),
+	);
+	await fs.list('/', () => 'advance');
+	const reader = fs.readStream('a.md', file('a.md', { size: 3 })).getReader();
+	expect((await reader.read()).value).toStrictEqual(bytes('abc'));
+	expect(calls.at(-1)?.headers?.Range).toBe('bytes=0-2');
+});
+
+test('duplicate names on Drive list once: the newest file, the first folder', async () => {
+	const { fs } = createFs(() =>
+		response({
+			files: [
+				note('old', 'a.md', 'root', 1000),
+				note('new', 'a.md', 'root', 9000),
+				note('older', 'a.md', 'root', 500),
+				folder('folder-1', 'a', 'root'),
+				folder('folder-2', 'a', 'root'),
+				{ id: 'orphan', name: 'lost.md' },
+			],
+		}),
+	);
+	const result = await fs.list('/', () => 'include');
+	expect(
+		result.map((stat) => ('mtime' in stat ? `${stat.key}@${stat.mtime}` : stat.key)),
+	).toStrictEqual(['a.md@9000', 'a/']);
+});
+
+test('listing follows every page', async () => {
+	const { calls, fs } = createFs((url) =>
+		new URL(url).searchParams.get('pageToken')
+			? response({ files: [note('file-2', 'b.md', 'root')] })
+			: response({ files: [note('file-1', 'a.md', 'root')], nextPageToken: 'next' }),
+	);
+	expect((await fs.list('/', () => 'advance')).map((stat) => stat.key)).toStrictEqual([
+		'a.md',
+		'b.md',
+	]);
+	expect(calls).toHaveLength(2);
+});
+
+test('writing over a known file updates it in place', async () => {
+	const { calls, fs } = createFs((_url, params) =>
+		params.method === 'GET'
+			? response({ files: [note('file-1', 'a.md', 'root')] })
+			: response({ id: 'file-1' }),
+	);
+	await fs.list('/', () => 'advance');
+	// Without an md5 from Drive, the upload's time and size stand in for it.
+	expect(await fs.write('a.md', bytes('x'), file('a.md', { mtime: 7, size: 1 }))).toBe('7~1');
+	expect(calls.at(-1)?.method).toBe('PATCH');
+	expect(calls.at(-1)?.url).toContain('/files/file-1');
+});
+
+test('folder creation fails clearly without a parent or an id', async () => {
+	const { fs } = createFs(() => response({}));
+	expect((await failure(fs.mkdir('a/b/', false)))?.message).toContain('Parent is not created');
+	expect((await failure(fs.mkdir('a/', false)))?.message).toContain('did not return an id');
+});
+
+test('a Drive error carries its status and message', async () => {
+	const { fs } = createFs(() => response({ error: { message: 'Rate limit exceeded' } }, 429));
+	const error = await failure(fs.stat('a.md'));
+	expect(error).toMatchObject({ status: 429 });
+	expect(String(error)).toContain('Rate limit');
 });
