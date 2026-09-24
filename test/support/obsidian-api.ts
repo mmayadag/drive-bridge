@@ -1,4 +1,4 @@
-// oxlint-disable typescript/require-await typescript/no-extraneous-class no-useless-constructor no-empty-function
+// oxlint-disable typescript/require-await typescript/no-extraneous-class no-useless-constructor no-empty-function class-methods-use-this
 export async function requestUrl() {
 	return {
 		headers: {},
@@ -19,20 +19,76 @@ export function normalizePath(path: string) {
 
 export class Notice {
 	constructor(_message: string) {}
+	hide() {}
+	setMessage() {
+		return this;
+	}
 }
 
 export class Vault {}
 export class TFolder {}
 export class TFile {}
-export class Plugin {}
+// Enough of Plugin, Modal and PluginSettingTab for the built bundle's onload to run
+// (test/bundle-load.test.ts); unit tests only need the classes to exist.
+export class Plugin {
+	manifest = { id: 'drive-bridge', version: 'test' };
+	constructor(readonly app: unknown) {}
+	addCommand(command: unknown) {
+		return command;
+	}
+	addRibbonIcon() {
+		return stubElement();
+	}
+	addStatusBarItem() {
+		return stubElement();
+	}
+	addSettingTab() {}
+	registerEvent() {}
+	registerDomEvent() {}
+	registerInterval(id: number) {
+		return id;
+	}
+	register() {}
+	async loadData() {
+		return {};
+	}
+	async saveData() {}
+}
 export class App {}
-export class Modal {}
+export class Modal {
+	contentEl = stubElement();
+	titleEl = stubElement();
+	modalEl = stubElement();
+	constructor(readonly app: unknown) {}
+	open() {}
+	close() {}
+	setTitle() {
+		return this;
+	}
+}
+export class ItemView {}
 export class Setting {}
-export class PluginSettingTab {}
+export class PluginSettingTab {
+	constructor(
+		readonly app: unknown,
+		readonly plugin: unknown,
+	) {}
+	update() {}
+	refreshDomState() {}
+}
 export class TextComponent {}
 export class ButtonComponent {}
 export class ProgressBarComponent {}
 export class SecretComponent {}
+
+/** A stand-in DOM element: any property is callable and returns another stand-in. */
+export function stubElement(): never {
+	const target = () => {};
+	return new Proxy(target, {
+		apply: () => stubElement(),
+		get: (_target, key) => (key === 'then' ? undefined : stubElement()),
+	}) as never;
+}
 
 export function setIcon() {}
 export function setTooltip() {}
