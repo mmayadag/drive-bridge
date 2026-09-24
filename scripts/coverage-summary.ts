@@ -4,7 +4,7 @@
 // unlike the average of file percentages that Bun prints. Bun's own coverageThreshold checks every file
 // separately, which would fail on any single untested file.
 
-export const FLOOR = { functions: 0.82, lines: 0.79 };
+export const FLOOR = { functions: 0.99, lines: 0.99 };
 
 export type FileCoverage = {
 	file: string;
