@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.1.15 - 2026-09-24
+
+- Sync errors read as a sentence: for example _Failed: Can't reach Google.
+  Check the internet connection._ instead of `net::ERR_NAME_NOT_RESOLVED`.
+  Sign-in, rate limit, refused request, server errors and failed files are
+  covered too. The original error stays in the log and shows when you hover
+  the Last sync row (#55).
+
+For maintainers:
+
+- `bun coverage` prints test coverage and fails below a floor; CI writes the
+  report to the job summary (#53).
+
 ## v0.1.14 - 2026-09-23
 
 - The line above the coffee button follows the last sync on this device:
