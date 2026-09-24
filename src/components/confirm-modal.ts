@@ -7,9 +7,13 @@ export type ConfirmOptions = {
 	confirm: string;
 	cancel: string;
 	onConfirm: () => unknown;
+	/** Runs when the modal closes without confirming. */
+	onCancel?: () => unknown;
 };
 
 export default class ConfirmModal extends Modal {
+	private confirmed = false;
+
 	constructor(
 		app: App,
 		private readonly options: ConfirmOptions,
@@ -28,6 +32,7 @@ export default class ConfirmModal extends Modal {
 					.setButtonText(confirm)
 					.setDestructive()
 					.onClick(() => {
+						this.confirmed = true;
 						this.close();
 						void onConfirm();
 					}),
@@ -36,5 +41,6 @@ export default class ConfirmModal extends Modal {
 
 	onClose() {
 		this.contentEl.empty();
+		if (!this.confirmed) void this.options.onCancel?.();
 	}
 }

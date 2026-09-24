@@ -4,6 +4,7 @@ import { Modal, Setting } from 'obsidian';
 import type { Ref } from '@/shared/reactive';
 import type { BaseTask, RemoveLocal, TaskNames } from '@/sync';
 import type { Progress } from '@/types';
+import ConfirmModal from '@/components/confirm-modal';
 import mountFileTree from '@/components/file-tree';
 import renderFailedTasks from '@/components/render-failed-tasks';
 import renderProgress from '@/components/render-progress';
@@ -96,6 +97,17 @@ export default class ProgressModal extends Modal {
 					if (shouldClose) this.close();
 				});
 			}),
+			ctx.on('requestConfirmMassDelete', (counts) => {
+				// Closing the dialog keeps the files: the safe answer.
+				new ConfirmModal(ctx.app, {
+					cancel: this.t('keepThem'),
+					confirm: this.t('deleteThem'),
+					message: this.t('massDeleteMessage', counts),
+					onCancel: () => this.dispatch('massDeleteConfirmed', false),
+					onConfirm: () => this.dispatch('massDeleteConfirmed', true),
+					title: this.t('massDeleteTitle'),
+				}).open();
+			}),
 			ctx.on('requestConfirmTasks', (tasks) => {
 				if (!this.opening) this.open();
 				const { unmount, getState } = mountFileTree(
@@ -130,6 +142,7 @@ export default class ProgressModal extends Modal {
 	declare readonly events: {
 		tasksConfirmed: Array<BaseTask>;
 		deleteConfirmed: DeleteConfirmReturn;
+		massDeleteConfirmed: boolean;
 	};
 
 	declare readonly i18n: {
@@ -137,6 +150,10 @@ export default class ProgressModal extends Modal {
 		completed: string;
 		failedTasksDescription: Snippet<number>;
 		confirmDeleteDescription: Snippet<number>;
+		massDeleteTitle: string;
+		massDeleteMessage: Snippet<{ local: number; remote: number }>;
+		deleteThem: string;
+		keepThem: string;
 		confirmTasksDescription: Snippet<TaskCounts>;
 		hide: string;
 		confirm: string;

@@ -31,6 +31,7 @@ import {
 	syncCancelledError,
 	taskMap,
 } from '@/sync';
+import { findMassDeletion, keepDeletedFiles } from '@/sync/mass-delete';
 import { prepareGlobMatch } from '@/utils/glob-match';
 import type { Dispatch, On } from './event-bus';
 import type { Translate } from './i18n';
@@ -75,6 +76,7 @@ export default class Sync {
 		remoteWalkProgress: Progress;
 		syncTerminated: SyncTerminateReason;
 		requestConfirmDelete: Array<RemoveLocal>;
+		requestConfirmMassDelete: { local: number; remote: number };
 		requestConfirmTasks: Array<BaseTask>;
 		syncCanceled: undefined;
 		taskCompleted: TaskInfo;
@@ -122,6 +124,24 @@ export default class Sync {
 			dispatch('requestConfirmTasks', tasks);
 		});
 
+	private readonly confirmMassDeletion = (counts: { local: number; remote: number }) =>
+		new Promise<boolean>((resolve, reject) => {
+			const { on, dispatch } = this.ctx;
+			const unsub1 = on('massDeleteConfirmed', (approved) => {
+				cleanup();
+				resolve(approved);
+			});
+			const unsub2 = on('syncCanceled', () => {
+				cleanup();
+				reject(syncCancelledError);
+			});
+			function cleanup() {
+				unsub1();
+				unsub2();
+			}
+			dispatch('requestConfirmMassDelete', counts);
+		});
+
 	private readonly confirmDeletion = (tasks: Array<RemoveLocal>) =>
 		new Promise<DeleteConfirmReturn>((resolve, reject) => {
 			const { on, dispatch } = this.ctx;
@@ -144,8 +164,15 @@ export default class Sync {
 		trigger: string,
 		options: SyncOptions = {},
 	): Promise<SyncTerminateReason> => {
-		const { settings, ctx, postProcess, confirmDeletion, confirmTasks, convertDeleteToUpload } =
-			this;
+		const {
+			settings,
+			ctx,
+			postProcess,
+			confirmDeletion,
+			confirmMassDeletion,
+			confirmTasks,
+			convertDeleteToUpload,
+		} = this;
 		const { on, dispatch, initializeSync, getConflictResolver, translate, getDecider } = ctx;
 		const {
 			decider = getDecider(),
@@ -235,16 +262,36 @@ export default class Sync {
 				tasks,
 				(task) => task instanceof AddRecord || task instanceof RemoveRecord,
 			);
-			if (needConfirmTasks && displayableTasks.length !== 0) {
+			const reviewed = needConfirmTasks && displayableTasks.length !== 0;
+			if (reviewed) {
 				const confirmResult = await confirmTasks(displayableTasks);
 				tasks = [...nonDisplayableTasks, ...confirmResult];
+			}
+
+			// A reviewed task list already showed every deletion.
+			let deletionsApproved = reviewed;
+			const massDeletion = findMassDeletion(
+				tasks,
+				Math.max(localStats.size, remoteStats.size, records.size),
+			);
+			if (!reviewed && massDeletion.exceeded) {
+				const { local, remote, threshold } = massDeletion;
+				dispatch(
+					'logSync',
+					`${local.length} local and ${remote.length} remote deletion(s) exceed the limit of ${threshold}; asking.`,
+				);
+				deletionsApproved = await confirmMassDeletion({
+					local: local.length,
+					remote: remote.length,
+				});
+				if (!deletionsApproved) tasks = keepDeletedFiles(tasks, massDeletion, taskFactory);
 			}
 
 			const [removeLocalTasks, otherTasks] = partition(
 				tasks,
 				(task) => task instanceof RemoveLocal,
 			);
-			if (needConfirmDeletion && removeLocalTasks.length !== 0) {
+			if (needConfirmDeletion && !deletionsApproved && removeLocalTasks.length !== 0) {
 				const { delete: deleted, reupload } = await confirmDeletion(removeLocalTasks);
 				tasks = [
 					...deleted,
