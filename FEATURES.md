@@ -65,5 +65,6 @@ Details: [Setup](TECHNICAL.md#setup).
   never in synced files.
 - Requests go only to Google, plus a webhook URL if you set one.
 - No telemetry, no analytics, no code downloaded at runtime.
+- The clipboard is written only when you press Copy, and never read.
 
 Details: [PRIVACY.md](PRIVACY.md), [Security model](TECHNICAL.md#security-model).
