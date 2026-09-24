@@ -51,8 +51,9 @@ export async function applyChanges(json: Json, snapshot: Snapshot): Promise<Snap
 	// A folder new to the snapshot, restored from the trash say, may bring files with no change of their own.
 	const arrivedFolders: Array<string> = [];
 	let pageToken = snapshot.token;
-	for (;;) {
-		const page = (await json(
+	let page: ChangeList;
+	do {
+		page = (await json(
 			buildUrl(DRIVE_API, '/changes', {
 				fields: `nextPageToken,newStartPageToken,changes(changeType,fileId,removed,file(${FILE_FIELDS},trashed))`,
 				pageSize: String(PAGE_SIZE),
@@ -71,13 +72,14 @@ export async function applyChanges(json: Json, snapshot: Snapshot): Promise<Snap
 				files.set(id, kept);
 			}
 		}
-		if (page.newStartPageToken) {
-			await addContents(json, files, arrivedFolders);
-			return { ...snapshot, files: [...files.values()], token: page.newStartPageToken };
+		if (!page.newStartPageToken) {
+			if (!page.nextPageToken)
+				throw new Error('Google Drive ended the changes without a token!');
+			pageToken = page.nextPageToken;
 		}
-		if (!page.nextPageToken) throw new Error('Google Drive ended the changes without a token!');
-		pageToken = page.nextPageToken;
-	}
+	} while (!page.newStartPageToken);
+	await addContents(json, files, arrivedFolders);
+	return { ...snapshot, files: [...files.values()], token: page.newStartPageToken };
 }
 
 async function addContents(json: Json, files: Map<string, DriveFile>, folders: Array<string>) {

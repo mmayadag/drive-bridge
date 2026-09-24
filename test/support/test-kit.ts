@@ -93,7 +93,6 @@ function runDecider(
 			record: {} as never,
 			remoteFs: {} as never,
 		} as never);
-		task.name = name;
 		task.prettyName = name;
 		tasks.push({
 			key: options.key,

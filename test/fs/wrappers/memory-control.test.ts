@@ -281,3 +281,24 @@ test('memory wrapper orders hanging operations by transfer size, not reservation
 	]);
 	await Promise.all([largerRead, smallerRead]);
 });
+
+test('getUid, delete, move, mkdir, stat, exists and list pass straight through', async () => {
+	const remote = fs();
+	const state = createSharedState(SIXTEEN_MIB);
+	const wrapper = memoryControlWrapper(remote.fs, state);
+
+	expect(wrapper.getUid()).toBe('uid');
+	await wrapper.delete('note.md');
+	await wrapper.move('old.md', 'new.md');
+	await wrapper.mkdir('folder/', true);
+	await wrapper.stat('note.md');
+	await wrapper.exists('note.md');
+	await wrapper.list('/', () => 'include');
+
+	expect(remote.calls.delete).toStrictEqual(['note.md']);
+	expect(remote.calls.move).toStrictEqual([['old.md', 'new.md']]);
+	expect(remote.calls.mkdir).toStrictEqual(['folder/']);
+	expect(remote.calls.stat).toStrictEqual(['note.md']);
+	expect(remote.calls.exists).toStrictEqual(['note.md']);
+	expect(remote.calls.list).toStrictEqual(['/']);
+});

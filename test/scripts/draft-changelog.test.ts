@@ -38,3 +38,13 @@ test('leaves out the fixes block when there are none', () => {
 		'## v0.1.9 - 2026-09-23\n\n- Sub-pages (#20).',
 	);
 });
+
+test('leaves out the blank separator when there are only fixes', () => {
+	expect(draftSection('0.1.10', [issue(21, 'Crash on startup', 'bug')], '2026-09-23')).toBe(
+		['## v0.1.10 - 2026-09-23', '', 'Fixes:', '', '- Crash on startup (#21).'].join('\n'),
+	);
+});
+
+test('an empty milestone drafts just the header', () => {
+	expect(draftSection('0.1.11', [], '2026-09-23')).toBe('## v0.1.11 - 2026-09-23\n');
+});

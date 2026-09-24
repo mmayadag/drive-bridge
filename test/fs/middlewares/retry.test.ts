@@ -124,3 +124,46 @@ test('retry middleware returns retryable status response after exhausting retrie
 	expect(harness.calls).toHaveLength(3);
 	expect(sleepSpy).toHaveBeenCalledTimes(2);
 });
+
+test('the default backoff delay is used when none is given', () => {
+	sleepSpy.mockClear();
+	let attempts = 0;
+	const harness = request(() => {
+		attempts += 1;
+		if (attempts < 2) throw { res: { status: 503 } };
+		return {};
+	});
+	const wrapped = retryMiddleware(harness.request);
+
+	expect(wrapped('retry.md')).resolves.toMatchObject({ status: 200 });
+	expect(sleepSpy).toHaveBeenCalledTimes(1);
+	// sleep is mocked, so this only checks the delay value backoff() actually computed.
+	const [delay] = sleepSpy.mock.calls[0];
+	expect(delay).toBeGreaterThanOrEqual(0);
+	expect(delay).toBeLessThanOrEqual(1000);
+});
+
+test('a retryable error message on a bare string (not wrapped in an object) is retried', () => {
+	sleepSpy.mockClear();
+	let attempts = 0;
+	const harness = request(() => {
+		attempts += 1;
+		if (attempts < 2) throw 'socket hang up';
+		return {};
+	});
+	const wrapped = retryMiddleware(harness.request, { maxRetry: 2, retryDelay: () => 25 });
+
+	expect(wrapped('retry.md')).resolves.toMatchObject({ status: 200 });
+	expect(sleepSpy).toHaveBeenCalledTimes(1);
+});
+
+test('a non-retryable bare string error is not retried', () => {
+	sleepSpy.mockClear();
+	const harness = request(() => {
+		throw 'just a plain string, not a known transient error';
+	});
+	const wrapped = retryMiddleware(harness.request, { maxRetry: 2, retryDelay: () => 25 });
+
+	expect(wrapped('retry.md')).rejects.toBe('just a plain string, not a known transient error');
+	expect(sleepSpy).not.toHaveBeenCalled();
+});

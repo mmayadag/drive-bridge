@@ -450,7 +450,6 @@ function createTaskFactory({
 			name === 'resolveConflict'
 				? new taskMap[name]({ ...options, ...baseOptions, resolver } as never)
 				: new taskMap[name]({ ...options, ...baseOptions } as never);
-		task.name = name;
 		task.prettyName = translate(name);
 		return task;
 	}) as TaskFactory;

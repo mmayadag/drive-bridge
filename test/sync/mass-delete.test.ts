@@ -18,7 +18,6 @@ const taskFactory = ((name: TaskNames, options: TaskOptions) => {
 		record: {} as never,
 		remoteFs: {} as never,
 	} as never);
-	task.name = name;
 	return task;
 }) as TaskFactory;
 

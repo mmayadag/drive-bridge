@@ -7,6 +7,7 @@ import {
 	stripEndSlash,
 	basename,
 	dirname,
+	encodeUrl,
 } from '@/shared/path';
 
 test('normalizes path characters', () => {
@@ -44,4 +45,10 @@ test('normalizes urls', () => {
 test('strips trailing slash', () => {
 	expect(stripEndSlash('folder/')).toBe('folder');
 	expect(stripEndSlash('folder')).toBe('folder');
+});
+
+test('percent-encodes each path segment without touching the slashes', () => {
+	expect(encodeUrl("folder/a note (draft)'s.md")).toBe('folder/a%20note%20%28draft%29%27s.md');
+	expect(encodeUrl('folder/')).toBe('folder/');
+	expect(encodeUrl('/leading')).toBe('/leading');
 });

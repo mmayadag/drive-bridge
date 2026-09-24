@@ -1,10 +1,14 @@
 import type { OptionsWithBothFileStats } from '../decision/interface';
-import type { ConflictResolver } from './interface';
+import type { BaseTaskOptions, ConflictResolver } from './interface';
 import { BaseTask } from './interface';
 
-export default class ResolveConflict extends BaseTask<
-	OptionsWithBothFileStats & { resolver: ConflictResolver }
-> {
+type ResolveConflictOptions = OptionsWithBothFileStats & { resolver: ConflictResolver };
+
+export default class ResolveConflict extends BaseTask<ResolveConflictOptions> {
+	constructor(options: BaseTaskOptions & ResolveConflictOptions) {
+		super(options, 'resolveConflict');
+	}
+
 	exec = () =>
 		this.options.resolver({
 			key: this.key,

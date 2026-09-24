@@ -245,3 +245,18 @@ test('mkdir upserts folder record', async () => {
 	expect(getRemoteStore().get('remote-folder/')).toStrictEqual(folder('remote-folder/'));
 	expect(getLocalStore().get('local-folder/')).toStrictEqual(folder('local-folder/'));
 });
+
+test('getUid, read, readStream and exists pass straight through', async () => {
+	const remote = fs({ uid: 'remote-fs' });
+	const wrapper = remoteContextWrapper(remote.fs);
+	const stat = file('note.md');
+
+	expect(wrapper.getUid()).toBe('remote-fs');
+	await wrapper.read('note.md', stat);
+	await wrapper.readStream('note.md', stat);
+	await wrapper.exists('note.md');
+
+	expect(remote.calls.read).toStrictEqual([['note.md', stat]]);
+	expect(remote.calls.readStream).toStrictEqual([['note.md', stat]]);
+	expect(remote.calls.exists).toStrictEqual(['note.md']);
+});

@@ -1,8 +1,13 @@
 import moveValue from '@/utils/move-value';
 import type { OptionsWithLocalStatAndOldKey } from '../decision/interface';
+import type { BaseTaskOptions } from './interface';
 import { BaseTask } from './interface';
 
 export default class MoveRemote extends BaseTask<OptionsWithLocalStatAndOldKey> {
+	constructor(options: BaseTaskOptions & OptionsWithLocalStatAndOldKey) {
+		super(options, 'moveRemote');
+	}
+
 	async exec() {
 		const { key, oldKey } = this.options;
 		await this.remoteFs.move(oldKey, key);

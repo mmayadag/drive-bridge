@@ -176,3 +176,28 @@ test('logs the webhook origin, never the token in its path or query', async () =
 	expect(logs.join(' ')).not.toContain('s3cret');
 	expect(logs.join(' ')).toContain('https://hooks.example.com/…');
 });
+
+test('a slow endpoint is logged while the post is still pending', () => {
+	const originalSet = window.setTimeout;
+	const scheduled: Array<() => void> = [];
+	window.setTimeout = ((fn: () => void) => {
+		scheduled.push(fn);
+		return 0;
+	}) as never;
+	try {
+		const { emit, logs } = setup({ webhookOnFinish: 'https://hook.example.com/secret' });
+		emit('syncTerminated', { result: 'completed' });
+		expect(scheduled).toHaveLength(1);
+		scheduled[0]?.();
+		expect(logs).toStrictEqual(['Webhook to `https://hook.example.com/…` is taking long.']);
+	} finally {
+		window.setTimeout = originalSet;
+	}
+});
+
+test('dispose stops listening to sync events', () => {
+	const { emit, webhooks } = setup({ webhookOnFinish: 'https://hook/end' });
+	webhooks.dispose();
+	emit('syncTerminated', { result: 'completed' });
+	expect(posts).toHaveLength(0);
+});

@@ -42,3 +42,36 @@ test('disposing a memory database is a no-op', () => {
 	expect(db.getStore('s').get('k')).toBe('v');
 	deleteMemoryDB('kv-test-dispose');
 });
+
+test('a memory store lists, deletes and clears its entries', () => {
+	const db = openMemoryDB<Record<string, number>>('kv-test-listing');
+	const store = db.getStore('s');
+	store.set('a', 1);
+	store.set('b', 2);
+	expect(store.keys()).toStrictEqual(['a', 'b']);
+	expect(store.values()).toStrictEqual([1, 2]);
+	expect(store.entries()).toStrictEqual([
+		['a', 1],
+		['b', 2],
+	]);
+
+	store.delete('a');
+	expect(store.keys()).toStrictEqual(['b']);
+	store.clear();
+	expect(store.entries()).toStrictEqual([]);
+	deleteMemoryDB('kv-test-listing');
+});
+
+test('a memory database deletes one store or clears them all', () => {
+	const db = openMemoryDB<Record<string, number>>('kv-test-drop');
+	db.getStore('a').set('x', 1);
+	db.getStore('b').set('x', 2);
+
+	db.deleteStore('a');
+	expect(db.getStoreNames()).toStrictEqual(['b']);
+	expect(db.getStore('a').get('x')).toBeUndefined();
+
+	db.clearStores();
+	expect(db.getStoreNames()).toStrictEqual([]);
+	deleteMemoryDB('kv-test-drop');
+});

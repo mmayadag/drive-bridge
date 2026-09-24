@@ -90,7 +90,12 @@ export function stubElement(): never {
 	}) as never;
 }
 
-export function setIcon() {}
+// Real Obsidian replaces the element's content with an inline <svg>; some source code reads
+// that back (e.g. to style it), so this stub does the same instead of doing nothing.
+export function setIcon(el: { empty?: () => void; createSvg?: (tag: string) => unknown }) {
+	el.empty?.();
+	el.createSvg?.('svg');
+}
 export function setTooltip() {}
 export function getLanguage() {
 	return 'en';

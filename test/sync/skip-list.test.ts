@@ -16,7 +16,6 @@ const task = (name: TaskNames, key: string) => {
 		remote: file(key),
 		remoteFs: {} as never,
 	} as TaskOptions as never);
-	created.name = name;
 	return created as BaseTask;
 };
 

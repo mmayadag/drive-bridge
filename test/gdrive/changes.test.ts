@@ -138,6 +138,26 @@ test('a snapshot is used for a day, for the same account only', () => {
 	expect(isUsable(taken, 'user-1', 500)).toBe(false);
 });
 
+test('a multi-page changes list is followed to its end token', async () => {
+	const { json, urls } = drive({
+		'/changes?c2': {
+			changes: [{ file: note('new'), fileId: 'new' }],
+			newStartPageToken: 't2',
+		},
+		'/changes?t1': {
+			changes: [],
+			nextPageToken: 'c2',
+		},
+	});
+	const next = await applyChanges(json, snapshot([]));
+
+	expect(urls).toHaveLength(2);
+	expect(urls[0]).toContain('pageToken=t1');
+	expect(urls[1]).toContain('pageToken=c2');
+	expect(next.token).toBe('t2');
+	expect(next.files.map((file) => file.id)).toStrictEqual(['new']);
+});
+
 test('storage errors only cost a full scan', async () => {
 	const failing = {
 		getStore: () =>

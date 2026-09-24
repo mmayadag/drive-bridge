@@ -157,7 +157,6 @@ function createMoveTask(
 		side === 'local'
 			? new MoveLocal({ ...createTask.options, oldKey: deleteTask.key } as never)
 			: new MoveRemote({ ...createTask.options, oldKey: deleteTask.key } as never);
-	move.name = name;
 	move.prettyName = translate(name);
 	return move;
 }
