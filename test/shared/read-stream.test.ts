@@ -142,3 +142,31 @@ test('runs finally after the stream completes', async () => {
 	await reader.cancel();
 	expect(finalized).toBe(true);
 });
+
+test('a finalize that rejects or throws is swallowed', async () => {
+	let rejected = false;
+	const empty = createRangeReadStream({
+		chunkSize: 2,
+		concurrency: 2,
+		finalize: () => {
+			rejected = true;
+			return Promise.reject(new Error('cleanup failed'));
+		},
+		requestRange: () => Promise.resolve(new Uint8Array()),
+		size: 0,
+	});
+	expect(await collectStream(empty)).toStrictEqual(new Uint8Array());
+	expect(rejected).toBe(true);
+
+	const throwing = createRangeReadStream({
+		chunkSize: 2,
+		concurrency: 2,
+		finalize: () => {
+			throw new Error('cleanup failed');
+		},
+		requestRange: () => Promise.resolve(new Uint8Array()),
+		size: 0,
+	});
+	expect(await collectStream(throwing)).toStrictEqual(new Uint8Array());
+	await flush();
+});

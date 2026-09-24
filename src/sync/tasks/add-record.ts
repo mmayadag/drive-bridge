@@ -1,8 +1,13 @@
 import type { RecordStat, Stat } from '@/types';
 import type { OptionsWithBothStats } from '../decision/interface';
+import type { BaseTaskOptions } from './interface';
 import { BaseTask } from './interface';
 
 export default class AddRecord extends BaseTask<OptionsWithBothStats> {
+	constructor(options: BaseTaskOptions & OptionsWithBothStats) {
+		super(options, 'addRecord');
+	}
+
 	async exec() {
 		await this.record.set(this.key, toRecordStat(this.local, this.remote));
 	}

@@ -198,26 +198,11 @@ function canMatchAnyDescendant(rule: CompiledRule, path: Path): boolean {
 		return matcher.test(path.segments[0]);
 	}
 
-	const pending: Array<[number, boolean]> = [];
-	for (const state of prefixStates(rule.segments, path.segments)) pending.push([state, false]);
-	const visited = new Set<string>();
-
-	while (pending.length > 0) {
-		const [index, consumed] = pending.pop() as [number, boolean];
-		const key = `${index}:${consumed}`;
-		if (visited.has(key)) continue;
-		visited.add(key);
-
-		if (index === rule.segments.length) {
-			if (consumed) return true;
-			continue;
-		}
-
-		const segment = rule.segments[index];
-		if (segment === '**') pending.push([index + 1, consumed], [index, true]);
-		else pending.push([index + 1, true]);
-	}
-	return false;
+	// From any state short of the end, the rest of the pattern can still match a deeper
+	// path: a segment consumes one level and a globstar can consume any number. So only
+	// a prefix that is already used up, or that failed, rules out every descendant.
+	const { length } = rule.segments;
+	return [...prefixStates(rule.segments, path.segments)].some((state) => state < length);
 }
 
 export function prepareGlobMatch(

@@ -83,7 +83,6 @@ const request: Request = async (url: string, params?: RequestParam) => {
 };
 
 export default class Registrar {
-	private readonly cleanupCallbacks: Array<() => void> = [];
 	private readonly localFsWrapperRegistry = new Set<FsWrapperEntry>();
 	private readonly remoteFsWrapperRegistry = new Set<FsWrapperEntry>();
 	private readonly localOptimizerRegistry = new Set<OptimizerEntry>();
@@ -207,8 +206,6 @@ export default class Registrar {
 		registerTrigger: mapRegister(this.triggerRegistry),
 		remoteFsRegistry: this.remoteFsRegistry,
 	};
-
-	readonly dispose = () => this.cleanupCallbacks.splice(0).forEach((fn) => fn());
 }
 
 function wrapInOrder<T>(initial: T, set: Set<OrderedWrapperEntry<T>>) {

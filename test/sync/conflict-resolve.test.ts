@@ -78,3 +78,51 @@ test('equal times keep the Drive version', async () => {
 	await latestSurviveResolver(tie.payload);
 	expect(tie.local.calls.write).toHaveLength(1);
 });
+
+function setupVanished(localMtime: number, remoteMtime: number) {
+	const values = new Map<string, RecordStat>();
+	const record = {
+		set: (key: string, value: RecordStat) => Promise.resolve(void values.set(key, value)),
+	} as unknown as RecordStore;
+	const vanished = () => {
+		const error = new Error('not found') as Error & { status: number };
+		error.status = 404;
+		throw error;
+	};
+	const local = fs({ control: { read: vanished } });
+	const remote = fs({ control: { read: vanished } });
+	return {
+		local,
+		payload: {
+			key: 'note.md',
+			local: file('note.md', { mtime: localMtime, uid: 'local-uid' }),
+			localFs: local.fs,
+			record,
+			remote: file('note.md', { mtime: remoteMtime, uid: 'remote-uid' }),
+			remoteFs: remote.fs,
+		},
+		remote,
+		values,
+	};
+}
+
+test('keep local leaves no record when the vault file vanished before reading', async () => {
+	const { payload, remote, values } = setupVanished(1, 2);
+	await keepLocalResolver(payload);
+	expect(remote.calls.write).toHaveLength(0);
+	expect(values.has('note.md')).toBe(false);
+});
+
+test('keep remote leaves no record when the Drive file vanished before reading', async () => {
+	const { local, payload, values } = setupVanished(2, 1);
+	await keepRemoteResolver(payload);
+	expect(local.calls.write).toHaveLength(0);
+	expect(values.has('note.md')).toBe(false);
+});
+
+test('latest survives leaves no record when the winning side vanished before reading', async () => {
+	const { payload, remote, values } = setupVanished(5, 3);
+	await latestSurviveResolver(payload);
+	expect(remote.calls.write).toHaveLength(0);
+	expect(values.has('note.md')).toBe(false);
+});

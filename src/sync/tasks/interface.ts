@@ -34,7 +34,10 @@ export type ConflictResolverPayload = {
 export type ConflictResolver = (payload: ConflictResolverPayload) => MaybePromise<void>;
 
 export abstract class BaseTask<T extends TaskOptions = TaskOptions> {
-	constructor(readonly options: BaseTaskOptions & T) {
+	constructor(
+		readonly options: BaseTaskOptions & T,
+		readonly name: TaskNames,
+	) {
 		this.remoteFs = options.remoteFs;
 		this.localFs = options.localFs;
 		this.record = options.record;
@@ -45,7 +48,6 @@ export abstract class BaseTask<T extends TaskOptions = TaskOptions> {
 	protected readonly remoteFs: Fs;
 	protected readonly localFs: Fs;
 	protected readonly record: RecordStore;
-	declare name: TaskNames;
 	declare prettyName: string;
 	readonly key: string;
 	readonly local: (BaseTaskOptions & T)['local'];

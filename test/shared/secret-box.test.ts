@@ -29,3 +29,10 @@ test('a wrong passphrase or a changed blob is rejected', async () => {
 	expect(await failure(open(tampered, 'right'))).toBeInstanceOf(WrongPassphraseError);
 	expect(await failure(open('not a secret', 'right'))).toBeInstanceOf(WrongPassphraseError);
 });
+
+test('a blob that is not valid base64 is rejected as damaged', async () => {
+	const error = await failure(open('drive-bridge:v1:%%%', 'right'));
+	expect(error).toBeInstanceOf(WrongPassphraseError);
+	expect((error as Error).message).toContain('damaged');
+	expect((error as Error).name).toBe('WrongPassphraseError');
+});

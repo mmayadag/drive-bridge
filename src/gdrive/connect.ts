@@ -3,7 +3,10 @@ import type { Account, TokenManager } from './auth';
 import { fetchAccount, parseRefreshToken } from './auth';
 
 class LimitedScopeError extends Error {
-	override name = 'LimitedScopeError';
+	constructor() {
+		super();
+		this.name = 'LimitedScopeError';
+	}
 }
 
 export type ConnectResult =

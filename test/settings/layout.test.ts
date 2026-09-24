@@ -9,9 +9,11 @@ class FakeTab {
 void mock.module('obsidian', () => ({ ...ObsidianMock, PluginSettingTab: FakeTab }));
 
 const { default: Setting } = await import('@/modules/setting');
+const { countAutomaticSyncs } = await import('@/settings/layout');
 const { ref } = await import('@/shared/reactive');
 
 const settings = {
+	automaticSyncPaused: false,
 	conflictResolver: 'renameAndKeepBoth',
 	customHeaders: [],
 	decider: 'bidirectional',
@@ -147,4 +149,41 @@ test('a risky strategy replaces the entry description with its warning', () => {
 	expect(entry()?.desc).not.toBe('syncStrategyDescription');
 	expect((entry()?.desc as { textContent?: string })?.textContent).toContain('deletes');
 	settings.decider = 'bidirectional';
+});
+
+test('countAutomaticSyncs counts each independent automatic trigger', () => {
+	expect(
+		countAutomaticSyncs({
+			realtimeSync: { enabled: false },
+			scheduledSync: { enabled: false },
+			startupSync: { enabled: false },
+			syncOnLeave: false,
+		} as never),
+	).toStrictEqual({ on: 0, total: 4 });
+	expect(
+		countAutomaticSyncs({
+			realtimeSync: { enabled: true },
+			scheduledSync: { enabled: true },
+			startupSync: { enabled: false },
+			syncOnLeave: true,
+		} as never),
+	).toStrictEqual({ on: 3, total: 4 });
+});
+
+test('the automatic-sync page reports how many triggers are on, or that they are paused', () => {
+	const [more] = (buildTab() as Array<Page>).slice(-3);
+	const automatic = more?.items?.[0] as Page;
+	// The fake translate() in this file ignores its argument, so only the key is asserted;
+	// countAutomaticSyncs itself is checked above.
+	expect(automatic.displayValue()).toBe('xOfYOn');
+
+	settings.automaticSyncPaused = true;
+	expect(automatic.displayValue()).toBe('automaticSyncPausedStatus');
+	settings.automaticSyncPaused = false;
+});
+
+test('the filters page reports how many rules are configured', () => {
+	const [more] = (buildTab() as Array<Page>).slice(-3);
+	const filters = more?.items?.[1] as Page;
+	expect(filters.displayValue()).toBe('xConfigured');
 });

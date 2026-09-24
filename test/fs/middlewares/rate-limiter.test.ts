@@ -24,3 +24,19 @@ test('rate limiter middleware queues second request until first resolves', async
 	expect(secondPending).resolves.toMatchObject({ status: 202 });
 	expect(harness.calls).toStrictEqual([{ url: 'first.md' }, { url: 'second.md' }]);
 });
+
+test('rate limiter middleware spaces out requests by minInterval', async () => {
+	const harness = request(() => ({ status: 200 }));
+	const wrapped = rateLimiterMiddleware(harness.request, { maxConcurrency: 5, minInterval: 20 });
+
+	const first = wrapped('first.md');
+	const second = wrapped('second.md');
+	await flush();
+	// The second call arrives before minInterval has elapsed, so it must wait for the timer
+	// rather than running immediately.
+	expect(harness.calls).toStrictEqual([{ url: 'first.md' }]);
+
+	await first;
+	await second;
+	expect(harness.calls).toStrictEqual([{ url: 'first.md' }, { url: 'second.md' }]);
+});

@@ -5,8 +5,13 @@ export default class ReadWriteGate {
 	private readers = 0;
 	private writer = false;
 	private waitingWriters = 0;
-	private readonly readWaiters: Array<() => void> = [];
-	private readonly writeWaiters: Array<() => void> = [];
+	private readonly readWaiters: Array<() => void>;
+	private readonly writeWaiters: Array<() => void>;
+
+	constructor() {
+		this.readWaiters = [];
+		this.writeWaiters = [];
+	}
 
 	private wake() {
 		if (this.writer || this.readers > 0) return;

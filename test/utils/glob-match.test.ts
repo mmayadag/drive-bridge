@@ -151,6 +151,30 @@ test('probes excluded directories that may contain included descendants', () => 
 	});
 });
 
+test('probes through a globstar inclusion at the excluded folder itself', () => {
+	// The inclusion (a/**) shares its first segment with the excluded folder, so checking
+	// whether it could still match something deeper has to expand the trailing globstar.
+	const match = prepareGlobMatch([rule('a/**')], [rule('a/')]);
+	expect(results(['a/'], match)).toEqual({ 'a/': 'probe' });
+});
+
+test('probes through a globstar inclusion that resumes with a literal segment', () => {
+	const match = prepareGlobMatch([rule('a/**/specific.txt')], [rule('a/')]);
+	expect(results(['a/'], match)).toEqual({ 'a/': 'probe' });
+});
+
+test('probes through several literal segments before finding a match', () => {
+	const match = prepareGlobMatch([rule('a/b/c')], [rule('a/')]);
+	expect(results(['a/'], match)).toEqual({ 'a/': 'probe' });
+});
+
+test('an anchored, single-segment inclusion cannot reach into a subfolder', () => {
+	// The inclusion is root-only and the excluded folder is one level down, so nothing
+	// inside it could ever qualify: the folder is fully excluded rather than probed.
+	const match = prepareGlobMatch([rule('/keep.txt')], [rule('sub/')]);
+	expect(results(['sub/'], match)).toEqual({ 'sub/': 'exclude' });
+});
+
 test('honors case sensitivity per rule', () => {
 	const match = prepareGlobMatch([], [rule('README.md'), rule('Secret.txt', true)]);
 	expect(results(['readme.md', 'README.md', 'secret.txt', 'Secret.txt'], match)).toEqual({

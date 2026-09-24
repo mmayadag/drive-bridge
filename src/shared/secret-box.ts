@@ -57,7 +57,10 @@ export async function seal(plaintext: string, passphrase: string): Promise<strin
 }
 
 export class WrongPassphraseError extends Error {
-	override name = 'WrongPassphraseError';
+	constructor(message: string) {
+		super(message);
+		this.name = 'WrongPassphraseError';
+	}
 }
 
 /** Reverses `seal`. A wrong passphrase or a changed blob throws `WrongPassphraseError`. */

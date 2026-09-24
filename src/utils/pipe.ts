@@ -5,12 +5,15 @@ import type { Binary, FileStat } from '@/types';
 import { STREAM_RESERVATION_SIZE } from '@/fs/wrappers/memory-control';
 import { getStatus } from '@/shared/error';
 
-function getSizeCaps(): { streamThreshold: number; chunkSize: number; concurrency: number } {
+export function getSizeCaps(
+	device: { deviceMemory?: unknown; hardwareConcurrency: number } = navigator,
+	isAndroidApp = Platform.isAndroidApp,
+): { streamThreshold: number; chunkSize: number; concurrency: number } {
 	let size = 5 * 1024 ** 2; // 5 MiB
-	if ('deviceMemory' in navigator && typeof navigator.deviceMemory === 'number') {
-		if (navigator.deviceMemory <= 4) size /= 2;
-	} else if (navigator.hardwareConcurrency <= 4) size /= 2;
-	if (Platform.isAndroidApp) size /= 2;
+	if (typeof device.deviceMemory === 'number') {
+		if (device.deviceMemory <= 4) size /= 2;
+	} else if (device.hardwareConcurrency <= 4) size /= 2;
+	if (isAndroidApp) size /= 2;
 	const chunkSize = size * 0.8;
 	return {
 		chunkSize,

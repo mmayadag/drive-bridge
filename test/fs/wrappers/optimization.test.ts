@@ -348,3 +348,124 @@ test('optimization wrapper rejects anticipated write before write arrives', asyn
 	expect(rejection).toBe(optimizerError);
 	await pendingMkdir;
 });
+
+test('an anticipated write the optimizer resolves settles with its uid without writing', async () => {
+	const local = fs();
+	const wrapper = optimizationWrapper(local.fs, {
+		batchOptimizer: ({ atoms }) => {
+			for (const atom of atoms) if (atom.type === 'write') atom.resolve('optimized-uid');
+			return atoms.filter((atom) => atom.type !== 'write');
+		},
+		thisPool: new Set(['note.md']),
+	});
+	const stat = file('note.md');
+
+	expect(() => wrapper.read('transformed/note.md', stat)).toThrow();
+	const pendingMkdir = wrapper.mkdir('folder/');
+	await flushOptimization();
+	const uid = await wrapper.write('transformed/note.md', bytes('body'), stat);
+
+	expect(uid).toBe('optimized-uid');
+	expect(local.calls.write).toStrictEqual([]);
+	await pendingMkdir;
+});
+
+test('a queued atom rejected by the optimizer without ever being executed propagates', async () => {
+	// A lone atom takes flush()'s single-op fast path and skips the optimizer entirely, so
+	// this needs at least two queued atoms to reach the batch path that can reject one.
+	const optimizerError = new Error('optimizer rejected without executing');
+	const remote = fs();
+	const wrapper = optimizationWrapper(remote.fs, {
+		batchOptimizer: ({ atoms }) => {
+			const [rejected, ...rest] = atoms;
+			rejected?.reject(optimizerError);
+			return rest;
+		},
+		thisPool: new Set(),
+	});
+
+	const rejectedPending = wrapper.delete('note.md');
+	const keptPending = wrapper.mkdir('folder/');
+	await flushOptimization();
+
+	let rejection: unknown;
+	try {
+		await rejectedPending;
+	} catch (error) {
+		rejection = error;
+	}
+	expect(rejection).toBe(optimizerError);
+	expect(remote.calls.delete).toStrictEqual([]);
+	await keptPending;
+	expect(remote.calls.mkdir).toStrictEqual(['folder/']);
+});
+
+test('a queued atom the optimizer resolves without ever executing settles without delegating', async () => {
+	const remote = fs();
+	const wrapper = optimizationWrapper(remote.fs, {
+		batchOptimizer: ({ atoms }) => {
+			const [resolved, ...rest] = atoms;
+			(resolved as { resolve: () => void } | undefined)?.resolve();
+			return rest;
+		},
+		thisPool: new Set(),
+	});
+
+	const resolvedPending = wrapper.delete('note.md');
+	const keptPending = wrapper.mkdir('folder/');
+	await flushOptimization();
+
+	await resolvedPending;
+	expect(remote.calls.delete).toStrictEqual([]);
+	await keptPending;
+	expect(remote.calls.mkdir).toStrictEqual(['folder/']);
+});
+
+test('the optimization wrapper delegates getUid, move, stat, exists and list unchanged', async () => {
+	const remote = fs();
+	const wrapper = optimizationWrapper(remote.fs, {
+		batchOptimizer: ({ atoms }) => atoms,
+		thisPool: new Set(),
+	});
+
+	expect(wrapper.getUid()).toBe('uid');
+	await wrapper.stat('note.md');
+	await wrapper.exists('note.md');
+	await wrapper.list('/', () => 'include');
+	const pendingMove = wrapper.move('old.md', 'new.md');
+	await flushOptimization();
+	await pendingMove;
+
+	expect(remote.calls.stat).toStrictEqual(['note.md']);
+	expect(remote.calls.exists).toStrictEqual(['note.md']);
+	expect(remote.calls.list).toStrictEqual(['/']);
+	expect(remote.calls.move).toStrictEqual([['old.md', 'new.md']]);
+});
+
+test('the optimization companion delegates every operation to the original fs', async () => {
+	const remote = fs();
+	const companion = optimizationCompanionWrapper(remote.fs, {
+		getThatFs: () => remote.fs,
+		thatPool: new Set(),
+	});
+	const stat = file('note.md');
+
+	expect(companion.getUid()).toBe('uid');
+	await companion.write('note.md', bytes('x'), stat);
+	await companion.writeStream('note.md', stream([bytes('x')]), stat);
+	await companion.delete('note.md');
+	await companion.mkdir('folder/', true);
+	await companion.stat('note.md');
+	await companion.exists('note.md');
+	await companion.list('/', () => 'include');
+	await companion.move('old.md', 'new.md');
+
+	expect(remote.calls.write).toHaveLength(1);
+	expect(remote.calls.writeStream).toHaveLength(1);
+	expect(remote.calls.delete).toStrictEqual(['note.md']);
+	expect(remote.calls.mkdir).toStrictEqual(['folder/']);
+	expect(remote.calls.stat).toStrictEqual(['note.md']);
+	expect(remote.calls.exists).toStrictEqual(['note.md']);
+	expect(remote.calls.list).toStrictEqual(['/']);
+	expect(remote.calls.move).toStrictEqual([['old.md', 'new.md']]);
+});

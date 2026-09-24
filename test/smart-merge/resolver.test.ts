@@ -56,6 +56,30 @@ test('resolver should merge when base text exists', async () => {
 	});
 });
 
+test('resolver just re-records when both sides already match, even with a base', async () => {
+	const local = fs({ control: { read: () => bytes('same text') } });
+	const remote = fs({ control: { read: () => bytes('same text') } });
+	const resolver = smartMergeResolver(mergeOptions, db, () => 'namespace');
+	await db.getStore('base-text-namespace').set('note.md', 'same text');
+
+	await resolver({
+		key: 'note.md',
+		local: file('note.md', { mtime: 2, uid: 'local-1' }),
+		localFs: local.fs,
+		record,
+		remote: file('note.md', { mtime: 3, uid: 'remote-1' }),
+		remoteFs: remote.fs,
+	});
+
+	expect(local.calls.write).toHaveLength(0);
+	expect(remote.calls.write).toHaveLength(0);
+	expect(await record.get('note.md')).toStrictEqual({
+		isDir: false,
+		local: 'local-1',
+		remote: 'remote-1',
+	});
+});
+
 test('resolver keeps both versions when base text is missing', async () => {
 	const local = fs({ control: { read: () => bytes('local version') } });
 	const remote = fs({ control: { read: () => bytes('remote version') } });

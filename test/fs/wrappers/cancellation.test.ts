@@ -45,3 +45,36 @@ test('cancellation wrapper rejects writeStream after resolution when cancelled',
 	expect(pending).rejects.toBe(syncCancelledError);
 	expect(harness.calls.writeStream).toStrictEqual([['stream.md', streamStat]]);
 });
+
+test('every operation delegates through when never cancelled', async () => {
+	const harness = fs();
+	const wrapper = cancellationWrapper(harness.fs, ref(false));
+	const stat = file('note.md');
+
+	expect(wrapper.getUid()).toBe('uid');
+	await wrapper.read('note.md', stat);
+	await wrapper.readStream('note.md', stat);
+	await wrapper.delete('note.md');
+	await wrapper.move('old.md', 'new.md');
+	await wrapper.mkdir('folder/', true);
+	await wrapper.stat('note.md');
+	await wrapper.exists('note.md');
+	await wrapper.list('/', () => 'include');
+
+	expect(harness.calls.read).toStrictEqual([['note.md', stat]]);
+	expect(harness.calls.readStream).toStrictEqual([['note.md', stat]]);
+	expect(harness.calls.delete).toStrictEqual(['note.md']);
+	expect(harness.calls.move).toStrictEqual([['old.md', 'new.md']]);
+	expect(harness.calls.mkdir).toStrictEqual(['folder/']);
+	expect(harness.calls.stat).toStrictEqual(['note.md']);
+	expect(harness.calls.exists).toStrictEqual(['note.md']);
+	expect(harness.calls.list).toStrictEqual(['/']);
+});
+
+test('a "both"-guarded operation also rejects before delegation when already cancelled', () => {
+	const harness = fs();
+	const wrapper = cancellationWrapper(harness.fs, ref(true));
+
+	expect(wrapper.delete('note.md')).rejects.toBe(syncCancelledError);
+	expect(harness.calls.delete).toStrictEqual([]);
+});

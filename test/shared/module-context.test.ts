@@ -20,6 +20,17 @@ test('createContext merges module keys, flattens root and injects results', () =
 	expect(context.__getModule__(Second).settings).toBe(context.settings);
 });
 
+test('__assign__ merges extra values into the merged keys and returns the context', () => {
+	class Base {
+		settings = { a: 1 };
+	}
+	const context = createContext([Base] as const, { mergeKeys: ['settings'] });
+
+	const returned = context.__assign__({ settings: { b: 2 } } as never);
+	expect(returned).toBe(context);
+	expect(context.settings as object).toEqual({ a: 1, b: 2 });
+});
+
 test('__addModule__ merges a late module', () => {
 	class Base {
 		settings = { a: 1 };

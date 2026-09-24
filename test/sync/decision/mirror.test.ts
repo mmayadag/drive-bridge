@@ -85,6 +85,25 @@ for (const [name, decider, source] of strategies) {
 		]);
 	});
 
+	test(`${name} records a matching unrecorded folder on both sides`, () => {
+		const tasks = runDecider(decider, {
+			...sourceStats(folder('docs/')),
+			...targetStats(folder('docs/')),
+		});
+
+		expect(taskNames(tasks)).toStrictEqual(['addRecord']);
+	});
+
+	test(`${name} leaves a matching folder alone once it is recorded`, () => {
+		const tasks = runDecider(decider, {
+			...sourceStats(folder('docs/')),
+			...targetStats(folder('docs/')),
+			records: new Map([['docs/', folderRecord()]]),
+		});
+
+		expect(tasks).toHaveLength(0);
+	});
+
 	test(`${name} creates an authoritative folder and clears stale records`, () => {
 		const sourceFolder = folder('docs/');
 		const tasks = runDecider(decider, {

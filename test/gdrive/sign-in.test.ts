@@ -88,3 +88,29 @@ test('reports Google errors', async () => {
 	expect(failure).toBeInstanceOf(Error);
 	expect((failure as Error).message).toBe('Bad code');
 });
+
+test('a 200 response with no refresh token and no error message says so', async () => {
+	response = { json: {}, status: 200 };
+	const failure = await exchangeCode({
+		clientId: 'id',
+		clientSecret: 's',
+		code: 'c',
+		verifier: 'v',
+	})
+		.then(() => {})
+		.catch((error: unknown) => error);
+	expect((failure as Error).message).toBe('Google returned no refresh token.');
+});
+
+test('a failing response with no error message falls back to the HTTP status', async () => {
+	response = { json: {}, status: 503 };
+	const failure = await exchangeCode({
+		clientId: 'id',
+		clientSecret: 's',
+		code: 'c',
+		verifier: 'v',
+	})
+		.then(() => {})
+		.catch((error: unknown) => error);
+	expect((failure as Error).message).toBe('HTTP 503');
+});

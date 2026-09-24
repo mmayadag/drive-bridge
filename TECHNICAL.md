@@ -594,7 +594,9 @@ CI fails when they drop below `FLOOR` in `scripts/coverage-summary.ts`. The
 floor follows what the tests already reach: raise it a point or two per
 release as more gets covered, never lower it to let a change through. The
 sync, Drive and vault paths are kept well above it; settings screens and
-modals are covered mostly by the load test and device testing.
+modals are covered mostly by the load test and device testing. Only what ships
+in `main.js` is measured: `bunfig.toml` leaves out `scripts/`, whose tests
+still run but whose command-line glue (git, files, prompts) is not counted.
 
 ### Release checklist
 

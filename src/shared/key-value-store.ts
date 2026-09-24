@@ -60,7 +60,11 @@ const ignore = () => {};
 // --- Memory backend ---------------------------------------------------------------------
 
 class MemoryStore<T> implements StoreSync<T> {
-	private readonly map = new Map<string, T>();
+	private readonly map: Map<string, T>;
+
+	constructor() {
+		this.map = new Map();
+	}
 
 	get = (key: string) => this.map.get(key);
 	set = (key: string, value: T) => void this.map.set(key, value);
@@ -82,8 +86,13 @@ class MemoryStore<T> implements StoreSync<T> {
 }
 
 class MemoryDatabase {
-	private readonly stores = new Map<string, MemoryStore<unknown>>();
-	private readonly meta: Record<string, unknown> = {};
+	private readonly stores: Map<string, MemoryStore<unknown>>;
+	private readonly meta: Record<string, unknown>;
+
+	constructor() {
+		this.stores = new Map();
+		this.meta = {};
+	}
 
 	getStore = (name: PropertyKey) => {
 		const key = String(name);
@@ -129,7 +138,10 @@ function assertNotMetaStore(name: string) {
 }
 
 class NeedsUpgradeError extends Error {
-	override name = 'NeedsUpgradeError';
+	constructor() {
+		super();
+		this.name = 'NeedsUpgradeError';
+	}
 }
 
 class IndexedDBStore<T> implements StoreAsync<T> {
@@ -210,10 +222,8 @@ class IndexedDBDatabase {
 			// Another tab wants to upgrade: let go so it isn't blocked.
 			versionChange: () => {
 				forget();
-				connection.then(
-					(db) => db.close(),
-					() => {},
-				);
+				// Only an open connection hears versionchange, so this promise has resolved.
+				void connection.then((db) => db.close());
 			},
 		});
 		return connection;

@@ -58,3 +58,13 @@ test('orders siblings with folders first then alphabetically', () => {
 
 	expect(data.orderedNodeIds).toStrictEqual(['alpha', 'zeta', 'archive.md', 'notes.md']);
 });
+
+test('a second task at the same leaf key replaces the first one on that node', () => {
+	const data = createFileTreeData([
+		makeTask({ key: 'note.md', name: 'upload' }),
+		makeTask({ key: 'note.md', name: 'download' }),
+	]);
+
+	expect(data.orderedNodeIds).toStrictEqual(['note.md']);
+	expect(data.nodes['note.md'].task?.name).toBe('download');
+});

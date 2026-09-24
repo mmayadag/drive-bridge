@@ -3,7 +3,7 @@ import testKit from '$/support/test-kit';
 import { expect, test } from 'bun:test';
 import { App, TFile, TFolder } from 'obsidian';
 import type { RootFs, VaultRequest } from '@/fs';
-import type { MaybePromise } from '@/types';
+import type { Binary, MaybePromise } from '@/types';
 import { createVaultRequest, VaultFs } from '@/fs';
 import { OS } from '@/modules/event-bus';
 
@@ -192,6 +192,15 @@ function createVaultStub(options: VaultHarnessOptions): VaultHarness {
 	};
 }
 
+test('getUid identifies the vault by name, and read decodes the raw bytes', async () => {
+	const vault = createVaultStub({
+		control: { readBinary: () => Promise.resolve(bytes('hello').buffer) },
+	});
+
+	expect(vault.fs.getUid()).toBe('obsidian-vault~Vault Name');
+	expect(await vault.fs.read('note.md', file('note.md'))).toStrictEqual(bytes('hello'));
+});
+
 test('stat should normalize root, file, and folder keys', async () => {
 	const vault = createVaultStub({
 		stats: {
@@ -242,6 +251,25 @@ test('writeStream should append to temp file then rename into place', async () =
 	expect(vault.calls.appendBinary[1]?.[1]).toBe('cdef');
 	expect(vault.calls.rename[0]).toBeDefined();
 	expect(vault.calls.rename[0]?.[1]).toBe('note.md');
+});
+
+test('a failed writeStream reports the stream error even when cleanup fails too', async () => {
+	const vault = createVaultStub({
+		control: { remove: () => Promise.reject(new Error('cleanup failed')) },
+	});
+	let sent = false;
+	const failing = new ReadableStream<Binary>({
+		pull(controller) {
+			if (sent) return controller.error(new Error('stream broke'));
+			sent = true;
+			controller.enqueue(bytes('ab'));
+		},
+	});
+
+	expect(vault.fs.writeStream('note.md', failing, file('note.md'))).rejects.toThrow(
+		'stream broke',
+	);
+	await Promise.resolve();
 });
 
 test('delete should follow Obsidian trash fallback policy', async () => {
@@ -388,6 +416,21 @@ test('GET_STREAM streams the file behind its resource path', async () => {
 	}
 });
 
+test('readStream delegates through the vault request with GET_STREAM', async () => {
+	const realFetch = globalThis.fetch;
+	globalThis.fetch = (() => Promise.resolve(new Response('hello'))) as never;
+	try {
+		const { request } = bareRequest({});
+		const vaultFs = new VaultFs(request, 'Vault Name');
+		await withOS({ iOS: false, iPadOS: false }, async () => {
+			const body = await vaultFs.readStream('note.md', file('note.md', { size: 5 }));
+			expect(textDecoder.decode(await new Response(body).bytes())).toBe('hello');
+		});
+	} finally {
+		globalThis.fetch = realFetch;
+	}
+});
+
 test('on iOS, GET_STREAM reads ranges through a temporary media copy', async () => {
 	const realFetch = globalThis.fetch;
 	const fetched: Array<[string, string | undefined]> = [];
@@ -403,9 +446,10 @@ test('on iOS, GET_STREAM reads ranges through a temporary media copy', async () 
 			copy: (from: string, to: string) => void copies.push([from, to]),
 			exists: () => false,
 			mkdir: (path: string) => void made.push(path),
+			// Removing the temporary copy failing does not fail the read.
 			remove: (path: string) => {
 				removed.push(path);
-				return Promise.resolve();
+				return Promise.reject(new Error('busy'));
 			},
 		});
 		await withOS({ iOS: true }, async () => {
@@ -454,4 +498,23 @@ test('STAT of a file that is gone fails with its path', async () => {
 		'"gone.md" not found',
 	);
 	expect(await request('/', { method: 'MKDIR' })).toBeUndefined();
+});
+
+test('a cached LIST falls back to the adapter when the path is not a folder in the tree', async () => {
+	// The tree only knows `folder`; `.hidden` exists on disk but Obsidian never indexes it.
+	const vault = createVaultStub({
+		...HIDDEN_OPTIONS,
+		list: { '.hidden': { files: ['.hidden/a.md'], folders: ['.hidden/sub'] } },
+	});
+
+	expect(await vault.request('.hidden/', { method: 'LIST' })).toStrictEqual({
+		files: ['.hidden/a.md'],
+		folders: ['.hidden/sub/'],
+	});
+	expect(vault.calls.list).toStrictEqual(['.hidden']);
+});
+
+test('an unknown request method does nothing', async () => {
+	const vault = createVaultStub({});
+	expect(await vault.request('note.md', { method: 'NOPE' } as never)).toBeUndefined();
 });

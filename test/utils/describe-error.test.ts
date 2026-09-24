@@ -31,6 +31,10 @@ test('failed tasks keep their count', () => {
 	);
 });
 
+test('a recognized but count-less error translates to its plain key', () => {
+	expect(describeError('Request failed, status 401', translate)).toBe('errorSignIn');
+});
+
 test('unknown errors are shown as they are', () => {
 	const raw = 'Google Drive authorization expired or was revoked, please reconnect.';
 	expect(describeError(raw, translate)).toBe(raw);
