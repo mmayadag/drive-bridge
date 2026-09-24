@@ -15,6 +15,10 @@ file names, folder names or Google account.
   system's secure storage on each device, never in a synced file.
 - **Export settings** writes to your clipboard or a file in your vault, nowhere
   else. The Google account part is encrypted with your passphrase, or left out.
+- The clipboard is only written, and only when you press a copy button (the
+  sync log, the problem report, an export). The plugin never reads it.
+- The two uses of `fetch` read large files of this vault from disk, in pieces;
+  they never reach the network.
 - **Sign in with Google** opens Google's own sign-in page in your browser.
   The address you paste back goes only to Google's token endpoint
   (`oauth2.googleapis.com`), with your client; no other server sees it.
