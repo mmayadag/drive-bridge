@@ -9,6 +9,7 @@ import type {
 	TaskNames,
 	TaskOptionsMap,
 } from '@/sync';
+import type { KeptOnRemote } from '@/sync/keep-on-remote';
 import type {
 	GlobMatchRule,
 	MaybePromise,
@@ -31,6 +32,7 @@ import {
 	syncCancelledError,
 	taskMap,
 } from '@/sync';
+import { hideKeptOnRemote, keepOnRemote } from '@/sync/keep-on-remote';
 import { findMassDeletion, keepDeletedFiles } from '@/sync/mass-delete';
 import { prepareGlobMatch } from '@/utils/glob-match';
 import type { Dispatch, On } from './event-bus';
@@ -67,6 +69,7 @@ export default class Sync {
 			on: On<Events>;
 			translate: Translate<Translations>;
 			getConflictResolver: () => ConflictResolver;
+			saveSettings: () => Promise<void>;
 		},
 	) {}
 
@@ -85,6 +88,9 @@ export default class Sync {
 	};
 	declare readonly settings: {
 		maxFileSize: TogglableValue;
+		/** Files deleted in the vault stay on Drive. */
+		neverDeleteRemote: boolean;
+		keptOnRemote: KeptOnRemote;
 		exclusionRules: Array<GlobMatchRule>;
 		inclusionRules: Array<GlobMatchRule>;
 	};
@@ -225,6 +231,8 @@ export default class Sync {
 			const records = new Map(await record.entries());
 			const localStats = postProcess(localList, localPruner);
 			const remoteStats = postProcess(remoteList, remotePruner);
+			if (hideKeptOnRemote(settings.keptOnRemote, localStats, remoteStats))
+				void ctx.saveSettings();
 			dispatch(
 				'logSync',
 				`Local ${localStats.size} item(s), remote ${remoteStats.size} item(s), record ${records.size} item(s).`,
@@ -246,6 +254,16 @@ export default class Sync {
 			if (tasks.length === 0) {
 				terminateReason = { result: 'noop' };
 				return terminateReason;
+			}
+
+			if (settings.neverDeleteRemote) {
+				const before = Object.keys(settings.keptOnRemote).length;
+				tasks = keepOnRemote(tasks, settings.keptOnRemote, taskFactory);
+				const kept = Object.keys(settings.keptOnRemote).length - before;
+				if (kept) {
+					dispatch('logSync', `Kept ${kept} file(s) on Drive instead of deleting them.`);
+					void ctx.saveSettings();
+				}
 			}
 
 			if (detectMoves) {

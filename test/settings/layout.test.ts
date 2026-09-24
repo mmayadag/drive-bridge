@@ -74,6 +74,7 @@ test('the main screen keeps daily settings and links to the sub-pages', () => {
 		'backend',
 		'syncStrategy',
 		'conflictResolveStrategy',
+		'neverDeleteRemote',
 		'group',
 		'group',
 		'group',

@@ -10,6 +10,7 @@ test('reset puts settings back but keeps the backend, modules and last sync', ()
 		conflictResolver: 'keepLocal',
 		decider: 'mirrorLocal',
 		exclusionRules: [] as Settings['exclusionRules'],
+		keptOnRemote: { 'a.md': 'r1' },
 		lastSync,
 		modules,
 		remoteFs: 'other',
@@ -27,6 +28,7 @@ test('reset puts settings back but keeps the backend, modules and last sync', ()
 	expect(settings.remoteFs).toBe('other');
 	expect(settings.modules).toBe(modules);
 	expect(settings.lastSync).toBe(lastSync);
+	expect(settings.keptOnRemote).toStrictEqual({ 'a.md': 'r1' });
 });
 
 test('reset does not share objects with the defaults', () => {
