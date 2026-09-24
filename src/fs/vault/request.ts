@@ -121,7 +121,6 @@ export default function createVaultRequest(app: App): VaultRequest {
 					// Obsidian has no adapter call for reading a byte range.
 					// Nor can requestUrl address an app:// path at all.
 					requestRange: async (start, end) => {
-						// eslint-disable-next-line no-restricted-globals -- a local app:// vault file, not the network; requestUrl cannot read it
 						const response = await fetch(url, {
 							headers: { Range: `bytes=${start}-${end}` },
 							method: 'GET',
@@ -136,7 +135,6 @@ export default function createVaultRequest(app: App): VaultRequest {
 			// Only fetch hands back a stream.
 			// Using requestUrl would pull in the whole file at once.
 			// That is exactly what streaming exists to avoid on a large attachment.
-			// eslint-disable-next-line no-restricted-globals -- a local app:// vault file, not the network; requestUrl cannot stream it
 			const response = await fetch(url);
 			if (!response.body) throw new Error('Streaming vault file is not supported!');
 			return response.body as never;
