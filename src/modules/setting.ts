@@ -9,6 +9,7 @@ import headSettings from '@/settings/head';
 import layoutSettings from '@/settings/layout';
 import miscellaneousSettings from '@/settings/miscellaneous';
 import supportSettings from '@/settings/support';
+import { createTransfer } from '@/settings/transfer-settings';
 import webhooksSettings from '@/settings/webhooks';
 import type { On } from './event-bus';
 import type { Translate } from './i18n';
@@ -29,6 +30,7 @@ export default class Setting {
 	private readonly cleanupCallbacks: Array<() => void> = [];
 	private settingTab?: SettingTab;
 	private readonly settingRegistry = new Set<SettingEntry>();
+	private transfer?: ReturnType<typeof createTransfer>;
 
 	declare readonly i18n: {
 		match: string;
@@ -61,6 +63,8 @@ export default class Setting {
 		registerSetting({ apply: webhooksSettings(this.ctx as Context), priority: 4500 });
 		registerSetting({ apply: developmentSettings(this.ctx as Context), priority: 5000 });
 		registerSetting({ apply: supportSettings(this.ctx as Context), priority: 6000 });
+		this.transfer = createTransfer(this.ctx as Context);
+		registerSetting({ apply: this.transfer.tree, priority: 6500 });
 	};
 
 	private readonly matchLabel = () => ({
@@ -85,6 +89,7 @@ export default class Setting {
 	root = {
 		addSettingTab: this.addSettingTab,
 		matchLabel: this.matchLabel,
+		openImportSettings: () => this.transfer?.openImport(),
 		refreshSettingTab: this.refreshSettingTab,
 		registerSetting: setRegister(this.settingRegistry),
 		rerenderSettingTab: this.rerenderSettingTab,

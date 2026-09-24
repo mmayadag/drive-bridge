@@ -48,6 +48,8 @@ Seeing more also means more can go wrong, so safety comes first.
 - **Recovers on its own.** An interrupted sync picks up where it stopped,
   requests are retried, and a file that keeps failing is skipped and named
   instead of blocking the rest.
+- **Second device in one step.** Export the settings with the Google account
+  sealed by a passphrase, and import them on the next device.
 - **Clear status.** Last sync shows the result in plain words; logs can be
   exported.
 - **Clean notes.** No frontmatter, tags or markers are added to your notes.

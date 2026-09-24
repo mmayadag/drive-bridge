@@ -25,6 +25,7 @@ export const ADVANCED = {
 	development: 5000,
 	miscellaneous: 2000,
 	reset: 6000,
+	transfer: 5500,
 	webhooks: 4000,
 } as const;
 

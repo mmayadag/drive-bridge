@@ -13,6 +13,8 @@ file names, folder names or Google account.
   OAuth client. The author has no access to any of it.
 - Your Google client secret and refresh token are kept in the operating
   system's secure storage on each device, never in a synced file.
+- **Export settings** writes to your clipboard or a file in your vault, nowhere
+  else. The Google account part is encrypted with your passphrase, or left out.
 - **Sign in with Google** opens Google's own sign-in page in your browser.
   The address you paste back goes only to Google's token endpoint
   (`oauth2.googleapis.com`), with your client; no other server sees it.

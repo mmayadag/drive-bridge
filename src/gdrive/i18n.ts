@@ -66,6 +66,9 @@ const en: GdriveTranslations = {
 	pickFolderTitle: 'Choose a Drive folder',
 	pickSubfolder: 'Open a folder first; the whole Drive cannot be the vault folder.',
 	refreshTokenPlaceholder: 'Address from the browser, or a token',
+	setUpFromDevice: 'Set up from another device',
+	setUpFromDeviceDescription:
+		'Import the settings exported on a device that is already connected, with its passphrase.',
 	setupSteps: () =>
 		createFragment((frag) => {
 			frag.appendText(

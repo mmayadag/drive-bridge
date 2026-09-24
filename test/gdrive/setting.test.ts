@@ -30,7 +30,11 @@ function setup({
 		setSecret: (id: string, value: string) => void secrets.set(id, value),
 	};
 	const tree = gdriveSetting(
-		{ matchLabel: () => ({ text: 'match' }), translate: (key: string) => key } as never,
+		{
+			matchLabel: () => ({ text: 'match' }),
+			openImportSettings: () => {},
+			translate: (key: string) => key,
+		} as never,
 		{ accountEmail: email, clientId } as never,
 		new TokenManager(storage as never, () => clientId),
 	) as Record<number, (self: unknown) => SettingDefinitionGroup>;
@@ -54,6 +58,7 @@ test('asks for the whole setup until an account is connected', () => {
 	expect(call(page.status)).toBe('warning');
 	expect(call(page.displayValue)).toBe('clickToConnect');
 	expect(shown).toStrictEqual([
+		'setUpFromDevice',
 		'dummy',
 		'1. stepProject',
 		'2. stepDriveApi',

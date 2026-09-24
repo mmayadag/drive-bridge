@@ -125,7 +125,13 @@ thinking about that limit.
 ### 4. Connect each device
 
 In Obsidian, install Drive Bridge (see [Install](#install)), then open
-**Settings → Drive Bridge**:
+**Settings → Drive Bridge**.
+
+If another device is already set up, export its settings there (Advanced →
+**Export settings**, with _Include the Google account_ and a passphrase), and
+on this device press **Set up from another device** on the Google account
+page, paste the export and enter the passphrase. That covers everything
+below. Otherwise:
 
 1. Open **Google account** under Google Drive (it reads _Tap to connect_ or _Click to connect_) and
    paste the **OAuth client ID** (or the downloaded client JSON). A client ID
@@ -180,12 +186,13 @@ Google account dedicated to your vault, not your personal one.
 
 ## Security model
 
-| Rule                          | How                                                                                             |
-| ----------------------------- | ----------------------------------------------------------------------------------------------- |
-| No remote code                | The plugin never downloads or evaluates code at runtime. All modules are bundled at build time. |
-| No third-party servers        | Network calls go only to Google, plus any webhook URL you configure yourself.                   |
-| No credentials in the release | You bring your own OAuth client; nothing is compiled in.                                        |
-| Secrets off disk              | Client secret and refresh token live in Obsidian's secret storage, not in `data.json`.          |
+| Rule                          | How                                                                                                       |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------- |
+| No remote code                | The plugin never downloads or evaluates code at runtime. All modules are bundled at build time.           |
+| No third-party servers        | Network calls go only to Google, plus any webhook URL you configure yourself.                             |
+| No credentials in the release | You bring your own OAuth client; nothing is compiled in.                                                  |
+| Exports sealed                | A settings export carries the client secret and token only encrypted with your passphrase, or not at all. |
+| Secrets off disk              | Client secret and refresh token live in Obsidian's secret storage, not in `data.json`.                    |
 
 `data.json` holds settings and the client ID, no secrets. The default
 exclusion rules skip the whole config folder (`.obsidian/`), so plugin
@@ -443,12 +450,14 @@ trust; the payload carries the vault name, not its contents.
 
 ### Development
 
-| Setting             | What it does                                                                                                                                                                                                                                             |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Clear records       | Forgets what was synced before. The next sync treats every file present on both sides as a conflict or a new file. Only for recovery.                                                                                                                    |
-| Export logs to file | Writes the sync log into the vault for troubleshooting.                                                                                                                                                                                                  |
-| Skipped files       | How many files keep failing and are left out of syncs; **Retry** clears the list so they are tried again.                                                                                                                                                |
-| Reset to defaults   | At the bottom of Advanced, after a confirmation. Every setting goes back to its default, including filter rules, strategies, automatic sync, controls and webhooks. The Google account, OAuth client, base directory, backend and sync records are kept. |
+| Setting             | What it does                                                                                                                                                                                                                                                                                                          |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Clear records       | Forgets what was synced before. The next sync treats every file present on both sides as a conflict or a new file. Only for recovery.                                                                                                                                                                                 |
+| Export logs to file | Writes the sync log into the vault for troubleshooting.                                                                                                                                                                                                                                                               |
+| Skipped files       | How many files keep failing and are left out of syncs; **Retry** clears the list so they are tried again.                                                                                                                                                                                                             |
+| Export settings     | Copies every setting as JSON, or saves it in the vault. With _Include the Google account_, the client secret and refresh token are added sealed with a passphrase (PBKDF2-SHA256, 310,000 rounds, AES-GCM); without it they are left out. Device state (last sync, skipped files, files kept on Drive) never travels. |
+| Import settings     | Pastes an export: shows how many settings change, asks for the passphrase if the Google account is included, and asks before replacing an account this device already has. The imported token is verified like a pasted one.                                                                                          |
+| Reset to defaults   | At the bottom of Advanced, after a confirmation. Every setting goes back to its default, including filter rules, strategies, automatic sync, controls and webhooks. The Google account, OAuth client, base directory, backend and sync records are kept.                                                              |
 
 ## Sync behavior
 
