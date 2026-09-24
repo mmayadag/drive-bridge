@@ -14,6 +14,7 @@ import type { WebhooksSettingTranslations } from '@/settings/webhooks';
 import type { DatabaseSync } from '@/shared/key-value-store';
 import type { Ref } from '@/shared/reactive';
 import type { Stat, TogglableValue } from '@/types';
+import type { ErrorTranslations } from '@/utils/describe-error';
 import en from '@/en';
 import {
 	rateLimiterMiddleware,
@@ -104,6 +105,7 @@ export default class Bootstrap {
 		FeaturesSettingTranslations &
 		FilterSettingTranslations &
 		HeadSettingTranslations &
+		ErrorTranslations &
 		LayoutSettingTranslations &
 		MiscellaneousSettingTranslations &
 		WebhooksSettingTranslations &

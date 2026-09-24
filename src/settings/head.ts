@@ -12,6 +12,8 @@ import type {
 import type { CallableOrObjectTree } from '@/modules/setting';
 import type { Ref } from '@/shared/reactive';
 import type { MaybePromise } from '@/types';
+import type { ErrorTranslations } from '@/utils/describe-error';
+import { describeError } from '@/utils/describe-error';
 import formatDateTime from '@/utils/format-date';
 import type { CheckConnectionDB } from './check-connection';
 import type { AugmentedSettingDefinitionItem, LabelDefinition } from './utils';
@@ -45,7 +47,7 @@ export type HeadSettingTranslations = {
 
 export default function headSettings(
 	ctx: {
-		translate: Translate<HeadSettingTranslations>;
+		translate: Translate<HeadSettingTranslations & ErrorTranslations>;
 		saveSettings: () => Promise<void>;
 		settings: Settings;
 		remoteFsRegistry: Map<string, RemoteFsEntry>;
@@ -97,6 +99,8 @@ export default function headSettings(
 				const show = () => {
 					const { lastSync } = settings;
 					setting.setDesc(describeLastSync(lastSync, translate));
+					// The sentence replaces the raw error; keep the original one step away.
+					setting.descEl.setAttr('title', lastSync?.error ?? '');
 					if (!lastSync) return icon.hide();
 					const failed = lastSync.result === 'failed';
 					icon.className = failed
@@ -266,12 +270,12 @@ const RESULT_KEYS = {
 
 export function describeLastSync(
 	lastSync: LastSync | undefined,
-	translate: Translate<HeadSettingTranslations>,
+	translate: Translate<HeadSettingTranslations & ErrorTranslations>,
 ) {
 	if (!lastSync) return translate('lastSyncNever');
 	const text = translate('lastSyncValue', {
 		result: translate(RESULT_KEYS[lastSync.result]),
 		time: formatDateTime(lastSync.at),
 	});
-	return lastSync.error ? `${text}: ${lastSync.error}` : text;
+	return lastSync.error ? `${text}: ${describeError(lastSync.error, translate)}` : text;
 }

@@ -74,6 +74,12 @@ const en: Translations = {
 	done: 'Done',
 	download: 'Download',
 	edit: 'Edit',
+	errorForbidden: 'Google Drive refused the request, often because of a rate or storage limit.',
+	errorOffline: "Can't reach Google. Check the internet connection.",
+	errorRateLimited: 'Too many requests. Sync will work again shortly.',
+	errorServer: 'Google Drive had a problem. Try again later.',
+	errorSignIn: 'Google no longer accepts the sign-in. Connect the account again.',
+	errorTasksFailed: (count) => `${count} ${p(count, 'file', 'files')} could not be synced.`,
 	exclusionRules: 'Exclusion rules',
 	exclusionRulesDescription: () =>
 		createFragment((frag) => {
