@@ -34,6 +34,7 @@ export default class Scheduler {
 			app: App;
 			isIdle: Ref<boolean>;
 			dispatch: Dispatch<Events>;
+			saveSettings: () => Promise<void>;
 		},
 	) {}
 
@@ -45,9 +46,22 @@ export default class Scheduler {
 		exclusionRules: Array<GlobMatchRule>;
 		inclusionRules: Array<GlobMatchRule>;
 		avoidAutoSyncWhenOffline: boolean;
+		/** Automatic syncs are skipped on this device until resumed; manual ones still run. */
+		automaticSyncPaused: boolean;
+	};
+	declare readonly events: {
+		automaticSyncPausedChanged: boolean;
 	};
 
 	private readonly requestSync = (trigger: string): Promise<SyncTerminateReason> => {
+		const automatic = trigger !== 'manual' && trigger !== 'nonInteractiveManual';
+		if (automatic && this.settings.automaticSyncPaused) {
+			this.ctx.dispatch(
+				'logGeneral',
+				`Skipped paused auto sync with trigger \`${trigger}\`.`,
+			);
+			return Promise.resolve({ result: 'cancelled' });
+		}
 		if (
 			!navigator.onLine &&
 			this.settings.avoidAutoSyncWhenOffline &&
@@ -174,8 +188,15 @@ export default class Scheduler {
 		for (const request of batch) request.resolve(result);
 	};
 
+	private readonly setAutomaticSyncPaused = (paused: boolean) => {
+		this.settings.automaticSyncPaused = paused;
+		void this.ctx.saveSettings();
+		this.ctx.dispatch('automaticSyncPausedChanged', paused);
+	};
+
 	root = {
 		requestSync: this.requestSync,
+		setAutomaticSyncPaused: this.setAutomaticSyncPaused,
 		startScheduledSync: this.startScheduledSync,
 		stopScheduledSync: this.stopScheduledSync,
 	};

@@ -92,6 +92,7 @@ test('each sub-page holds its settings', () => {
 	const pages = (buildTab().at(-3) as Named).items ?? [];
 	const [automatic, filters, advanced] = pages;
 	expect(names(automatic.items)).toStrictEqual([
+		'pauseAutomaticSync',
 		'realtimeSync',
 		'startupSync',
 		'scheduledSync',

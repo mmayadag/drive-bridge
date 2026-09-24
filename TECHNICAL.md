@@ -495,6 +495,11 @@ trust; the payload carries the vault name, not its contents.
   it out, and Last sync adds _1 file skipped_. **Retry** under Advanced →
   Development → Skipped files, or the _Retry skipped files_ command, clears
   the list.
+- **Pausing:** _Pause automatic sync_ (top of the Automatic sync page, or
+  the command palette) skips every automatic sync on this device until
+  resumed; manual syncs still run. The status bar reads _Auto sync paused_,
+  and adds _no sync for a while_ when scheduled syncs have not completed for
+  twice their interval.
 - **Interrupted syncs:** each task records its result as soon as it finishes.
   If a sync stops halfway (Obsidian closed, offline, cancelled), the next one
   plans only what is left; finished uploads and downloads are not repeated.
