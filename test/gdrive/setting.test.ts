@@ -55,6 +55,10 @@ test('asks for the whole setup until an account is connected', () => {
 	expect(call(page.displayValue)).toBe('clickToConnect');
 	expect(shown).toStrictEqual([
 		'dummy',
+		'1. stepProject',
+		'2. stepDriveApi',
+		'3. stepConsent',
+		'4. stepClient',
 		'clientId',
 		'clientSecret',
 		'signInWithGoogle',
@@ -77,7 +81,16 @@ test('shows only the account once connected', () => {
 test('keeps the client fields reachable when this device lacks the secret', () => {
 	const { page, shown } = setup({ clientId: 'client', token: '1//token' });
 	expect(call(page.status)).toBe('warning');
-	expect(shown).toStrictEqual(['dummy', 'clientId', 'clientSecret', 'accountConnected']);
+	expect(shown).toStrictEqual([
+		'dummy',
+		'1. stepProject',
+		'2. stepDriveApi',
+		'3. stepConsent',
+		'4. stepClient',
+		'clientId',
+		'clientSecret',
+		'accountConnected',
+	]);
 });
 
 test('the account entry says what to do next', () => {

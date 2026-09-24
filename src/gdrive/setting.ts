@@ -14,8 +14,10 @@ import { getMessage } from '@/shared/error';
 import { normalizeBaseDir } from '@/shared/path';
 import type { GdriveSettings } from '.';
 import type { TokenManager } from './auth';
+import type { SetupStepKey } from './client-setup';
 import type { FolderPickerTranslations } from './folder-picker';
 import type { PendingSignIn } from './sign-in';
+import { isClientId, parseClientJson, SETUP_STEPS } from './client-setup';
 import { connectWithToken, findMissingInput } from './connect';
 import FolderPickerModal from './folder-picker';
 import { exchangeCode, parseRedirect, startSignIn } from './sign-in';
@@ -55,11 +57,15 @@ export type GdriveTranslations = FolderPickerTranslations & {
 	limitedScope: string;
 	refreshTokenPlaceholder: string;
 	signInWithGoogle: string;
-	signInWithGoogleDescription: string;
-	signInOpened: string;
-	signInStartAgain: string;
-	signInDenied: string;
-};
+	openConsole: string;
+	clientFromJson: string;
+} & Record<SetupStepKey, string> &
+	Record<`${SetupStepKey}Description`, string> & {
+		signInWithGoogleDescription: string;
+		signInOpened: string;
+		signInStartAgain: string;
+		signInDenied: string;
+	};
 
 type AccountHintKey =
 	| 'clickToConnect'
@@ -251,22 +257,57 @@ export default function gdriveSetting(
 							search: false,
 							visible: () => !ready(),
 						})),
+						// One row per Google Cloud step, each opening its Console page.
+						...Object.fromEntries(
+							SETUP_STEPS.map(({ key, url }, index) => [
+								200 + index,
+								s(() => ({
+									desc: translate(`${key}Description`),
+									name: `${index + 1}. ${translate(key)}`,
+									render: (setting) => {
+										setting.addButton((button) =>
+											button
+												.setButtonText(translate('openConsole'))
+												.onClick(() => window.open(url)),
+										);
+									},
+									search: false,
+									visible: () => !ready(),
+								})),
+							]),
+						),
 						1000: s(() => ({
 							desc: translate('clientIdDescription'),
 							name: translate('clientId'),
 							render: (setting) => {
 								setting.addText((text) => {
 									clientIdField = markValid(text);
-									text.setValue(settings.clientId).inputEl.addEventListener(
-										'blur',
-										() => {
-											const value = text.getValue().trim();
-											text.setValue(value);
-											if (value === settings.clientId) return;
-											settings.clientId = value;
+									const flag = (value: string) =>
+										text.inputEl.toggleClass(
+											INVALID,
+											Boolean(value) && !isClientId(value),
+										);
+									text.setValue(settings.clientId).onChange((value) => {
+										// The downloaded client_secret.json fills both fields at once.
+										const client = parseClientJson(value);
+										if (client) {
+											text.setValue(client.clientId);
+											clientSecretField?.setValue(client.clientSecret);
+											settings.clientId = client.clientId;
+											tokenManager.setClientSecret(client.clientSecret);
 											void saveSettings();
-										},
-									);
+											new Notice(translate('clientFromJson'));
+										}
+										flag(text.getValue().trim());
+									});
+									flag(settings.clientId);
+									text.inputEl.addEventListener('blur', () => {
+										const value = text.getValue().trim();
+										text.setValue(value);
+										if (value === settings.clientId) return;
+										settings.clientId = value;
+										void saveSettings();
+									});
 								});
 							},
 							visible: () => !ready(),

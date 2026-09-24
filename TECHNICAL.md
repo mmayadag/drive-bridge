@@ -26,7 +26,8 @@ a leaked token would expose everything in that account's Drive.
 ### 2. Create an OAuth client in Google Cloud
 
 Sign in to [Google Cloud Console](https://console.cloud.google.com) with that
-account.
+account. The Google account page in Drive Bridge lists the same four steps,
+each with a button to its Console page.
 
 1. **Create a project**: project picker → **New project**. Any name works.
 2. **Enable the Drive API**: **APIs & Services → Library**, search for
@@ -40,7 +41,8 @@ account.
    and sync stops.
 5. **Create the client**: **Google Auth Platform → Clients → Create client**.
    Application type **Desktop app**, any name. Copy the **client ID** and
-   **client secret**; you need both in the next steps.
+   **client secret**, or download the client's JSON: pasting the whole JSON
+   into the client ID field fills in both.
 
 You do not need to submit the app for verification. It is only used by you.
 
@@ -126,7 +128,8 @@ In Obsidian, install Drive Bridge (see [Install](#install)), then open
 **Settings → Drive Bridge**:
 
 1. Open **Google account** under Google Drive (it reads _Tap to connect_ or _Click to connect_) and
-   paste the **OAuth client ID**.
+   paste the **OAuth client ID** (or the downloaded client JSON). A client ID
+   that does not look like `….apps.googleusercontent.com` is outlined.
 2. On the same page, paste the **OAuth client secret**. It is stored in the
    device's secure storage, not in synced files.
 3. Press **Sign in with Google**. Google opens in the browser; choose the
