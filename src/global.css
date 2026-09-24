@@ -208,6 +208,19 @@ input[type='password'].drive-bridge-invalid-input {
 	margin-left: 0.5rem;
 }
 
+.drive-bridge-file-tree-label.is-reversed {
+	color: var(--text-accent);
+}
+
+.drive-bridge-file-tree-undo {
+	margin-left: auto;
+	color: var(--text-faint);
+}
+
+.drive-bridge-file-tree-undo.is-active {
+	color: var(--text-accent);
+}
+
 /* Progress */
 .drive-bridge-progress {
 	display: flex;

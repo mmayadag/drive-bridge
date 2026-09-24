@@ -9,6 +9,7 @@ import mountFileTree from '@/components/file-tree';
 import renderFailedTasks from '@/components/render-failed-tasks';
 import renderProgress from '@/components/render-progress';
 import { computed, hook } from '@/shared/reactive';
+import { reverseTasks } from '@/sync/reverse';
 import type { Dispatch, On } from './event-bus';
 import type { Snippet, Translate } from './i18n';
 import type { SyncStage } from './observability';
@@ -125,6 +126,7 @@ export default class ProgressModal extends Modal {
 					this.detailContainer as HTMLDivElement,
 					tasks,
 					this.t,
+					{ undo: true },
 				);
 				const cleanupUnmount = this.modalCleanupCallbacks.subscribe(unmount);
 				const taskCounts: TaskCounts = {
@@ -140,11 +142,11 @@ export default class ProgressModal extends Modal {
 				this.description?.setText(this.t('confirmTasksDescription', taskCounts));
 				this.showDetails();
 				this.renderConfirmCancel(() => {
-					const { selected } = getState();
+					const { selected, reversed } = getState();
 					this.hideDetails();
 					unmount();
 					cleanupUnmount();
-					this.dispatch('tasksConfirmed', selected);
+					this.dispatch('tasksConfirmed', [...selected, ...reverseTasks(reversed)]);
 				});
 			}),
 		);
