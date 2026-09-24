@@ -9,6 +9,7 @@ import type {
 import type { SettingEntry } from '@/modules/setting';
 import digOriginal from '@/fs/dig-original';
 import prefixWrapper from '@/fs/wrappers/prefix';
+import type { RemoteScan, SnapshotDB } from './changes';
 import type { GdriveDB } from './fs';
 import type { GdriveTranslations } from './setting';
 import { TokenManager, bearerMiddleware } from './auth';
@@ -22,6 +23,7 @@ export type GdriveSettings = {
 	accountEmail: string;
 	baseDirectory: string;
 	clientId: string;
+	remoteScan: RemoteScan;
 	useTrash: boolean;
 	userId: string;
 };
@@ -36,6 +38,7 @@ export default class Gdrive {
 			registerRemoteFs: (id: string, entry: RemoteFsEntry) => () => void;
 			app: App;
 			memoryDB: GdriveDB;
+			indexedDB: SnapshotDB;
 			registerRemoteFsWrapper: (entry: FsWrapperEntry) => () => void;
 			registerRemoteRequestMiddleware: (entry: RemoteRequestMiddlewareEntry) => () => void;
 			registerSetting: (entry: SettingEntry) => () => void;
@@ -79,12 +82,14 @@ export default class Gdrive {
 	// The account, client and folder are kept: they are what ties this device to its Drive.
 	readonly resetSettings = () => {
 		this.moduleSettings.useTrash = true;
+		this.moduleSettings.remoteScan = 'full';
 	};
 
 	readonly moduleSettings: GdriveSettings = {
 		accountEmail: '',
 		baseDirectory: '',
 		clientId: '',
+		remoteScan: 'full',
 		useTrash: true,
 		userId: '',
 	};
@@ -96,6 +101,7 @@ export default class Gdrive {
 			translate,
 			registerRemoteFs,
 			memoryDB,
+			indexedDB,
 			registerRemoteFsWrapper,
 			registerRemoteRequestMiddleware,
 			registerSetting,
@@ -103,7 +109,8 @@ export default class Gdrive {
 		this.cleanup.push(
 			registerRemoteFs('gdrive', {
 				checkConnection,
-				instantiate: (request) => new GdriveFs(request, this.moduleSettings, memoryDB),
+				instantiate: (request) =>
+					new GdriveFs(request, this.moduleSettings, memoryDB, indexedDB),
 				prettyName: () => translate('gdrive'),
 			}),
 			registerRemoteFsWrapper({

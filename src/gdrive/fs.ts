@@ -8,6 +8,7 @@ import { basename, dirname, isFolder } from '@/shared/path';
 import createRangeReadStream from '@/shared/read-stream';
 import { chunkSize, concurrency } from '@/utils/pipe';
 import type { DriveFile, DriveFileList } from './api';
+import type { RemoteScan, SnapshotDB } from './changes';
 import {
 	DRIVE_API,
 	DRIVE_UPLOAD_API,
@@ -18,11 +19,13 @@ import {
 	parseDriveError,
 	toFileStat,
 } from './api';
+import { applyChanges, getStartToken, isUsable, snapshotStore } from './changes';
 import { guessMimeType, resumableUpload, singleUpload } from './upload';
 
 export type GdriveFsOptions = {
 	userId: string;
 	useTrash: boolean;
+	remoteScan?: RemoteScan;
 };
 
 export type GdriveDB = DatabaseSync<{ gdriveIds: string }, { gdriveIdsMarker?: string }>;
@@ -48,12 +51,15 @@ function notFoundError(key: string): Error {
 export default class GdriveFs implements RootFs {
 	/** Path key (`'/'`, `folder/`, `folder/note.md`) to Drive file id. */
 	private readonly ids: StoreSync<string>;
+	private readonly snapshots: ReturnType<typeof snapshotStore>;
 
 	constructor(
 		private readonly request: Request,
 		private readonly options: GdriveFsOptions,
 		memoryDB: GdriveDB,
+		persistentDB?: SnapshotDB,
 	) {
+		this.snapshots = snapshotStore(persistentDB);
 		this.ids = memoryDB.getStore('gdriveIds');
 		if (memoryDB.getMeta('gdriveIdsMarker') !== this.getUid()) {
 			this.ids.clear();
@@ -290,13 +296,29 @@ export default class GdriveFs implements RootFs {
 		return (await this.resolveIdFresh(key)) !== undefined;
 	}
 
-	/**
-	 * Fetches every visible file in one paginated query, then walks the tree
-	 * under the requested key so the reporter can steer traversal.
-	 */
-	async list(key: string, reporter: ListReporter): Promise<Array<Stat>> {
-		const startId = this.resolveId(key) ?? (await this.resolveIdFresh(key));
-		if (startId === undefined) throw notFoundError(key);
+	private readonly getJson = async (url: string) =>
+		(await this.requestOrThrow(url, { method: 'GET' })).json();
+
+	/** Every visible Drive file, from the changes since the last scan when that is allowed. */
+	private async listEverything(): Promise<Array<DriveFile>> {
+		if (this.options.remoteScan !== 'changes') return this.listAllFiles();
+		const { userId } = this.options;
+		const snapshot = await this.snapshots.load();
+		if (snapshot && isUsable(snapshot, userId))
+			try {
+				const next = await applyChanges(this.getJson, snapshot);
+				await this.snapshots.save(next);
+				return next.files;
+			} catch {
+				// An expired token or a failed page: the full scan below starts over.
+			}
+		const token = await getStartToken(this.getJson);
+		const files = await this.listAllFiles();
+		await this.snapshots.save({ files, scannedAt: Date.now(), token, userId });
+		return files;
+	}
+
+	private async listAllFiles(): Promise<Array<DriveFile>> {
 		const all: Array<DriveFile> = [];
 		let pageToken: string | undefined;
 		do {
@@ -306,13 +328,23 @@ export default class GdriveFs implements RootFs {
 				q: 'trashed = false',
 			};
 			if (pageToken) query.pageToken = pageToken;
-			const response = await this.requestOrThrow(buildUrl(DRIVE_API, '/files', query), {
-				method: 'GET',
-			});
-			const parsed = response.json<DriveFileList>();
+			const parsed = (await this.getJson(
+				buildUrl(DRIVE_API, '/files', query),
+			)) as DriveFileList;
 			all.push(...(parsed.files ?? []));
 			pageToken = parsed.nextPageToken;
 		} while (pageToken);
+		return all;
+	}
+
+	/**
+	 * Fetches every visible file in one paginated query, then walks the tree
+	 * under the requested key so the reporter can steer traversal.
+	 */
+	async list(key: string, reporter: ListReporter): Promise<Array<Stat>> {
+		const startId = this.resolveId(key) ?? (await this.resolveIdFresh(key));
+		if (startId === undefined) throw notFoundError(key);
+		const all = await this.listEverything();
 
 		this.ids.clear();
 		this.ids.set(key, startId);
