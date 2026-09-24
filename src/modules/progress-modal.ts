@@ -246,58 +246,19 @@ export default class ProgressModal extends Modal {
 		const { contentEl } = this;
 		this.setTitle(this.t('syncProgress'));
 
-		const progress = computed<{
-			completed?: number;
-			total?: number;
-			percent?: number;
-			current?: string;
-		}>(
-			() => {
-				const stage = this.ctx.syncStage();
-				if (stage === 'walkingRemote') {
-					const { completed, current, total } = this.ctx.walkProgress();
-					return {
-						completed,
-						current: current
-							? `${this.t('walkingRemote')} ${current}`
-							: this.t('walkingRemote'),
-						percent: roundPercent(completed, total),
-						total,
-					};
-				} else if (stage === 'executing') {
-					const { completed, current, total } = this.ctx.executionProgress();
-					return {
-						completed,
-						current: current
-							? `${this.t(current.name)} ${current.key}`
-							: this.t('executing'),
-						percent: roundPercent(completed, total),
-						total,
-					};
-				} else if (stage === 'awaitingConfirmation')
-					return {
-						completed: 0,
-						current: this.t('awaitingConfirmation'),
-						percent: 0,
-						total: 1,
-					};
-				else if (stage === 'none') return {};
-				else if (stage === 'cancelled') return { current: this.t('cancelled') };
-				else if (stage === 'completed') return { current: this.t('completed') };
-				else if (stage === 'completedNoop')
-					return {
-						completed: 0,
-						current: this.t('completedNoop'),
-						percent: 100,
-						total: 0,
-					};
-				return { current: this.t('failed') };
-			},
+		const progress = computed(
+			() =>
+				describeProgress(
+					this.ctx.syncStage(),
+					this.ctx.walkProgress,
+					this.ctx.executionProgress,
+					this.t,
+				),
 			{ deps: [this.ctx.walkProgress, this.ctx.syncStage, this.ctx.executionProgress] },
 		);
 
 		const container = contentEl.createDiv('drive-bridge-progress-modal');
-		const { bar, left, right } = renderProgress(container);
+		const { bar, barEl, left, right } = renderProgress(container);
 		this.description = container.createEl('p', 'drive-bridge-progress-description');
 		this.description.hide();
 		this.detailContainer = container.createDiv('drive-bridge-progress-details');
@@ -305,7 +266,10 @@ export default class ProgressModal extends Modal {
 
 		this.modalCleanupCallbacks.subscribe(
 			progress.subscribe(
-				({ completed, current, percent, total }) => {
+				({ completed, counter = true, current, percent, total }) => {
+					for (const el of [right, barEl])
+						if (counter) el.show();
+						else el.hide();
 					if (completed !== undefined && total !== undefined)
 						right.setText(`${completed}/${total} ${this.t('completed')}`);
 					if (current !== undefined) left.setText(current);
@@ -340,4 +304,52 @@ export default class ProgressModal extends Modal {
 		this.onClose();
 		this.moduleCleanupCallbacks.splice(0).forEach((fn) => fn());
 	}
+}
+
+export type ProgressView = {
+	completed?: number;
+	total?: number;
+	percent?: number;
+	current?: string;
+	/** False hides the count and the bar. */
+	counter?: boolean;
+};
+
+/** What the progress row shows for a sync stage. */
+export function describeProgress(
+	stage: SyncStage,
+	walkProgress: () => Progress,
+	executionProgress: () => Progress<TaskInfo>,
+	t: Translate<Translations>,
+): ProgressView {
+	if (stage === 'walkingRemote') {
+		const { completed, current, total } = walkProgress();
+		return {
+			completed,
+			current: current ? `${t('walkingRemote')} ${current}` : t('walkingRemote'),
+			percent: roundPercent(completed, total),
+			total,
+		};
+	} else if (stage === 'executing') {
+		const { completed, current, total } = executionProgress();
+		return {
+			completed,
+			current: current ? `${t(current.name)} ${current.key}` : t('executing'),
+			percent: roundPercent(completed, total),
+			total,
+		};
+	} else if (stage === 'awaitingConfirmation')
+		// Nothing has run yet; the operation count is in the text below.
+		return { counter: false, current: t('awaitingConfirmation') };
+	else if (stage === 'none') return {};
+	else if (stage === 'cancelled') return { current: t('cancelled') };
+	else if (stage === 'completed') return { current: t('completed') };
+	else if (stage === 'completedNoop')
+		return {
+			completed: 0,
+			current: t('completedNoop'),
+			percent: 100,
+			total: 0,
+		};
+	return { current: t('failed') };
 }

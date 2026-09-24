@@ -5,6 +5,7 @@ export default function renderProgress(container: HTMLElement, extraClass?: stri
 	const progressTextContainer = progressSection.createDiv('drive-bridge-progress-text');
 	const left = progressTextContainer.createDiv('drive-bridge-progress-current');
 	const right = progressTextContainer.createDiv('drive-bridge-progress-count');
-	const bar = new ProgressBarComponent(progressSection);
-	return { bar, left, right };
+	const barEl = progressSection.createDiv('drive-bridge-progress-bar');
+	const bar = new ProgressBarComponent(barEl);
+	return { bar, barEl, left, right };
 }
