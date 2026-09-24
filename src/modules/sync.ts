@@ -1,4 +1,6 @@
 import type { Events, Translations } from '@';
+import type { Command } from 'obsidian';
+import { Notice } from 'obsidian';
 import type { Fs, ListReporter } from '@/fs';
 import type { Ref } from '@/shared/reactive';
 import type {
@@ -10,6 +12,7 @@ import type {
 	TaskOptionsMap,
 } from '@/sync';
 import type { KeptOnRemote } from '@/sync/keep-on-remote';
+import type { SkipState } from '@/sync/skip-list';
 import type {
 	GlobMatchRule,
 	MaybePromise,
@@ -34,10 +37,10 @@ import {
 } from '@/sync';
 import { hideKeptOnRemote, keepOnRemote } from '@/sync/keep-on-remote';
 import { findMassDeletion, keepDeletedFiles } from '@/sync/mass-delete';
+import { countOutcome, withoutSkipped } from '@/sync/skip-list';
 import { prepareGlobMatch } from '@/utils/glob-match';
 import type { Dispatch, On } from './event-bus';
-import type { Translate } from './i18n';
-import type { DeleteConfirmReturn } from './progress-modal';
+import type { Snippet, Translate } from './i18n';
 import type { Infras } from './registrar';
 
 export type SyncTerminateReason =
@@ -70,8 +73,21 @@ export default class Sync {
 			translate: Translate<Translations>;
 			getConflictResolver: () => ConflictResolver;
 			saveSettings: () => Promise<void>;
+			addCommand: (command: Command) => Command;
 		},
-	) {}
+	) {
+		ctx.addCommand({
+			callback: () => this.retrySkipped(),
+			id: 'retry-skipped-files',
+			name: ctx.translate('retrySkippedFiles'),
+		});
+	}
+
+	private readonly retrySkipped = () => {
+		this.settings.skipState = { failures: {}, skipped: [] };
+		void this.ctx.saveSettings();
+		new Notice(this.ctx.translate('skippedFilesCleared'));
+	};
 
 	declare readonly events: {
 		syncStarted: { isCancelled: Ref<boolean>; trigger: string };
@@ -86,11 +102,17 @@ export default class Sync {
 		taskFailed: FailedTaskInfo;
 		executionStarted: Array<BaseTask>;
 	};
+	declare readonly i18n: {
+		retrySkippedFiles: string;
+		skippedFilesCleared: string;
+		fileSkipped: Snippet<string>;
+	};
 	declare readonly settings: {
 		maxFileSize: TogglableValue;
 		/** Files deleted in the vault stay on Drive. */
 		neverDeleteRemote: boolean;
 		keptOnRemote: KeptOnRemote;
+		skipState: SkipState;
 		exclusionRules: Array<GlobMatchRule>;
 		inclusionRules: Array<GlobMatchRule>;
 	};
@@ -112,59 +134,37 @@ export default class Sync {
 		return includedStats;
 	};
 
-	private readonly confirmTasks = (tasks: Array<BaseTask>) =>
-		new Promise<Array<BaseTask>>((resolve, reject) => {
+	/** Dispatches a request and waits for its answer; a cancelled sync rejects. */
+	private readonly ask = <R extends keyof Events, A extends keyof Events>(
+		request: R,
+		payload: Events[R],
+		answer: A,
+	) =>
+		new Promise<Events[A]>((resolve, reject) => {
 			const { on, dispatch } = this.ctx;
-			const unsub1 = on('tasksConfirmed', (result) => {
+			const cleanup = () => {
+				offAnswer();
+				offCancel();
+			};
+			const offAnswer = on(answer, (result) => {
 				cleanup();
 				resolve(result);
 			});
-			const unsub2 = on('syncCanceled', () => {
+			const offCancel = on('syncCanceled', () => {
 				cleanup();
 				reject(syncCancelledError);
 			});
-			function cleanup() {
-				unsub1();
-				unsub2();
-			}
-			dispatch('requestConfirmTasks', tasks);
+			(dispatch as (event: R, payload: Events[R]) => void)(request, payload);
 		});
+
+	private readonly confirmTasks = (tasks: Array<BaseTask>) =>
+		this.ask('requestConfirmTasks', tasks, 'tasksConfirmed');
 
 	private readonly confirmMassDeletion = (counts: { local: number; remote: number }) =>
-		new Promise<boolean>((resolve, reject) => {
-			const { on, dispatch } = this.ctx;
-			const unsub1 = on('massDeleteConfirmed', (approved) => {
-				cleanup();
-				resolve(approved);
-			});
-			const unsub2 = on('syncCanceled', () => {
-				cleanup();
-				reject(syncCancelledError);
-			});
-			function cleanup() {
-				unsub1();
-				unsub2();
-			}
-			dispatch('requestConfirmMassDelete', counts);
-		});
+		this.ask('requestConfirmMassDelete', counts, 'massDeleteConfirmed');
 
 	private readonly confirmDeletion = (tasks: Array<RemoveLocal>) =>
-		new Promise<DeleteConfirmReturn>((resolve, reject) => {
-			const { on, dispatch } = this.ctx;
-			const unsub1 = on('deleteConfirmed', (result) => {
-				cleanup();
-				resolve(result);
-			});
-			const unsub2 = on('syncCanceled', () => {
-				cleanup();
-				reject(syncCancelledError);
-			});
-			function cleanup() {
-				unsub1();
-				unsub2();
-			}
-			dispatch('requestConfirmDelete', tasks);
-		});
+		this.ask('requestConfirmDelete', tasks, 'deleteConfirmed');
 
 	private readonly executeSync = async (
 		trigger: string,
@@ -320,16 +320,31 @@ export default class Sync {
 
 			sortTasks(tasks);
 
+			const skipState = settings.skipState;
+			const { run, skippedCount } = withoutSkipped(tasks, skipState.skipped);
+			if (skippedCount)
+				dispatch('logSync', `Skipping ${skippedCount} file(s) on the skip list.`);
+			tasks = run;
+			if (tasks.length === 0) {
+				terminateReason = { result: 'noop' };
+				return terminateReason;
+			}
+
 			if (isCancelled()) throw syncCancelledError;
 			dispatch('executionStarted', tasks);
 			await Promise.all(
 				tasks.map(async (task) => {
 					try {
 						await task.exec();
+						countOutcome(skipState, task.key, true);
 						dispatch('taskCompleted', toTaskInfo(task));
 					} catch (error) {
 						if (isCancelled()) return;
 						failedCount++;
+						if (countOutcome(skipState, task.key, false)) {
+							dispatch('logSync', `Moved \`${task.key}\` to the skip list.`);
+							new Notice(translate('fileSkipped', task.key));
+						}
 						dispatch('taskFailed', {
 							...toTaskInfo(task),
 							error: getMessage(error),
@@ -337,6 +352,7 @@ export default class Sync {
 					}
 				}),
 			);
+			void ctx.saveSettings();
 
 			terminateReason = isCancelled()
 				? { result: 'cancelled' }

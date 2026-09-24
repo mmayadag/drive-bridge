@@ -421,6 +421,7 @@ trust; the payload carries the vault name, not its contents.
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Clear records       | Forgets what was synced before. The next sync treats every file present on both sides as a conflict or a new file. Only for recovery.                                                                                                                    |
 | Export logs to file | Writes the sync log into the vault for troubleshooting.                                                                                                                                                                                                  |
+| Skipped files       | How many files keep failing and are left out of syncs; **Retry** clears the list so they are tried again.                                                                                                                                                |
 | Reset to defaults   | At the bottom of Advanced, after a confirmation. Every setting goes back to its default, including filter rules, strategies, automatic sync, controls and webhooks. The Google account, OAuth client, base directory, backend and sync records are kept. |
 
 ## Sync behavior
@@ -444,6 +445,11 @@ trust; the payload carries the vault name, not its contents.
   whose task list was already reviewed is not asked twice.
 - **Layout:** one vault maps to one Drive folder (`baseDirectory`). Listing is
   parent-based, so the real folder structure is mirrored.
+- **Files that keep failing:** a file whose sync fails three times in a row
+  goes on this device's skip list, with a notice naming it. Later syncs leave
+  it out, and Last sync adds _1 file skipped_. **Retry** under Advanced →
+  Development → Skipped files, or the _Retry skipped files_ command, clears
+  the list.
 - **Interrupted syncs:** each task records its result as soon as it finishes.
   If a sync stops halfway (Obsidian closed, offline, cancelled), the next one
   plans only what is left; finished uploads and downloads are not repeated.

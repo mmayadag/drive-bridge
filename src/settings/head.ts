@@ -30,6 +30,7 @@ export type HeadSettingTranslations = {
 	lastSync: string;
 	lastSyncNever: string;
 	lastSyncValue: Snippet<{ time: string; result: string }>;
+	filesSkipped: Snippet<number>;
 	completed: string;
 	completedNoop: string;
 	cancelled: string;
@@ -285,5 +286,10 @@ export function describeLastSync(
 		result: translate(RESULT_KEYS[lastSync.result]),
 		time: formatDateTime(lastSync.at),
 	});
-	return lastSync.error ? `${text}: ${describeError(lastSync.error, translate)}` : text;
+	const described = lastSync.error
+		? `${text}: ${describeError(lastSync.error, translate)}`
+		: text;
+	return lastSync.skipped
+		? `${described} · ${translate('filesSkipped', lastSync.skipped)}`
+		: described;
 }

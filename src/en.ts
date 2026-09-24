@@ -96,6 +96,9 @@ const en: Translations = {
 	exportLogsToFile: 'Export logs to file',
 	failed: 'Failed',
 	failedTasksDescription: (count) => `${pcOperations(count)} failed during sync:`,
+	fileSkipped: (key) =>
+		`Drive Bridge: "${key}" failed three syncs in a row and is skipped now. Advanced → Development → Skipped files retries it.`,
+	filesSkipped: (count) => `${pc(count, 'file', 'files')} skipped`,
 	filterPlaceholder: 'E.g. temp.md, .trash/**/*',
 	filterRules: 'Filter rules',
 	forRepairs: 'For repairs: switch back after one sync',
@@ -191,6 +194,8 @@ const en: Translations = {
 	resetToDefaultsDescription:
 		'Everything except the Google account, OAuth client and base directory goes back to its default.',
 	resolveConflict: 'Resolve conflict',
+	retry: 'Retry',
+	retrySkippedFiles: 'Retry skipped files',
 	scheduledSync: 'Scheduled sync',
 	scheduledSyncDescription: 'Sync at the interval in the field.',
 	scheduledSyncPlaceholder: 'Enter interval (e.g. 10min, 0.5h)',
@@ -199,6 +204,12 @@ const en: Translations = {
 	showProgress: 'Show progress',
 	skip: 'Skip',
 	skipDescription: 'Nothing changes; the conflict comes back on the next sync.',
+	skippedFiles: 'Skipped files',
+	skippedFilesCleared: 'Skipped files will be tried again on the next sync.',
+	skippedFilesDescription: (count) =>
+		count
+			? `${pc(count, 'file keeps', 'files keep')} failing and ${count === 1 ? 'is' : 'are'} left out of syncs.`
+			: 'No file is being skipped.',
 	speed: 'Speed',
 	speedLabelDescription: 'Properly configuring this setting could improve sync speed.',
 	startNonInteractiveSync: 'Start non-interactive sync',
