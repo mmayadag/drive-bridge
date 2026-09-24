@@ -112,6 +112,7 @@ test('getState returns selected and deselected task arrays using blueprint names
 
 	expect(selection.getState()).toStrictEqual({
 		deselected: [folder, file],
+		reversed: [],
 		selected: [],
 	});
 });
@@ -127,4 +128,85 @@ test('selecting descendant file task restores required ancestor create-folder ta
 
 	expect(selection.isSelected('folder')).toBe(true);
 	expect(selection.isSelected('folder/note.md')).toBe(true);
+});
+
+const undoable = (task: BaseTask) => task.name.startsWith('remove') || task.name === 'upload';
+function createReversible(tasks: Array<BaseTask>) {
+	return createFileTreeSelection(createFileTreeData(tasks), undoable);
+}
+
+test('undoing a task takes it out of the selection and reports it as reversed', () => {
+	const upload = makeTask({ key: 'a.md', name: 'upload' });
+	const move = makeTask({ key: 'b.md', name: 'moveLocal', remoteIsDir: false });
+	const selection = createReversible([upload, move]);
+	expect(selection.canReverse('a.md')).toBe(true);
+	expect(selection.canReverse('b.md')).toBe(false);
+	expect(selection.reverse('b.md', true)).toStrictEqual(new Set());
+	expect(selection.reverse('missing', true)).toStrictEqual(new Set());
+
+	expect(selection.reverse('a.md', true)).toStrictEqual(new Set(['a.md']));
+	// Asking again changes nothing.
+	expect(selection.reverse('a.md', true)).toStrictEqual(new Set());
+	expect(selection.isReversed('a.md')).toBe(true);
+	expect(selection.isSelected('a.md')).toBe(false);
+	expect(selection.getState()).toStrictEqual({
+		deselected: [],
+		reversed: [upload],
+		selected: [move],
+	});
+});
+
+test('taking the undo back, or ticking the row, runs the task as planned again', () => {
+	const selection = createReversible([makeTask({ key: 'a.md', name: 'upload' })]);
+	selection.reverse('a.md', true);
+	expect(selection.reverse('a.md', false)).toStrictEqual(new Set(['a.md']));
+	expect(selection.isSelected('a.md')).toBe(true);
+	selection.reverse('a.md', true);
+	selection.toggle('a.md', true);
+	expect(selection.isReversed('a.md')).toBe(false);
+	// Unticking from a cascade leaves the undo in place.
+	selection.reverse('a.md', true);
+	selection.toggle('a.md', false);
+	expect(selection.getState().deselected).toHaveLength(0);
+	expect(selection.isReversed('a.md')).toBe(true);
+});
+
+test('undoing a deletion inside a deleted folder brings the folders back too', () => {
+	const tasks = [
+		makeTask({ key: 'folder', localIsDir: true, name: 'removeLocal' }),
+		makeTask({ key: 'folder/nested', localIsDir: true, name: 'removeLocal' }),
+		makeTask({ key: 'folder/nested/note.md', name: 'removeLocal' }),
+		makeTask({ key: 'folder/other.md', name: 'removeLocal' }),
+	];
+	const selection = createReversible(tasks);
+	expect(selection.reverse('folder/nested/note.md', true)).toStrictEqual(
+		new Set(['folder/nested/note.md', 'folder', 'folder/nested']),
+	);
+	// A sibling is still deleted.
+	expect(selection.isSelected('folder/other.md')).toBe(true);
+});
+
+test('undoing a folder deletion brings back everything deleted inside it', () => {
+	const selection = createReversible([
+		makeTask({ key: 'folder', name: 'removeRemote', remoteIsDir: true }),
+		makeTask({ key: 'folder/a.md', name: 'removeRemote', remoteIsDir: false }),
+		makeTask({ key: 'folder/b.md', name: 'upload' }),
+	]);
+	selection.reverse('folder', true);
+	expect(selection.isReversed('folder/a.md')).toBe(true);
+	// Not a deletion: left as it was.
+	expect(selection.isSelected('folder/b.md')).toBe(true);
+	// Re-ticking the folder deletes its contents again.
+	selection.toggle('folder', true);
+	expect(selection.isSelected('folder/a.md')).toBe(true);
+	expect(selection.isReversed('folder/a.md')).toBe(false);
+});
+
+test('ticking a deletion inside a deleted folder leaves the folder deletion ticked', () => {
+	const selection = createSelection([
+		makeTask({ key: 'folder', localIsDir: true, name: 'removeLocal' }),
+		makeTask({ key: 'folder/note.md', name: 'removeLocal' }),
+	]);
+	selection.toggle('folder/note.md', true);
+	expect(selection.isSelected('folder')).toBe(true);
 });

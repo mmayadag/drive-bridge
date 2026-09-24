@@ -432,7 +432,7 @@ the rule. The notice has an **Undo** link.
 | Custom headers                     | none    | none        | Extra HTTP headers; not needed for Google Drive.                                                                                                                                |
 | Notice sync status on mobile       | on      | on          | Shows progress as a notice on mobile.                                                                                                                                           |
 | Avoid auto sync when offline       | on      | on          | Skips automatic syncs without a connection.                                                                                                                                     |
-| Confirm operations in manual sync  | on      | on          | Lists the planned changes before a manual sync runs.                                                                                                                            |
+| Confirm operations in manual sync  | on      | on          | Lists the planned changes before a manual sync runs. Untick a row to skip it, or press its undo button to run the opposite (see _Undo one change_ under Sync behavior).         |
 | Confirm deletions during auto-sync | on      | **on**      | Before an automatic sync deletes local files (because they were deleted in Drive), asks first; you can re-upload instead. This is the guard against another app deleting notes. |
 
 ### Webhooks
@@ -521,6 +521,14 @@ trust; the payload carries the vault name, not its contents.
   device, never synced or exported, and name no files. _Sync log_ shows the
   recent log in a window with a copy button; the general log keeps its last
   500 lines.
+- **Undo one change:** in the list a manual sync shows first, a row's undo
+  button runs the opposite instead: a pending upload downloads the Drive
+  version, a pending download uploads the vault version, a vault deletion
+  (deleted on Drive) uploads the file again, and a Drive deletion (deleted in
+  the vault) downloads it again. Undoing a deletion inside a deleted folder
+  brings the folder back too, and undoing a folder deletion brings back what
+  was deleted inside it. New files and conflicts have no undo; untick them to
+  skip them. The row's icon shows what will run.
 - **Interrupted syncs:** each task records its result as soon as it finishes.
   If a sync stops halfway (Obsidian closed, offline, cancelled), the next one
   plans only what is left; finished uploads and downloads are not repeated.
