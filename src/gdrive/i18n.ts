@@ -21,6 +21,7 @@ const en: GdriveTranslations = {
 	baseDirectoryPlaceholder: 'my-vault/',
 	cancel: 'Cancel',
 	clickToConnect: 'Click to connect',
+	clientFromJson: 'Client ID and secret filled in from the downloaded JSON.',
 	clientId: 'OAuth client ID',
 	clientIdDescription: 'From your Google Cloud project. Saved in plugin settings.',
 	clientIdMissing: 'Client ID missing',
@@ -60,6 +61,7 @@ const en: GdriveTranslations = {
 	newFolder: 'Create folder',
 	newFolderPrompt: 'New folder name',
 	noSubfolders: 'No folders here yet.',
+	openConsole: 'Open',
 	pickFolder: 'Browse Drive folders',
 	pickFolderTitle: 'Choose a Drive folder',
 	pickSubfolder: 'Open a folder first; the whole Drive cannot be the vault folder.',
@@ -67,13 +69,13 @@ const en: GdriveTranslations = {
 	setupSteps: () =>
 		createFragment((frag) => {
 			frag.appendText(
-				'Drive Bridge uses your own Google Cloud OAuth client. Create a "Desktop app" client with the Drive API enabled (see the ',
+				'Drive Bridge uses your own Google Cloud OAuth client (details in the ',
 			);
 			frag.createEl('a', {
 				attr: { href: SETUP_GUIDE_URL },
 				text: 'setup guide',
 			});
-			frag.appendText('), enter it below, then Sign in with Google.');
+			frag.appendText('). Four one-time steps, then Sign in with Google.');
 		}),
 	signInDenied: 'Google access was not allowed. Sign in again and choose Allow.',
 	signInOpened:
@@ -82,6 +84,16 @@ const en: GdriveTranslations = {
 	signInWithGoogle: 'Sign in with Google',
 	signInWithGoogleDescription:
 		'Opens Google in your browser to allow Drive Bridge access with your client above. No terminal needed.',
+	stepClient: 'Create a Desktop client',
+	stepClientDescription:
+		'Application type Desktop app. Download the JSON and paste it into the client ID below, or copy the ID and secret.',
+	stepConsent: 'Set up the consent screen',
+	stepConsentDescription:
+		'App name and your email. Then under Audience choose External and press Publish app, or tokens expire after 7 days.',
+	stepDriveApi: 'Enable the Google Drive API',
+	stepDriveApiDescription: 'In the new project, open the Drive API page and press Enable.',
+	stepProject: 'Create a Google Cloud project',
+	stepProjectDescription: 'Any name. Use the Google account whose Drive should hold the vault.',
 	tapToConnect: 'Tap to connect',
 	useThisFolder: 'Use this folder',
 	useTrash: 'Delete to trash',
