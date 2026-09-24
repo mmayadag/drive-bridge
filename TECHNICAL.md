@@ -431,6 +431,9 @@ trust; the payload carries the vault name, not its contents.
   (`confirmDeleteInAutoSync`).
 - **Layout:** one vault maps to one Drive folder (`baseDirectory`). Listing is
   parent-based, so the real folder structure is mirrored.
+- **Interrupted syncs:** each task records its result as soon as it finishes.
+  If a sync stops halfway (Obsidian closed, offline, cancelled), the next one
+  plans only what is left; finished uploads and downloads are not repeated.
 
 ### Known limits
 
