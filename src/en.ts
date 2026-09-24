@@ -69,6 +69,7 @@ const en: Translations = {
 	customHeaders: 'Custom headers',
 	customHeadersDescription:
 		'Extra HTTP headers on every Drive request, in plain text or the OS keychain. Drive needs none.',
+	deleteThem: 'Delete them',
 	development: 'Development',
 	diffMatchPatch: 'Merge',
 	done: 'Done',
@@ -116,6 +117,7 @@ const en: Translations = {
 	keepRemote: 'Keep remote',
 	keepRemoteDescription: 'The Drive version overwrites the vault.',
 	keepRemoteWarning: 'The vault version is replaced without asking.',
+	keepThem: 'Keep them',
 	lastSync: 'Last sync',
 	lastSyncNever: 'No sync on this device yet.',
 	lastSyncValue: ({ time, result }) => `${time} · ${result}`,
@@ -123,6 +125,9 @@ const en: Translations = {
 	latestSurviveDescription:
 		'The newer modified time wins. A device with a wrong clock can pick the old edit.',
 	latestSurviveWarning: 'The older edit is replaced without asking.',
+	massDeleteMessage: ({ local, remote }) =>
+		`This sync would delete ${pc(local, 'file', 'files')} in the vault and ${pc(remote, 'file', 'files')} on Google Drive. That is more than usual, so nothing is deleted without your answer. Keep them to copy them back to the side they were removed from.`,
+	massDeleteTitle: 'Delete many files?',
 	match: 'Match',
 	matchLabelDescription: 'This setting must be kept the same on all devices.',
 	maxFileSize: 'Max file size',

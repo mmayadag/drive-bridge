@@ -262,7 +262,8 @@ _Bidirectional_.
 | **Mirror local**  | Makes Drive an exact copy of the vault. Every file is uploaded; anything on Drive that is not in the vault is deleted. Nothing is ever downloaded and no conflict can happen. | Remote only, and without asking.                                                              | Once, to push a known-good vault over a damaged Drive folder. Switch back afterwards. |
 | **Mirror remote** | Makes the vault an exact copy of Drive. Every file is downloaded; anything in the vault that is not on Drive is deleted. Nothing is ever uploaded and no conflict can happen. | Local only, and without asking.                                                               | Once, to restore a device from Drive. Switch back afterwards.                         |
 
-Both mirrors still go through the usual safety nets: a manual sync lists every
+Both mirrors still go through the usual safety nets, including the mass
+deletion check described under [Sync behavior](#sync-behavior): a manual sync lists every
 operation first while _Confirm operations in manual sync_ is on, and vault
 deletions are confirmed in automatic syncs while _Confirm deletions during
 auto-sync_ is on. Deletions on the Drive side are never confirmed, which is
@@ -429,6 +430,11 @@ trust; the payload carries the vault name, not its contents.
   [Conflict resolve strategies](#conflict-resolve-strategies).
 - **Deletes:** remote deletions require confirmation during automatic sync
   (`confirmDeleteInAutoSync`).
+- **Mass deletions:** when one sync would delete more than max(50, 5% of the
+  files) on the two sides together, it stops and asks. _Delete them_ runs the
+  deletions; _Keep them_ (or closing the dialog) copies each file back to the
+  side it was removed from, so the next sync does not try again. A manual sync
+  whose task list was already reviewed is not asked twice.
 - **Layout:** one vault maps to one Drive folder (`baseDirectory`). Listing is
   parent-based, so the real folder structure is mirrored.
 - **Interrupted syncs:** each task records its result as soon as it finishes.

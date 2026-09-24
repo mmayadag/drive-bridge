@@ -81,6 +81,11 @@ export default class EventBus {
 				);
 			}),
 			on('tasksConfirmed', (tasks) => putSyncLog(`Confirmed ${tasks.length} task(s).`)),
+			on('massDeleteConfirmed', (approved) =>
+				putSyncLog(
+					approved ? 'Mass deletion approved.' : 'Mass deletion declined; files kept.',
+				),
+			),
 			on('syncCanceled', () => putSyncLog('Sync is forced to stop.')),
 			on('deleteConfirmed', ({ reupload, delete: { length } }) =>
 				putSyncLog(

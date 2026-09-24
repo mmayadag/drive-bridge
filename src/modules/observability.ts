@@ -145,6 +145,7 @@ export default class Observability {
 			}),
 			on('requestConfirmDelete', () => syncStage('awaitingConfirmation')),
 			on('requestConfirmTasks', () => syncStage('awaitingConfirmation')),
+			on('requestConfirmMassDelete', () => syncStage('awaitingConfirmation')),
 			on('executionStarted', (tasks) => {
 				totalSyncTasks = tasks.length;
 				completedTasks = 0;
