@@ -39,6 +39,8 @@ export type HeadSettingTranslations = {
 	checkConnection: string;
 	conflictResolveStrategy: string;
 	conflictResolveStrategyDescription: string;
+	neverDeleteRemote: string;
+	neverDeleteRemoteDescription: string;
 	forRepairs: string;
 	nothingLost: string;
 	replacesOneVersion: string;
@@ -249,6 +251,12 @@ export default function headSettings(
 				type: 'page',
 			};
 		}),
+		// A safety switch, so it sits with the strategies rather than under Advanced.
+		[CONFLICTS + 5]: s(() => ({
+			control: { key: 'neverDeleteRemote', type: 'toggle' },
+			desc: translate('neverDeleteRemoteDescription'),
+			name: translate('neverDeleteRemote'),
+		})),
 	};
 }
 

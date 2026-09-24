@@ -430,6 +430,13 @@ trust; the payload carries the vault name, not its contents.
   [Conflict resolve strategies](#conflict-resolve-strategies).
 - **Deletes:** remote deletions require confirmation during automatic sync
   (`confirmDeleteInAutoSync`).
+- **Never delete on Drive:** with this switch on (main screen, under the
+  strategies), nothing is deleted on Drive. A file deleted in the vault stays
+  on Drive and is marked as kept on this device, so later syncs neither
+  delete it nor download it again. The mark goes when the file changes on
+  Drive (the new version downloads), comes back in the vault, or is removed
+  from Drive. Turning the switch off keeps existing marks; Reset to defaults
+  keeps them too.
 - **Mass deletions:** when one sync would delete more than max(50, 5% of the
   files) on the two sides together, it stops and asks. _Delete them_ runs the
   deletions; _Keep them_ (or closing the dialog) copies each file back to the

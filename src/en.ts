@@ -155,6 +155,9 @@ const en: Translations = {
 	miscellaneous: 'Miscellaneous',
 	moveLocal: 'Move local',
 	moveRemote: 'Move remote',
+	neverDeleteRemote: 'Never delete on Drive',
+	neverDeleteRemoteDescription:
+		'Files deleted in the vault stay on Google Drive and are not downloaded again.',
 	noHeaderConfigured: 'No header configured.',
 	noRuleConfigured: 'No rule configured.',
 	none: 'None',

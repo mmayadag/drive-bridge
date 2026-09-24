@@ -31,11 +31,13 @@ export function defaultSettings(configDir: string): Settings {
 		].map((expr) => ({ caseSensitive: false, expr })),
 		exportLogsDirectory: 'Drive Bridge Logs/',
 		inclusionRules: [],
+		keptOnRemote: {},
 		maxFileSize: { enabled: false, value: 31_457_280 },
 		maxMemoryConsumption: { enabled: true, value: 100 * 1024 ** 2 },
 		maxRequestConcurrency: { enabled: true, value: 50 },
 		minRequestInterval: { enabled: false, value: 0 },
 		modules: {},
+		neverDeleteRemote: false,
 		noticeStatusOnMobile: true,
 		realtimeSync: { enabled: false, value: 5000 },
 		realtimeSyncFastMode: true,
@@ -51,11 +53,13 @@ export function defaultSettings(configDir: string): Settings {
 
 /**
  * Puts every setting back to its default, except what ties this device to its account
- * and folder: the backend, module settings (each module resets its own) and the last
- * sync result.
+ * and folder: the backend, module settings (each module resets its own), files kept on
+ * Drive and the last sync result.
  */
 export function resetSettings(settings: Settings, configDir: string) {
-	const { modules, remoteFs, lastSync } = settings;
-	Object.assign(settings, defaultSettings(configDir), { modules, remoteFs });
+	// Kept-on-Drive marks are state, not a preference: dropping them would download every
+	// kept file again.
+	const { modules, remoteFs, lastSync, keptOnRemote } = settings;
+	Object.assign(settings, defaultSettings(configDir), { keptOnRemote, modules, remoteFs });
 	if (lastSync) settings.lastSync = lastSync;
 }
