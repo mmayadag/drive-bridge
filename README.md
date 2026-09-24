@@ -63,8 +63,6 @@ Drive Bridge is not in the community store. Install it with
 Step-by-step instructions and the reasoning behind each choice are in
 [TECHNICAL.md](TECHNICAL.md#setup).
 
-Drive safe :)
-
 ## Privacy
 
 Your notes stay between this device and your own Google Drive. The plugin uses
@@ -80,7 +78,7 @@ code and bug reports are welcome too, see
 [CONTRIBUTORS.md](CONTRIBUTORS.md).
 
 <p align="right">
-<a href="https://buymeacoffee.com/muratmayadag"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee" height="48"></a>
+Drive safe :)&nbsp;&nbsp;<a href="https://buymeacoffee.com/muratmayadag"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy me a coffee" height="48" align="absmiddle"></a>
 </p>
 
 ## License
