@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.1.17 - 2026-09-24
+
+Maintenance only; the plugin behaves as in 0.1.16.
+
+- Lint warnings now fail `bun check` and CI; CI and releases install from the
+  lockfile as it is (#67).
+- A release checklist in TECHNICAL.md covers what unit tests cannot: the
+  settings in Obsidian, on desktop and on a phone (#68).
+- `bun visual` renders the main settings rows at phone width in both themes
+  for a quick layout check (#69).
+
 ## v0.1.16 - 2026-09-24
 
 Safety release.
