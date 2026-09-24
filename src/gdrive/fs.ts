@@ -19,7 +19,7 @@ import {
 	parseDriveError,
 	toFileStat,
 } from './api';
-import { applyChanges, getStartToken, isUsable, snapshotStore } from './changes';
+import { applyChanges, fullScanReason, getStartToken, snapshotStore } from './changes';
 import { guessMimeType, resumableUpload, singleUpload } from './upload';
 
 export type GdriveFsOptions = {
@@ -52,14 +52,16 @@ export default class GdriveFs implements RootFs {
 	/** Path key (`'/'`, `folder/`, `folder/note.md`) to Drive file id. */
 	private readonly ids: StoreSync<string>;
 	private readonly snapshots: ReturnType<typeof snapshotStore>;
+	private readonly log: (line: string) => void;
 
 	constructor(
 		private readonly request: Request,
 		private readonly options: GdriveFsOptions,
 		memoryDB: GdriveDB,
-		persistentDB?: SnapshotDB,
+		{ persistentDB, log }: { persistentDB?: SnapshotDB; log?: (line: string) => void } = {},
 	) {
 		this.snapshots = snapshotStore(persistentDB);
+		this.log = log ?? (() => {});
 		this.ids = memoryDB.getStore('gdriveIds');
 		if (memoryDB.getMeta('gdriveIdsMarker') !== this.getUid()) {
 			this.ids.clear();
@@ -301,17 +303,24 @@ export default class GdriveFs implements RootFs {
 
 	/** Every visible Drive file, from the changes since the last scan when that is allowed. */
 	private async listEverything(): Promise<Array<DriveFile>> {
-		if (this.options.remoteScan !== 'changes') return this.listAllFiles();
+		if (this.options.remoteScan !== 'changes') {
+			this.log('Drive scan: full scan (setting).');
+			return this.listAllFiles();
+		}
 		const { userId } = this.options;
 		const snapshot = await this.snapshots.load();
-		if (snapshot && isUsable(snapshot, userId))
+		let reason = fullScanReason(snapshot, userId);
+		if (snapshot && !reason)
 			try {
-				const next = await applyChanges(this.getJson, snapshot);
+				const { snapshot: next, changed } = await applyChanges(this.getJson, snapshot);
 				await this.snapshots.save(next);
+				this.log(`Drive scan: changes only (${changed} change(s)).`);
 				return next.files;
 			} catch {
 				// An expired token or a failed page: the full scan below starts over.
+				reason = 'changes could not be read';
 			}
+		this.log(`Drive scan: full scan (${reason}).`);
 		const token = await getStartToken(this.getJson);
 		const files = await this.listAllFiles();
 		await this.snapshots.save({ files, scannedAt: Date.now(), token, userId });

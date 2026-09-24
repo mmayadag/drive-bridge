@@ -1,5 +1,6 @@
-import type { Context, SelectFromContext, Settings, Translations } from '@';
+import type { Context, Events, SelectFromContext, Settings, Translations } from '@';
 import type { App } from 'obsidian';
+import type { Dispatch } from '@/modules/event-bus';
 import type { Translate, TranslationResource } from '@/modules/i18n';
 import type {
 	FsWrapperEntry,
@@ -39,6 +40,7 @@ export default class Gdrive {
 			app: App;
 			memoryDB: GdriveDB;
 			indexedDB: SnapshotDB;
+			dispatch: Dispatch<Events>;
 			registerRemoteFsWrapper: (entry: FsWrapperEntry) => () => void;
 			registerRemoteRequestMiddleware: (entry: RemoteRequestMiddlewareEntry) => () => void;
 			registerSetting: (entry: SettingEntry) => () => void;
@@ -102,6 +104,7 @@ export default class Gdrive {
 			registerRemoteFs,
 			memoryDB,
 			indexedDB,
+			dispatch,
 			registerRemoteFsWrapper,
 			registerRemoteRequestMiddleware,
 			registerSetting,
@@ -110,7 +113,10 @@ export default class Gdrive {
 			registerRemoteFs('gdrive', {
 				checkConnection,
 				instantiate: (request) =>
-					new GdriveFs(request, this.moduleSettings, memoryDB, indexedDB),
+					new GdriveFs(request, this.moduleSettings, memoryDB, {
+						log: (line) => dispatch('logSync', line),
+						persistentDB: indexedDB,
+					}),
 				prettyName: () => translate('gdrive'),
 			}),
 			registerRemoteFsWrapper({

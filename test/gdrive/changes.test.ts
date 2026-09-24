@@ -6,7 +6,7 @@ import {
 	FULL_SCAN_INTERVAL,
 	applyChanges,
 	getStartToken,
-	isUsable,
+	fullScanReason,
 	snapshotStore,
 } from '@/gdrive/changes';
 
@@ -69,10 +69,12 @@ test('changes add, update and drop files, over every page', async () => {
 			newStartPageToken: 't3',
 		},
 	});
-	const next = await applyChanges(
+	const { snapshot: next, changed } = await applyChanges(
 		json,
 		snapshot([note('kept'), note('gone'), note('binned'), note('no-file'), note('same')]),
 	);
+	// The shared drive change is not one of ours.
+	expect(changed).toBe(5);
 	expect(next.token).toBe('t3');
 	expect(next.scannedAt).toBe(1000);
 	expect(next.files.map((file) => file.id).toSorted()).toStrictEqual(['kept', 'new', 'same']);
@@ -93,7 +95,7 @@ test('a folder new to the snapshot brings its whole contents', async () => {
 		},
 		'/files?p2': { files: [note('b', 'restored')] },
 	});
-	const next = await applyChanges(json, snapshot([]));
+	const { snapshot: next } = await applyChanges(json, snapshot([]));
 	expect(next.files.map((file) => file.id).toSorted()).toStrictEqual([
 		'a',
 		'b',
@@ -130,12 +132,12 @@ test('the start token comes from Drive or the scan fails', async () => {
 
 test('a snapshot is used for a day, for the same account only', () => {
 	const taken = snapshot([]);
-	expect(isUsable(taken, 'user-1', 1000 + FULL_SCAN_INTERVAL - 1)).toBe(true);
-	expect(isUsable(taken, 'user-1', 1000 + FULL_SCAN_INTERVAL)).toBe(false);
-	expect(isUsable(taken, 'user-2', 2000)).toBe(false);
-	expect(isUsable(undefined, 'user-1', 2000)).toBe(false);
+	expect(fullScanReason(taken, 'user-1', 1000 + FULL_SCAN_INTERVAL - 1)).toBeUndefined();
+	expect(fullScanReason(taken, 'user-1', 1000 + FULL_SCAN_INTERVAL)).toBe('daily check');
+	expect(fullScanReason(taken, 'user-2', 2000)).toBe('another account');
+	expect(fullScanReason(undefined, 'user-1', 2000)).toBe('first sync');
 	// A clock set back is not trusted either.
-	expect(isUsable(taken, 'user-1', 500)).toBe(false);
+	expect(fullScanReason(taken, 'user-1', 500)).toBe('daily check');
 });
 
 test('a multi-page changes list is followed to its end token', async () => {
@@ -149,8 +151,9 @@ test('a multi-page changes list is followed to its end token', async () => {
 			nextPageToken: 'c2',
 		},
 	});
-	const next = await applyChanges(json, snapshot([]));
+	const { changed, snapshot: next } = await applyChanges(json, snapshot([]));
 
+	expect(changed).toBe(1);
 	expect(urls).toHaveLength(2);
 	expect(urls[0]).toContain('pageToken=t1');
 	expect(urls[1]).toContain('pageToken=c2');

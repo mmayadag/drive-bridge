@@ -497,7 +497,10 @@ trust; the payload carries the vault name, not its contents.
   list, such as one restored from the trash, is listed with its contents. It
   falls back to a full scan on the first sync, once a day, for another
   account, and whenever Drive rejects the token or a changes page fails.
-  Clearing records drops the list too.
+  Clearing records drops the list too. The sync log names the scan each
+  time: `Drive scan: changes only (3 change(s)).` or `Drive scan: full scan
+(first sync).`, with the reason (first sync, daily check, another account,
+  changes could not be read, setting).
 - **Files that keep failing:** a file whose sync fails three times in a row
   goes on this device's skip list, with a notice naming it. Later syncs leave
   it out, and Last sync adds _1 file skipped_. **Retry** under Advanced →
