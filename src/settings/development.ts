@@ -1,7 +1,7 @@
 import type { Settings } from '@';
 import type { App, SettingGroupItem } from 'obsidian';
 import { Notice } from 'obsidian';
-import type { Translate } from '@/modules/i18n';
+import type { Snippet, Translate } from '@/modules/i18n';
 import type { CallableOrObjectTree } from '@/modules/setting';
 import type { MaybePromise } from '@/types';
 import ConfirmModal from '@/components/confirm-modal';
@@ -21,6 +21,10 @@ export type DevelopmentSettingTranslations = {
 	resetToDefaultsDescription: string;
 	resetToDefaultsConfirm: string;
 	settingsReset: string;
+	skippedFiles: string;
+	skippedFilesDescription: Snippet<number>;
+	skippedFilesCleared: string;
+	retry: string;
 	cancel: string;
 	export: string;
 	exportLogsDescription: string;
@@ -84,6 +88,26 @@ export default function developmentSettings({
 												title: translate('clearRecords'),
 											}).open(),
 										),
+								);
+							},
+						})),
+						1500: s(() => ({
+							desc: translate(
+								'skippedFilesDescription',
+								settings.skipState.skipped.length,
+							),
+							name: translate('skippedFiles'),
+							render: (setting) => {
+								setting.addButton((button) =>
+									button
+										.setButtonText(translate('retry'))
+										.setDisabled(!settings.skipState.skipped.length)
+										.onClick(async () => {
+											settings.skipState = { failures: {}, skipped: [] };
+											await saveSettings();
+											new Notice(translate('skippedFilesCleared'));
+											rerenderSettingTab();
+										}),
 								);
 							},
 						})),

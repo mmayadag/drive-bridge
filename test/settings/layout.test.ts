@@ -25,6 +25,7 @@ const settings = {
 	realtimeSyncFastMode: true,
 	remoteFs: 'gdrive',
 	scheduledSync: { enabled: true, value: 1 },
+	skipState: { failures: {}, skipped: [] as Array<string> },
 	startupSync: { enabled: true, value: 1 },
 	syncOnLeave: true,
 };

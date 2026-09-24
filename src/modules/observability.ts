@@ -2,6 +2,7 @@ import type { Events, Translations } from '@';
 import type { App, Command, DataAdapter, IconName } from 'obsidian';
 import { Notice, Platform, setIcon } from 'obsidian';
 import type { Ref } from '@/shared/reactive';
+import type { SkipState } from '@/sync/skip-list';
 import type { Progress } from '@/types';
 import { getMessage } from '@/shared/error';
 import { computed, ref } from '@/shared/reactive';
@@ -28,6 +29,8 @@ export type LastSync = {
 	at: number;
 	result: SyncTerminateReason['result'];
 	error?: string;
+	/** Files on this device's skip list when the sync ended. */
+	skipped?: number;
 };
 
 export type AddRibbonIcon = (
@@ -79,6 +82,7 @@ export default class Observability {
 		exportLogsDirectory: string;
 		/** Result of the last sync on this device. Not synced, `data.json` is device-local. */
 		lastSync?: LastSync;
+		skipState: SkipState;
 	};
 	declare readonly i18n: {
 		startSync: string;
@@ -173,6 +177,9 @@ export default class Observability {
 					at: this.lastSyncTime,
 					...(reason.result === 'failed' ? { error: reason.error } : {}),
 					result: reason.result,
+					...(this.settings.skipState.skipped.length
+						? { skipped: this.settings.skipState.skipped.length }
+						: {}),
 				};
 				void ctx.saveSettings();
 				const setUpdateInterval = () =>
