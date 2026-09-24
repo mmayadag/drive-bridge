@@ -53,7 +53,13 @@ test('asks for the whole setup until an account is connected', () => {
 	const { page, shown } = setup({ clientId: 'client', secret: 'secret' });
 	expect(call(page.status)).toBe('warning');
 	expect(call(page.displayValue)).toBe('clickToConnect');
-	expect(shown).toStrictEqual(['dummy', 'clientId', 'clientSecret', 'connectAccount']);
+	expect(shown).toStrictEqual([
+		'dummy',
+		'clientId',
+		'clientSecret',
+		'signInWithGoogle',
+		'connectAccount',
+	]);
 });
 
 test('shows only the account once connected', () => {
