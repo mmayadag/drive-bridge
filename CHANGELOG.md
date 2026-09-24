@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.1.16 - 2026-09-24
+
+Safety release.
+
+- A sync that would delete more than 50 files, or 5% of the vault, on the two
+  sides together stops and asks. _Keep them_, also chosen by closing the
+  dialog, copies each file back instead of deleting it (#60).
+- **Never delete on Drive** on the main screen: files deleted in the vault
+  stay on Google Drive and are not downloaded again, unless they change on
+  Drive (#66).
+- A file that fails three syncs in a row is skipped, with a notice naming it.
+  Last sync shows how many files are skipped; **Retry** under Advanced or the
+  _Retry skipped files_ command tries them again (#62).
+- The README has a features list and a shorter install section (#64).
+- Checked and documented: an interrupted sync resumes where it stopped (#61).
+
 ## v0.1.15 - 2026-09-24
 
 - Sync errors read as a sentence: for example _Failed: Can't reach Google.
