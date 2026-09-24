@@ -365,7 +365,11 @@ test('changes only lists everything once, then asks only what changed', async ()
 		return response({ files: [note('file-1', 'a.md', 'root')] });
 	});
 	const options = { remoteScan: 'changes' as const, useTrash: true, userId: 'user-1' };
-	const fs = new GdriveFs(harness.request, options, db, persistentDB);
+	const logs: Array<string> = [];
+	const fs = new GdriveFs(harness.request, options, db, {
+		log: (line) => logs.push(line),
+		persistentDB,
+	});
 	const keys = async () => (await fs.list('/', () => 'advance')).map((stat) => stat.key);
 	const paths = () =>
 		harness.calls.splice(0).map((call) => new URL(call.url).pathname.split('/v3')[1]);
@@ -385,4 +389,10 @@ test('changes only lists everything once, then asks only what changed', async ()
 	options.remoteScan = 'full' as never;
 	await keys();
 	expect(paths()).toStrictEqual(['/files']);
+	expect(logs).toStrictEqual([
+		'Drive scan: full scan (first sync).',
+		'Drive scan: changes only (1 change(s)).',
+		'Drive scan: full scan (changes could not be read).',
+		'Drive scan: full scan (setting).',
+	]);
 });

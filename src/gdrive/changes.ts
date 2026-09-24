@@ -46,7 +46,11 @@ export async function getStartToken(json: Json): Promise<string> {
 }
 
 /** The snapshot moved forward to now; files that were removed, trashed or lost go. */
-export async function applyChanges(json: Json, snapshot: Snapshot): Promise<Snapshot> {
+export async function applyChanges(
+	json: Json,
+	snapshot: Snapshot,
+): Promise<{ snapshot: Snapshot; changed: number }> {
+	let changed = 0;
 	const files = new Map(snapshot.files.map((file) => [file.id, file]));
 	// A folder new to the snapshot, restored from the trash say, may bring files with no change of their own.
 	const arrivedFolders: Array<string> = [];
@@ -65,6 +69,7 @@ export async function applyChanges(json: Json, snapshot: Snapshot): Promise<Snap
 			if (changeType && changeType !== 'file') continue;
 			const id = file?.id ?? fileId;
 			if (!id) continue;
+			changed++;
 			if (removed || !file || file.trashed) files.delete(id);
 			else {
 				const { trashed: _, ...kept } = file;
@@ -79,7 +84,10 @@ export async function applyChanges(json: Json, snapshot: Snapshot): Promise<Snap
 		}
 	} while (!page.newStartPageToken);
 	await addContents(json, files, arrivedFolders);
-	return { ...snapshot, files: [...files.values()], token: page.newStartPageToken };
+	return {
+		changed,
+		snapshot: { ...snapshot, files: [...files.values()], token: page.newStartPageToken },
+	};
 }
 
 async function addContents(json: Json, files: Map<string, DriveFile>, folders: Array<string>) {
@@ -103,19 +111,26 @@ async function addContents(json: Json, files: Map<string, DriveFile>, folders: A
 	}
 }
 
-export function isUsable(snapshot: Snapshot | undefined, userId: string, now = Date.now()) {
-	return (
-		snapshot?.userId === userId &&
-		now - snapshot.scannedAt < FULL_SCAN_INTERVAL &&
-		now >= snapshot.scannedAt
-	);
+/** Why the snapshot cannot be used and a full scan runs, or undefined when it can. */
+export function fullScanReason(snapshot: Snapshot | undefined, userId: string, now = Date.now()) {
+	if (!snapshot) return 'first sync';
+	if (snapshot.userId !== userId) return 'another account';
+	// A clock set back is not trusted either.
+	if (now - snapshot.scannedAt >= FULL_SCAN_INTERVAL || now < snapshot.scannedAt)
+		return 'daily check';
 }
 
 /** Losing the snapshot only costs a full scan, so storage errors never fail a sync. */
 export function snapshotStore(db?: SnapshotDB) {
 	const store = db?.getStore('gdriveSnapshot');
 	return {
-		load: () => store?.get(SNAPSHOT_KEY).catch(() => {}),
+		load: async (): Promise<Snapshot | undefined> => {
+			try {
+				return await store?.get(SNAPSHOT_KEY);
+			} catch {
+				// Unreadable: a full scan writes a new one.
+			}
+		},
 		save: (snapshot: Snapshot) => store?.set(SNAPSHOT_KEY, snapshot).catch(() => {}),
 	};
 }
