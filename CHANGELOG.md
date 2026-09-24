@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.2.1 - 2026-09-24
+
+Fixes:
+
+- The plugin failed to load since 0.1.16, on phones and desktop alike
+  (_Failed to load plugin "drive-bridge"_). A command was registered before
+  its name could be translated. Fixed, and a missing string no longer breaks
+  loading (#115).
+
 ## v0.2.0 - 2026-09-24
 
 Easy setup.

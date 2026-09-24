@@ -1,11 +1,11 @@
 {
 	"id": "drive-bridge",
 	"name": "Drive Bridge",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"minAppVersion": "1.13.0",
 	"authorUrl": "https://github.com/mmayadag",
 	"fundingUrl": "https://buymeacoffee.com/muratmayadag",
-	"description": "Two-way Google Drive sync that also picks up files other apps add. Keeps both versions on conflict, asks before mass deletions, and uses your own Google client.",
+	"description": "Two-way Google Drive sync that also picks up files other apps put in the folder. Keeps both versions on conflict, confirms deletions, uses your own OAuth client, and downloads no code at runtime.",
 	"author": "Murat Mayadağ",
 	"isDesktopOnly": false
 }
