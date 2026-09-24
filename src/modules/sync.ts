@@ -75,13 +75,16 @@ export default class Sync {
 			saveSettings: () => Promise<void>;
 			addCommand: (command: Command) => Command;
 		},
-	) {
-		ctx.addCommand({
+	) {}
+
+	// Commands need translated names, which are registered after every module is built.
+	readonly start = () => {
+		this.ctx.addCommand({
 			callback: () => this.retrySkipped(),
 			id: 'retry-skipped-files',
-			name: ctx.translate('retrySkippedFiles'),
+			name: this.ctx.translate('retrySkippedFiles'),
 		});
-	}
+	};
 
 	private readonly retrySkipped = () => {
 		this.settings.skipState = { failures: {}, skipped: [] };

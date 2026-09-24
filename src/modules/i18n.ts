@@ -23,6 +23,8 @@ export default class I18n {
 	private readonly translate = ((key: string, arg: unknown) => {
 		const value = this.i18n[key];
 		if (typeof value === 'string') return value;
+		// A string asked for before it is registered shows its key rather than breaking the caller.
+		if (typeof value !== 'function') return key;
 		return (value as Factory<unknown>)(arg);
 	}) as Translate<TranslationResource>;
 
