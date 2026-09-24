@@ -536,7 +536,9 @@ and the plugin's log output.
 Unit tests do not run the settings in Obsidian; the strategy page bug in
 0.1.11 (#46) shipped because of that. Before tagging a release that touches
 the UI or sync, build (`bun run build`), reload the plugin in the test vault,
-and check on desktop, then on a phone:
+and check on desktop, then on a phone. For CSS changes, `bun visual` renders
+the main rows at phone width in both themes first, as a quick look before the
+real devices:
 
 - **Main screen**: Last sync, the two strategy entries, _Never delete on
   Drive_, the Google Drive group, the sub-page entries, the Help row and the

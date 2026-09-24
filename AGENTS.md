@@ -29,6 +29,7 @@ This is the repository for Drive Bridge, an Obsidian plugin that syncs vault fil
 - `bun tests <test path>`: run tests in a specific file.
 - `bun coverage`: run all tests with coverage; prints the totals and least covered files and fails below the floor in `scripts/coverage-summary.ts`.
 - `bun ver <x.y.z>`: prepare a release (see Releasing in `TECHNICAL.md`); `bun ver --check [tag]` checks the release files agree.
+- `bun visual [--out <dir>]`: render key settings rows with the built CSS at phone width, dark and light, into `visual/sheet.png` (needs a Chromium; approximates Obsidian's layout). Run before and after a CSS change and compare.
 - `bun changelog <milestone>`: print a CHANGELOG draft from the milestone's closed issues (GitHub CLI).
 - `bun -e '<code>'` run TS code directly, can import from codebase, use double quotes inside code.
 
