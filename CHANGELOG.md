@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.3.1 - 2026-09-24
+
+Fixes:
+
+- The Obsidian store review failed 0.3.0: its rules forbid disabling the
+  `fetch` check, which 0.3.0 did on the two lines that read large vault files
+  from disk. Those comments are gone (the review shows a warning there, as for
+  0.2.1), and a test keeps such comments out of the source (#136).
+
 ## v0.3.0 - 2026-09-24
 
 Control and safety.
