@@ -35,6 +35,7 @@ export type LayoutSettingTranslations = {
 	filterRules: string;
 	xConfigured: (count: number) => string;
 	xOfYOn: (count: { on: number; total: number }) => string;
+	automaticSyncPausedStatus: string;
 };
 
 const items = (self: SettingTree) => Object.values(self).map((node) => node(node));
@@ -58,7 +59,10 @@ export default function layoutSettings(ctx: {
 	return {
 		[MORE]: s((self) => ({ items: items(self) as never, type: 'group' }), {
 			[PAGE.automaticSync]: s((self) => ({
-				displayValue: () => translate('xOfYOn', countAutomaticSyncs(settings)),
+				displayValue: () =>
+					settings.automaticSyncPaused
+						? translate('automaticSyncPausedStatus')
+						: translate('xOfYOn', countAutomaticSyncs(settings)),
 				items: items(self),
 				name: translate('automaticSync'),
 				type: 'page',

@@ -19,9 +19,12 @@ export type FeaturesSettingTranslations = {
 	scheduledSyncPlaceholder: string;
 	syncOnLeave: string;
 	syncOnLeaveDescription: string;
+	pauseAutomaticSync: string;
+	pauseAutomaticSyncDescription: string;
 };
 
 export default function featuresSettings(ctx: {
+	setAutomaticSyncPaused: (paused: boolean) => void;
 	translate: Translate<FeaturesSettingTranslations>;
 	saveSettings: () => Promise<void>;
 	startScheduledSync: () => void;
@@ -29,8 +32,15 @@ export default function featuresSettings(ctx: {
 	settings: Settings;
 	speedLabel: () => LabelDefinition;
 }): CallableOrObjectTree {
-	const { translate, saveSettings, startScheduledSync, stopScheduledSync, settings, speedLabel } =
-		ctx;
+	const {
+		setAutomaticSyncPaused,
+		translate,
+		saveSettings,
+		startScheduledSync,
+		stopScheduledSync,
+		settings,
+		speedLabel,
+	} = ctx;
 	return {
 		[MORE]: {
 			[PAGE.automaticSync]: {
@@ -86,6 +96,17 @@ export default function featuresSettings(ctx: {
 					desc: translate('realtimeSyncFastModeDescription'),
 					labels: [speedLabel()],
 					name: translate('realtimeSyncFastMode'),
+				})),
+				500: s(() => ({
+					desc: translate('pauseAutomaticSyncDescription'),
+					name: translate('pauseAutomaticSync'),
+					render: (setting) => {
+						setting.addToggle((toggle) =>
+							toggle
+								.setValue(settings.automaticSyncPaused)
+								.onChange((paused) => setAutomaticSyncPaused(paused)),
+						);
+					},
 				})),
 			},
 		},

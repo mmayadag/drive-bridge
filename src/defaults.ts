@@ -3,6 +3,7 @@ import type { Settings } from '@';
 /** What a fresh install uses, and what Reset to defaults goes back to. */
 export function defaultSettings(configDir: string): Settings {
 	return {
+		automaticSyncPaused: false,
 		avoidAutoSyncWhenOffline: true,
 		confirmDeleteInAutoSync: true,
 		confirmTasksInSync: true,

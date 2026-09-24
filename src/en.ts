@@ -15,6 +15,7 @@ const en: Translations = {
 	addSecretHeader: 'Add secret header',
 	advanced: 'Advanced',
 	automaticSync: 'Automatic sync',
+	automaticSyncPausedStatus: 'Auto sync paused',
 	avoidAutoSyncWhenOffline: 'Avoid auto sync when offline',
 	avoidAutoSyncWhenOfflineDescription: 'Skip automatic syncs when there is no internet.',
 	awaitingConfirmation: 'Awaiting confirmation',
@@ -199,6 +200,9 @@ const en: Translations = {
 	passphraseMismatch: 'The passphrases do not match.',
 	passphraseTooShort: 'Use a passphrase of at least 8 characters.',
 	pasteExport: 'Paste the exported settings here',
+	pauseAutomaticSync: 'Pause automatic sync',
+	pauseAutomaticSyncDescription:
+		'Skip every automatic sync on this device until turned off. Manual syncs still run.',
 	pluginVersion: (version) => `Drive Bridge ${version}`,
 	realtimeSync: 'Realtime sync',
 	realtimeSyncDescription: 'Sync after a file changes, once the delay in the field passes.',
@@ -228,6 +232,7 @@ const en: Translations = {
 	resetToDefaultsDescription:
 		'Everything except the Google account, OAuth client and base directory goes back to its default.',
 	resolveConflict: 'Resolve conflict',
+	resumeAutomaticSync: 'Resume automatic sync',
 	retry: 'Retry',
 	retrySkippedFiles: 'Retry skipped files',
 	saveToVault: 'Save to vault',
@@ -256,6 +261,7 @@ const en: Translations = {
 	stopSync: 'Stop sync',
 	syncOnLeave: 'Sync when leaving Obsidian',
 	syncOnLeaveDescription: 'Sync when Obsidian goes to the background, if files changed.',
+	syncOverdue: 'no sync for a while',
 	syncProgress: 'Sync progress',
 	syncStrategy: 'Sync strategy',
 	syncStrategyDescription: 'How changes flow between this vault and Drive.',

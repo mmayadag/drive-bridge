@@ -43,29 +43,40 @@ export default class Observability {
 	private lastSyncTime = 0;
 	private lastFailure?: string;
 	private readonly sinceLastSyncText = ref('');
+	private readonly paused = ref(false);
+	/** No sync for twice the scheduled interval, while not paused. */
+	private readonly overdue = ref(false);
 	private readonly syncStage = ref<SyncStage>('none');
 	private readonly walkProgress = ref<Progress>({ completed: 0, total: 1 });
 	private readonly executionProgress = ref<Progress<TaskInfo>>({ completed: 0, total: 0 });
 	private readonly cleanupCallbacks: Array<() => void> = [];
 	private readonly t: Translate<Translations>;
+	private readonly stageText = () => {
+		const stage = this.syncStage();
+		if (stage === 'walkingRemote') {
+			const { completed, total } = this.walkProgress();
+			return `${this.t('walkingRemote')} ${completed}/${total}`;
+		} else if (stage === 'awaitingConfirmation') return this.t('awaitingConfirmation');
+		else if (stage === 'executing') {
+			const { completed, total } = this.executionProgress();
+			return `${this.t('executing')} ${roundPercent(completed, total)}%`;
+		} else if (stage === 'cancelled') return this.t('cancelled');
+		else if (stage === 'completed') return `${this.t('completed')}${this.sinceLastSyncText()}`;
+		else if (stage === 'completedNoop')
+			return `${this.t('completedNoop')}${this.sinceLastSyncText()}`;
+		else if (stage === 'failed')
+			return `${this.t('failed')}: ${describeError(this.lastFailure ?? '', this.t)}`;
+		return '';
+	};
+
 	private readonly progressText = computed(
 		() => {
-			const stage = this.syncStage();
-			if (stage === 'walkingRemote') {
-				const { completed, total } = this.walkProgress();
-				return `${this.t('walkingRemote')} ${completed}/${total}`;
-			} else if (stage === 'awaitingConfirmation') return this.t('awaitingConfirmation');
-			else if (stage === 'executing') {
-				const { completed, total } = this.executionProgress();
-				return `${this.t('executing')} ${roundPercent(completed, total)}%`;
-			} else if (stage === 'cancelled') return this.t('cancelled');
-			else if (stage === 'completed')
-				return `${this.t('completed')}${this.sinceLastSyncText()}`;
-			else if (stage === 'completedNoop')
-				return `${this.t('completedNoop')}${this.sinceLastSyncText()}`;
-			else if (stage === 'failed')
-				return `${this.t('failed')}: ${describeError(this.lastFailure ?? '', this.t)}`;
-			return '';
+			const text = this.stageText();
+			const notes = [
+				...(this.overdue() ? [this.t('syncOverdue')] : []),
+				...(this.paused() ? [this.t('automaticSyncPausedStatus')] : []),
+			];
+			return [text, ...notes].filter(Boolean).join(' · ');
 		},
 		{
 			deps: [
@@ -73,6 +84,8 @@ export default class Observability {
 				this.walkProgress,
 				this.executionProgress,
 				this.sinceLastSyncText,
+				this.paused,
+				this.overdue,
 			],
 		},
 	);
@@ -83,11 +96,17 @@ export default class Observability {
 		/** Result of the last sync on this device. Not synced, `data.json` is device-local. */
 		lastSync?: LastSync;
 		skipState: SkipState;
+		automaticSyncPaused: boolean;
+		scheduledSync: { enabled: boolean; value: number };
 	};
 	declare readonly i18n: {
 		startSync: string;
 		startNonInteractiveSync: string;
 		stopSync: string;
+		pauseAutomaticSync: string;
+		resumeAutomaticSync: string;
+		automaticSyncPausedStatus: string;
+		syncOverdue: string;
 		showProgress: string;
 		exportLogsToFile: string;
 		exportLogsFailed: string;
@@ -97,6 +116,7 @@ export default class Observability {
 	constructor(
 		private readonly ctx: {
 			addStatusBarItem: () => HTMLElement;
+			setAutomaticSyncPaused: (paused: boolean) => void;
 			on: On<Events>;
 			translate: Translate<Translations>;
 			isIdle: Ref<boolean>;
@@ -136,10 +156,16 @@ export default class Observability {
 
 		setupCommands();
 		setupStatus();
+		this.paused(settings.automaticSyncPaused);
 
 		cleanupCallbacks.push(
+			on('automaticSyncPausedChanged', (paused) => {
+				this.paused(paused);
+				this.overdue(false);
+			}),
 			on('syncStarted', () => {
 				syncStage('walkingRemote');
+				this.overdue(false);
 				window.clearInterval(updateInterval);
 				sinceLastSyncText('');
 				if (settings.noticeStatusOnMobile && Platform.isMobile) {
@@ -188,6 +214,12 @@ export default class Observability {
 						const sinceNow = Date.now() - this.lastSyncTime;
 						const time = formatTime(sinceNow).replace(' ', '');
 						sinceLastSyncText(` ${time} ago`);
+						const { scheduledSync, automaticSyncPaused } = settings;
+						this.overdue(
+							scheduledSync.enabled &&
+								!automaticSyncPaused &&
+								sinceNow > 2 * scheduledSync.value,
+						);
 					}, 60_000));
 				if (result === 'cancelled') syncStage('cancelled');
 				else if (result === 'completed') {
@@ -303,6 +335,24 @@ export default class Observability {
 				icon: 'activity',
 				id: 'show-progress',
 				name: this.t('showProgress'),
+			},
+			{
+				checkCallback: (checking: boolean) => {
+					if (checking) return !this.settings.automaticSyncPaused;
+					this.ctx.setAutomaticSyncPaused(true);
+				},
+				icon: 'pause',
+				id: 'pause-automatic-sync',
+				name: this.t('pauseAutomaticSync'),
+			},
+			{
+				checkCallback: (checking: boolean) => {
+					if (checking) return this.settings.automaticSyncPaused;
+					this.ctx.setAutomaticSyncPaused(false);
+				},
+				icon: 'play',
+				id: 'resume-automatic-sync',
+				name: this.t('resumeAutomaticSync'),
 			},
 			{
 				callback: () => void this.exportLogs(),
