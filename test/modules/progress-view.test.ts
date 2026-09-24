@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test';
-import { describeProgress } from '@/modules/progress-modal';
+import { describeProgress } from '@/modules/progress-view';
 
 const t = ((key: string) => key) as never;
 const walk = () => ({ completed: 2, current: 'notes/', total: 8 });
