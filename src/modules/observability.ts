@@ -5,6 +5,7 @@ import type { Ref } from '@/shared/reactive';
 import type { Progress } from '@/types';
 import { getMessage } from '@/shared/error';
 import { computed, ref } from '@/shared/reactive';
+import { describeError } from '@/utils/describe-error';
 import roundPercent from '@/utils/round-percent';
 import { formatTime } from '@/utils/unit-converter';
 import type { Dispatch, On } from './event-bus';
@@ -59,7 +60,8 @@ export default class Observability {
 				return `${this.t('completed')}${this.sinceLastSyncText()}`;
 			else if (stage === 'completedNoop')
 				return `${this.t('completedNoop')}${this.sinceLastSyncText()}`;
-			else if (stage === 'failed') return `${this.t('failed')}: ${this.lastFailure}`;
+			else if (stage === 'failed')
+				return `${this.t('failed')}: ${describeError(this.lastFailure ?? '', this.t)}`;
 			return '';
 		},
 		{
