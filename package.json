@@ -16,7 +16,7 @@
 		"dev": "bun scripts/build.ts --watch",
 		"build": "bun scripts/build.ts",
 		"changelog": "bun scripts/draft-changelog.ts",
-		"check": "tsc && oxlint && oxfmt --check",
+		"check": "tsc && oxlint --deny-warnings && oxfmt --check",
 		"coverage": "bun --preload=./test/support/setup.ts test --coverage && bun scripts/coverage-summary.ts",
 		"fix": "oxlint --silent --fix && oxfmt",
 		"tests": "bun --preload=./test/support/setup.ts test",
