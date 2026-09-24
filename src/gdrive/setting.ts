@@ -57,6 +57,8 @@ export type GdriveTranslations = FolderPickerTranslations & {
 	limitedScope: string;
 	refreshTokenPlaceholder: string;
 	signInWithGoogle: string;
+	setUpFromDevice: string;
+	setUpFromDeviceDescription: string;
 	openConsole: string;
 	clientFromJson: string;
 } & Record<SetupStepKey, string> &
@@ -101,8 +103,11 @@ export default function gdriveSetting(
 		memoryDB,
 		getCheckConnection,
 		settings: rootSettings,
+		openImportSettings,
 	}: {
-		translate: Translate<GdriveTranslations & CheckConnectionTranslations>;
+		translate: Translate<
+			GdriveTranslations & CheckConnectionTranslations & { importSettings: string }
+		>;
 		saveSettings: () => Promise<void>;
 		matchLabel: () => LabelDefinition;
 		refreshSettingTab: () => void;
@@ -113,6 +118,7 @@ export default function gdriveSetting(
 		memoryDB: CheckConnectionDB;
 		getCheckConnection: () => () => MaybePromise<CheckConnectionResult>;
 		settings: Settings;
+		openImportSettings: () => void;
 	},
 	settings: GdriveSettings,
 	tokenManager: TokenManager,
@@ -249,6 +255,19 @@ export default function gdriveSetting(
 						type: 'page',
 					}),
 					{
+						// A device that is not set up can copy everything from one that is.
+						10: s(() => ({
+							desc: translate('setUpFromDeviceDescription'),
+							name: translate('setUpFromDevice'),
+							render: (setting) => {
+								setting.addButton((button) =>
+									button
+										.setButtonText(translate('importSettings'))
+										.onClick(openImportSettings),
+								);
+							},
+							visible: () => !connected(),
+						})),
 						100: s(() => ({
 							desc: translate('setupSteps'),
 							name: 'dummy',

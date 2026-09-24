@@ -103,6 +103,7 @@ test('each sub-page holds its settings', () => {
 		'webhooks',
 		'development',
 		'group',
+		'group',
 	]);
 });
 

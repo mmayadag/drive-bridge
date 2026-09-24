@@ -7,6 +7,12 @@ export type ModuleInstance = {
 	moduleSettings: object;
 	/** Resets the module's settings that Reset to defaults may change. */
 	resetSettings?: () => void;
+	/** Secrets a settings export may carry, sealed with a passphrase. */
+	secrets?: {
+		export: () => Record<string, string>;
+		/** Stores imported secrets; returns a line for the import notice. */
+		import: (values: Record<string, string>) => Promise<string | undefined>;
+	};
 	dispose?: () => void;
 	start?: () => void;
 };
@@ -59,9 +65,36 @@ export default class BundledModules {
 			(this.ctx.__getModule__(ctor as never) as ModuleInstance).resetSettings?.();
 	};
 
+	private readonly instances = () =>
+		[...this.loadedModules].map(
+			([id, ctor]) => [id, this.ctx.__getModule__(ctor as never) as ModuleInstance] as const,
+		);
+
+	private readonly exportModuleSecrets = () => {
+		const secrets: Record<string, Record<string, string>> = {};
+		for (const [id, instance] of this.instances())
+			if (instance.secrets) secrets[id] = instance.secrets.export();
+		return secrets;
+	};
+
+	private readonly importModuleSecrets = async (
+		secrets: Record<string, Record<string, string>>,
+	) => {
+		const lines: Array<string> = [];
+		for (const [id, instance] of this.instances()) {
+			const values = secrets[id];
+			if (!values || !instance.secrets) continue;
+			const line = await instance.secrets.import(values);
+			if (line) lines.push(line);
+		}
+		return lines;
+	};
+
 	readonly dispose = () => this.loadedModules.clear();
 
 	readonly root = {
+		exportModuleSecrets: this.exportModuleSecrets,
+		importModuleSecrets: this.importModuleSecrets,
 		loadAllModules: this.loadAllModules,
 		loadedModules: this.loadedModules,
 		resetModuleSettings: this.resetModuleSettings,

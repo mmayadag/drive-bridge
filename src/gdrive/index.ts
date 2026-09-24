@@ -13,6 +13,7 @@ import type { GdriveDB } from './fs';
 import type { GdriveTranslations } from './setting';
 import { TokenManager, bearerMiddleware } from './auth';
 import checkConnection from './check-connection';
+import { connectWithToken } from './connect';
 import GdriveFs from './fs';
 import en from './i18n';
 import gdriveSetting from './setting';
@@ -49,6 +50,31 @@ export default class Gdrive {
 			() => this.moduleSettings.clientId,
 		);
 	}
+
+	readonly secrets = {
+		export: () => {
+			const { clientSecret } = this.tokenManager.getCredentials();
+			const refreshToken = this.tokenManager.getRefreshToken() ?? '';
+			return Object.fromEntries(
+				Object.entries({ clientSecret, refreshToken }).filter(([, value]) => value),
+			);
+		},
+		// The token is verified like a pasted one before it replaces the current account.
+		import: async ({ clientSecret, refreshToken }: Record<string, string>) => {
+			if (clientSecret) this.tokenManager.setClientSecret(clientSecret);
+			if (!refreshToken) return;
+			const result = await connectWithToken(this.tokenManager, refreshToken);
+			const { translate } = this.ctx;
+			if (result.status !== 'connected')
+				return translate(
+					'authorizationFailed',
+					result.status === 'failed' ? result.reason : translate('invalidRefreshToken'),
+				);
+			this.moduleSettings.userId = result.account.userId;
+			this.moduleSettings.accountEmail = result.account.email;
+			return translate('accountConnectedDescription', result.account.email);
+		},
+	};
 
 	// The account, client and folder are kept: they are what ties this device to its Drive.
 	readonly resetSettings = () => {

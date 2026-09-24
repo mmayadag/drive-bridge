@@ -591,3 +591,11 @@ a.drive-bridge-coffee-button:hover .drive-bridge-coffee-cup {
 	stroke-linecap: round;
 	stroke-linejoin: round;
 }
+
+/* Import settings: the pasted export. */
+.drive-bridge-transfer-input {
+	box-sizing: border-box;
+	width: 100%;
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-smaller);
+}

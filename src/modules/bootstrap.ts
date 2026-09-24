@@ -10,6 +10,7 @@ import type { HeadSettingTranslations } from '@/settings/head';
 import type { LayoutSettingTranslations } from '@/settings/layout';
 import type { MiscellaneousSettingTranslations } from '@/settings/miscellaneous';
 import type { SupportSettingTranslations } from '@/settings/support';
+import type { TransferTranslations } from '@/settings/transfer-settings';
 import type { WebhooksSettingTranslations } from '@/settings/webhooks';
 import type { DatabaseSync } from '@/shared/key-value-store';
 import type { Ref } from '@/shared/reactive';
@@ -110,6 +111,7 @@ export default class Bootstrap {
 		MiscellaneousSettingTranslations &
 		WebhooksSettingTranslations &
 		SupportSettingTranslations &
+		TransferTranslations &
 		FileTreeTranslations;
 	declare readonly settings: {
 		maxMemoryConsumption: TogglableValue;
