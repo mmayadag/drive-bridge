@@ -478,6 +478,11 @@ trust; the payload carries the vault name, not its contents.
   deletions; _Keep them_ (or closing the dialog) copies each file back to the
   side it was removed from, so the next sync does not try again. A manual sync
   whose task list was already reviewed is not asked twice.
+- **Mass changes:** when one sync would upload, download or resolve more than
+  max(100, half of the files) that were already in sync, it stops and asks.
+  That many changes at once usually means a wrong setting or a problem, not
+  edits. _Stop_ (or closing the dialog) ends the sync without changing
+  anything. A first sync, which copies everything, is never asked.
 - **Layout:** one vault maps to one Drive folder (`baseDirectory`). Listing is
   parent-based, so the real folder structure is mirrored.
 - **Files that keep failing:** a file whose sync fails three times in a row

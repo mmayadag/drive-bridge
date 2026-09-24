@@ -108,6 +108,17 @@ export default class ProgressModal extends Modal {
 					title: this.t('massDeleteTitle'),
 				}).open();
 			}),
+			ctx.on('requestConfirmMassChange', (counts) => {
+				// Closing the dialog stops the sync: the safe answer.
+				new ConfirmModal(ctx.app, {
+					cancel: this.t('stopSync'),
+					confirm: this.t('continueSync'),
+					message: this.t('massChangeMessage', counts),
+					onCancel: () => this.dispatch('massChangeConfirmed', false),
+					onConfirm: () => this.dispatch('massChangeConfirmed', true),
+					title: this.t('massChangeTitle'),
+				}).open();
+			}),
 			ctx.on('requestConfirmTasks', (tasks) => {
 				if (!this.opening) this.open();
 				const { unmount, getState } = mountFileTree(
@@ -143,6 +154,7 @@ export default class ProgressModal extends Modal {
 		tasksConfirmed: Array<BaseTask>;
 		deleteConfirmed: DeleteConfirmReturn;
 		massDeleteConfirmed: boolean;
+		massChangeConfirmed: boolean;
 	};
 
 	declare readonly i18n: {
@@ -154,6 +166,9 @@ export default class ProgressModal extends Modal {
 		massDeleteMessage: Snippet<{ local: number; remote: number }>;
 		deleteThem: string;
 		keepThem: string;
+		massChangeTitle: string;
+		massChangeMessage: Snippet<{ changes: number; percent: number }>;
+		continueSync: string;
 		confirmTasksDescription: Snippet<TaskCounts>;
 		hide: string;
 		confirm: string;

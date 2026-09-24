@@ -1,6 +1,9 @@
 import type { BaseTask, TaskFactory } from './index';
+import Download from './tasks/download';
 import RemoveLocal from './tasks/remove-local';
 import RemoveRemote from './tasks/remove-remote';
+import ResolveConflict from './tasks/resolve-conflict';
+import Upload from './tasks/upload';
 
 /** Deletions above max(50, 5% of the files) in one sync need the user's approval. */
 export const MASS_DELETE_MIN = 50;
@@ -56,4 +59,31 @@ export function keepDeletedFiles(
 		);
 	}
 	return [...tasks.filter((task) => !removals.has(task)), ...restored];
+}
+
+/** Changes to already synced files above max(100, half of the files) need approval. */
+export const MASS_CHANGE_MIN = 100;
+export const MASS_CHANGE_RATIO = 0.5;
+
+/**
+ * Uploads, downloads and conflicts of files that were synced before. A first sync, which
+ * copies everything, has no records and never trips this.
+ */
+export function findMassChange(
+	tasks: Array<BaseTask>,
+	synced: ReadonlySet<string>,
+	fileCount: number,
+) {
+	const changes = tasks.filter(
+		(task) =>
+			synced.has(task.key) &&
+			(task instanceof Upload || task instanceof Download || task instanceof ResolveConflict),
+	).length;
+	const threshold = Math.max(MASS_CHANGE_MIN, Math.ceil(fileCount * MASS_CHANGE_RATIO));
+	return {
+		changes,
+		exceeded: changes > threshold,
+		percent: fileCount ? Math.round((changes / fileCount) * 100) : 0,
+		threshold,
+	};
 }

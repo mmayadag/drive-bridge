@@ -36,7 +36,7 @@ import {
 	taskMap,
 } from '@/sync';
 import { hideKeptOnRemote, keepOnRemote } from '@/sync/keep-on-remote';
-import { findMassDeletion, keepDeletedFiles } from '@/sync/mass-delete';
+import { findMassChange, findMassDeletion, keepDeletedFiles } from '@/sync/mass-delete';
 import { countOutcome, withoutSkipped } from '@/sync/skip-list';
 import { prepareGlobMatch } from '@/utils/glob-match';
 import type { Dispatch, On } from './event-bus';
@@ -96,6 +96,7 @@ export default class Sync {
 		syncTerminated: SyncTerminateReason;
 		requestConfirmDelete: Array<RemoveLocal>;
 		requestConfirmMassDelete: { local: number; remote: number };
+		requestConfirmMassChange: { changes: number; percent: number };
 		requestConfirmTasks: Array<BaseTask>;
 		syncCanceled: undefined;
 		taskCompleted: TaskInfo;
@@ -163,6 +164,9 @@ export default class Sync {
 	private readonly confirmMassDeletion = (counts: { local: number; remote: number }) =>
 		this.ask('requestConfirmMassDelete', counts, 'massDeleteConfirmed');
 
+	private readonly confirmMassChange = (counts: { changes: number; percent: number }) =>
+		this.ask('requestConfirmMassChange', counts, 'massChangeConfirmed');
+
 	private readonly confirmDeletion = (tasks: Array<RemoveLocal>) =>
 		this.ask('requestConfirmDelete', tasks, 'deleteConfirmed');
 
@@ -175,6 +179,7 @@ export default class Sync {
 			ctx,
 			postProcess,
 			confirmDeletion,
+			confirmMassChange,
 			confirmMassDeletion,
 			confirmTasks,
 			convertDeleteToUpload,
@@ -303,6 +308,21 @@ export default class Sync {
 					remote: remote.length,
 				});
 				if (!deletionsApproved) tasks = keepDeletedFiles(tasks, massDeletion, taskFactory);
+			}
+
+			// Many synced files changing at once usually means a bug or a wrong setting, not edits.
+			const massChange = findMassChange(
+				tasks,
+				new Set(records.keys()),
+				Math.max(localStats.size, remoteStats.size, records.size),
+			);
+			if (!reviewed && massChange.exceeded) {
+				const { changes, percent } = massChange;
+				dispatch(
+					'logSync',
+					`${changes} change(s) to synced files (${percent}%) exceed the limit; asking.`,
+				);
+				if (!(await confirmMassChange({ changes, percent }))) throw syncCancelledError;
 			}
 
 			const [removeLocalTasks, otherTasks] = partition(

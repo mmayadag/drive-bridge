@@ -63,6 +63,7 @@ const en: Translations = {
 	confirmTasksInSyncDescription: 'Review pending operations before a manual sync runs.',
 	conflictResolveStrategy: 'Conflict resolve strategy',
 	conflictResolveStrategyDescription: 'What to do when a file changed on both sides.',
+	continueSync: 'Continue',
 	controls: 'Controls',
 	copyExport: 'Copy',
 	createLocalDir: 'Create local folder',
@@ -143,6 +144,9 @@ const en: Translations = {
 	latestSurviveDescription:
 		'The newer modified time wins. A device with a wrong clock can pick the old edit.',
 	latestSurviveWarning: 'The older edit is replaced without asking.',
+	massChangeMessage: ({ changes, percent }) =>
+		`This sync would change ${pc(changes, 'file', 'files')} that were already in sync (${percent}% of the vault). That usually means a wrong setting or a problem rather than edits. Stop to look first, or continue if you expected it.`,
+	massChangeTitle: 'Change many files?',
 	massDeleteMessage: ({ local, remote }) =>
 		`This sync would delete ${pc(local, 'file', 'files')} in the vault and ${pc(remote, 'file', 'files')} on Google Drive. That is more than usual, so nothing is deleted without your answer. Keep them to copy them back to the side they were removed from.`,
 	massDeleteTitle: 'Delete many files?',
