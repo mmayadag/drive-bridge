@@ -9,11 +9,11 @@ import mountFileTree from '@/components/file-tree';
 import renderFailedTasks from '@/components/render-failed-tasks';
 import renderProgress from '@/components/render-progress';
 import { computed, hook } from '@/shared/reactive';
-import roundPercent from '@/utils/round-percent';
 import type { Dispatch, On } from './event-bus';
 import type { Snippet, Translate } from './i18n';
 import type { SyncStage } from './observability';
 import type { FailedTaskInfo, TaskInfo } from './sync';
+import { describeProgress } from './progress-view';
 
 export type DeleteConfirmReturn = {
 	delete: Array<RemoveLocal>;
@@ -246,58 +246,19 @@ export default class ProgressModal extends Modal {
 		const { contentEl } = this;
 		this.setTitle(this.t('syncProgress'));
 
-		const progress = computed<{
-			completed?: number;
-			total?: number;
-			percent?: number;
-			current?: string;
-		}>(
-			() => {
-				const stage = this.ctx.syncStage();
-				if (stage === 'walkingRemote') {
-					const { completed, current, total } = this.ctx.walkProgress();
-					return {
-						completed,
-						current: current
-							? `${this.t('walkingRemote')} ${current}`
-							: this.t('walkingRemote'),
-						percent: roundPercent(completed, total),
-						total,
-					};
-				} else if (stage === 'executing') {
-					const { completed, current, total } = this.ctx.executionProgress();
-					return {
-						completed,
-						current: current
-							? `${this.t(current.name)} ${current.key}`
-							: this.t('executing'),
-						percent: roundPercent(completed, total),
-						total,
-					};
-				} else if (stage === 'awaitingConfirmation')
-					return {
-						completed: 0,
-						current: this.t('awaitingConfirmation'),
-						percent: 0,
-						total: 1,
-					};
-				else if (stage === 'none') return {};
-				else if (stage === 'cancelled') return { current: this.t('cancelled') };
-				else if (stage === 'completed') return { current: this.t('completed') };
-				else if (stage === 'completedNoop')
-					return {
-						completed: 0,
-						current: this.t('completedNoop'),
-						percent: 100,
-						total: 0,
-					};
-				return { current: this.t('failed') };
-			},
+		const progress = computed(
+			() =>
+				describeProgress(
+					this.ctx.syncStage(),
+					this.ctx.walkProgress,
+					this.ctx.executionProgress,
+					this.t,
+				),
 			{ deps: [this.ctx.walkProgress, this.ctx.syncStage, this.ctx.executionProgress] },
 		);
 
 		const container = contentEl.createDiv('drive-bridge-progress-modal');
-		const { bar, left, right } = renderProgress(container);
+		const { bar, barEl, left, right } = renderProgress(container);
 		this.description = container.createEl('p', 'drive-bridge-progress-description');
 		this.description.hide();
 		this.detailContainer = container.createDiv('drive-bridge-progress-details');
@@ -305,7 +266,10 @@ export default class ProgressModal extends Modal {
 
 		this.modalCleanupCallbacks.subscribe(
 			progress.subscribe(
-				({ completed, current, percent, total }) => {
+				({ completed, counter = true, current, percent, total }) => {
+					for (const el of [right, barEl])
+						if (counter) el.show();
+						else el.hide();
 					if (completed !== undefined && total !== undefined)
 						right.setText(`${completed}/${total} ${this.t('completed')}`);
 					if (current !== undefined) left.setText(current);
