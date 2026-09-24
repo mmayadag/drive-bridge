@@ -2,7 +2,12 @@ import testKit from '$/support/test-kit';
 import { expect, test } from 'bun:test';
 import type { BaseTask, TaskFactory, TaskNames, TaskOptions } from '@/sync';
 import { taskMap } from '@/sync';
-import { findMassDeletion, keepDeletedFiles, massDeleteThreshold } from '@/sync/mass-delete';
+import {
+	findMassChange,
+	findMassDeletion,
+	keepDeletedFiles,
+	massDeleteThreshold,
+} from '@/sync/mass-delete';
 
 const { file, folder } = testKit;
 
@@ -53,4 +58,17 @@ test('keeping the files copies each one back instead of deleting it', () => {
 		'createLocalDir dir/',
 		'upload gone-there.md',
 	]);
+});
+
+test('mass changes count only files that were synced before', () => {
+	const synced = new Set(Array.from({ length: 150 }, (_, i) => `n${i}.md`));
+	const uploads = Array.from({ length: 120 }, (_, i) =>
+		taskFactory('upload', { key: `n${i}.md`, local: file(`n${i}.md`) }),
+	);
+	const found = findMassChange(uploads, synced, 200);
+	expect(found).toStrictEqual({ changes: 120, exceeded: true, percent: 60, threshold: 100 });
+	// A first sync uploads everything but has no records.
+	expect(findMassChange(uploads, new Set(), 200).exceeded).toBe(false);
+	// Below half of a big vault is normal.
+	expect(findMassChange(uploads, synced, 1000).exceeded).toBe(false);
 });
