@@ -2,16 +2,20 @@ import type { Events, Translations } from '@';
 import type { App, Command, DataAdapter, IconName } from 'obsidian';
 import { Notice, Platform, setIcon } from 'obsidian';
 import type { Ref } from '@/shared/reactive';
+import type { SyncCounts, SyncSummary } from '@/sync/history';
 import type { SkipState } from '@/sync/skip-list';
 import type { Progress } from '@/types';
+import { HistoryModal, LogModal } from '@/components/history-modal';
 import { copyProblemReport } from '@/settings/support';
 import { getMessage } from '@/shared/error';
 import { computed, ref } from '@/shared/reactive';
+import { addToHistory, countTasks, emptyCounts } from '@/sync/history';
 import { describeError } from '@/utils/describe-error';
+import formatDateTime from '@/utils/format-date';
 import roundPercent from '@/utils/round-percent';
 import { formatTime } from '@/utils/unit-converter';
 import type { Dispatch, On } from './event-bus';
-import type { Translate } from './i18n';
+import type { Snippet, Translate } from './i18n';
 import type { SyncTerminateReason, TaskInfo } from './sync';
 
 export type SyncStage =
@@ -99,6 +103,8 @@ export default class Observability {
 		skipState: SkipState;
 		automaticSyncPaused: boolean;
 		scheduledSync: { enabled: boolean; value: number };
+		/** Recent sync summaries on this device, newest first. */
+		syncHistory: Array<SyncSummary>;
 	};
 	declare readonly i18n: {
 		startSync: string;
@@ -108,6 +114,12 @@ export default class Observability {
 		resumeAutomaticSync: string;
 		automaticSyncPausedStatus: string;
 		syncOverdue: string;
+		syncHistory: string;
+		syncLog: string;
+		historyEmpty: string;
+		historyCounts: Snippet<SyncCounts>;
+		copyLog: string;
+		logCopied: string;
 		showProgress: string;
 		exportLogsToFile: string;
 		exportLogsFailed: string;
@@ -152,6 +164,8 @@ export default class Observability {
 		let totalSyncTasks = 0;
 		let completedTasks = 0;
 		let updateInterval: number | undefined;
+		let currentTrigger = '';
+		let currentCounts = emptyCounts();
 		let noticeTimeout: number | undefined;
 		let mobileSyncNotice: Notice | undefined;
 
@@ -164,7 +178,9 @@ export default class Observability {
 				this.paused(paused);
 				this.overdue(false);
 			}),
-			on('syncStarted', () => {
+			on('syncStarted', ({ trigger }) => {
+				currentTrigger = trigger;
+				currentCounts = emptyCounts();
 				syncStage('walkingRemote');
 				this.overdue(false);
 				window.clearInterval(updateInterval);
@@ -179,11 +195,13 @@ export default class Observability {
 			on('requestConfirmMassDelete', () => syncStage('awaitingConfirmation')),
 			on('requestConfirmMassChange', () => syncStage('awaitingConfirmation')),
 			on('executionStarted', (tasks) => {
+				currentCounts = countTasks(tasks.map((task) => task.name));
 				totalSyncTasks = tasks.length;
 				completedTasks = 0;
 				executionProgress({ completed: 0, total: totalSyncTasks });
 				syncStage('executing');
 			}),
+			on('taskFailed', () => void currentCounts.failed++),
 			on('remoteWalkProgress', (progress) => walkProgress(progress)),
 			on('taskCompleted', (current) => {
 				completedTasks += 1;
@@ -209,6 +227,13 @@ export default class Observability {
 						? { skipped: this.settings.skipState.skipped.length }
 						: {}),
 				};
+				addToHistory(settings.syncHistory, {
+					at: this.lastSyncTime,
+					counts: currentCounts,
+					...(reason.result === 'failed' ? { error: reason.error } : {}),
+					result: reason.result,
+					trigger: currentTrigger,
+				});
 				void ctx.saveSettings();
 				const setUpdateInterval = () =>
 					(updateInterval = window.setInterval(() => {
@@ -356,6 +381,18 @@ export default class Observability {
 				name: this.t('resumeAutomaticSync'),
 			},
 			{
+				callback: () => this.showSyncHistory(),
+				icon: 'history',
+				id: 'show-sync-history',
+				name: this.t('syncHistory'),
+			},
+			{
+				callback: () => this.showSyncLog(),
+				icon: 'scroll-text',
+				id: 'show-sync-log',
+				name: this.t('syncLog'),
+			},
+			{
 				callback: () =>
 					void copyProblemReport({
 						getLogs: this.ctx.getLogs,
@@ -397,13 +434,52 @@ export default class Observability {
 		this.progressText.dispose();
 	};
 
+	private readonly showSyncLog = () => {
+		const { t } = this;
+		new LogModal(this.ctx.app, {
+			copied: t('logCopied'),
+			copy: t('copyLog'),
+			log: this.ctx.getLogs(),
+			title: t('syncLog'),
+		}).open();
+	};
+
+	private readonly showSyncHistory = () => {
+		const { t } = this;
+		new HistoryModal(this.ctx.app, {
+			history: this.settings.syncHistory,
+			showLog: this.showSyncLog,
+			texts: {
+				describe: (summary) => ({
+					detail: [
+						t('historyCounts', summary.counts),
+						...(summary.error ? [describeError(summary.error, t)] : []),
+					].join(' · '),
+					heading: `${formatDateTime(summary.at)} · ${t(RESULT_TEXT[summary.result])} · ${summary.trigger}`,
+				}),
+				empty: t('historyEmpty'),
+				showLog: t('syncLog'),
+				title: t('syncHistory'),
+			},
+		}).open();
+	};
+
 	root = {
 		executionProgress: this.executionProgress,
 		exportLogs: this.exportLogs,
+		showSyncHistory: this.showSyncHistory,
+		showSyncLog: this.showSyncLog,
 		syncStage: this.syncStage,
 		walkProgress: this.walkProgress,
 	};
 }
+
+const RESULT_TEXT = {
+	cancelled: 'cancelled',
+	completed: 'completed',
+	failed: 'failed',
+	noop: 'completedNoop',
+} as const;
 
 async function mkdirRecursive(adapter: DataAdapter, path: string): Promise<void> {
 	const parts = path.split('/');

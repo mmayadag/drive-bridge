@@ -46,6 +46,7 @@ export function defaultSettings(configDir: string): Settings {
 		scheduledSync: { enabled: true, value: 15 * 60 * 1000 },
 		skipState: { failures: {}, skipped: [] },
 		startupSync: { enabled: true, value: 5000 },
+		syncHistory: [],
 		syncOnLeave: true,
 		webhookOnFinish: '',
 		webhookOnStart: '',
@@ -61,7 +62,12 @@ export function defaultSettings(configDir: string): Settings {
 export function resetSettings(settings: Settings, configDir: string) {
 	// Kept-on-Drive marks are state, not a preference: dropping them would download every
 	// kept file again.
-	const { modules, remoteFs, lastSync, keptOnRemote } = settings;
-	Object.assign(settings, defaultSettings(configDir), { keptOnRemote, modules, remoteFs });
+	const { modules, remoteFs, lastSync, keptOnRemote, syncHistory } = settings;
+	Object.assign(settings, defaultSettings(configDir), {
+		keptOnRemote,
+		modules,
+		remoteFs,
+		syncHistory,
+	});
 	if (lastSync) settings.lastSync = lastSync;
 }

@@ -67,6 +67,7 @@ const en: Translations = {
 	continueSync: 'Continue',
 	controls: 'Controls',
 	copyExport: 'Copy',
+	copyLog: 'Copy',
 	copyProblemReport: 'Copy a problem report (versions, settings without secrets, recent log)',
 	createLocalDir: 'Create local folder',
 	createRemoteDir: 'Create remote folder',
@@ -121,6 +122,9 @@ const en: Translations = {
 	helpAndSupport: 'Help and support',
 	helpAndSupportDescription: 'Setup guide, bug reports and feature requests.',
 	hide: 'Hide',
+	historyCounts: ({ uploaded, downloaded, deletedHere, deletedOnDrive, conflicts, failed }) =>
+		`↑${uploaded} ↓${downloaded} · deleted ${deletedHere} here, ${deletedOnDrive} on Drive · ${pc(conflicts, 'conflict', 'conflicts')}${failed ? ` · ${failed} failed` : ''}`,
+	historyEmpty: 'No sync on this device yet.',
 	idle: 'Idle',
 	importAction: 'Import',
 	importSettings: 'Import settings',
@@ -151,6 +155,7 @@ const en: Translations = {
 	latestSurviveDescription:
 		'The newer modified time wins. A device with a wrong clock can pick the old edit.',
 	latestSurviveWarning: 'The older edit is replaced without asking.',
+	logCopied: 'Log copied.',
 	massChangeMessage: ({ changes, percent }) =>
 		`This sync would change ${pc(changes, 'file', 'files')} that were already in sync (${percent}% of the vault). That usually means a wrong setting or a problem rather than edits. Stop to look first, or continue if you expected it.`,
 	massChangeTitle: 'Change many files?',
@@ -263,6 +268,8 @@ const en: Translations = {
 	startupSyncDescription: 'Sync when Obsidian opens, after the delay in the field.',
 	startupSyncPlaceholder: 'Enter delay (e.g. 5s, 1min)',
 	stopSync: 'Stop sync',
+	syncHistory: 'Sync history',
+	syncLog: 'Sync log',
 	syncOnLeave: 'Sync when leaving Obsidian',
 	syncOnLeaveDescription: 'Sync when Obsidian goes to the background, if files changed.',
 	syncOverdue: 'no sync for a while',

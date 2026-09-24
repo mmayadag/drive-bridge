@@ -15,6 +15,7 @@ export const OS = {
 	Windows: Platform.isWin,
 };
 const MAX_SYNC_LOGS = 100;
+const MAX_GENERAL_LOGS = 500;
 export const VERSION = Bun.env.VERSION ?? '3.0.0';
 
 export type Dispatch<O extends object> = <K extends keyof O>(
@@ -119,6 +120,9 @@ export default class EventBus {
 	private readonly putGeneralLog = (log: string, level: 'info' | 'error' = 'info') => {
 		const message = `- \`${level.toLocaleUpperCase()}\` - ${log}`;
 		this.generalLogs.push(`- ${formatDateTime(Date.now(), true)} ${message}`);
+		// Long sessions would otherwise grow this without end.
+		if (this.generalLogs.length > MAX_GENERAL_LOGS)
+			this.generalLogs.splice(0, this.generalLogs.length - MAX_GENERAL_LOGS);
 	};
 
 	private readonly subscribers: { [K in keyof Events]?: Set<(event: Events[K]) => void> } = {};

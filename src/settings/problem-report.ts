@@ -22,6 +22,11 @@ export function sanitizeSettings(settings: Settings): Record<string, unknown> {
 	if (kept) copy.keptOnRemote = `${Object.keys(kept).length} file(s)`;
 	const skip = copy.skipState as { skipped?: Array<string> } | undefined;
 	if (skip) copy.skipState = `${skip.skipped?.length ?? 0} file(s) skipped`;
+	// Raw errors can name files; the report keeps results and counts.
+	if (Array.isArray(copy.syncHistory))
+		copy.syncHistory = (copy.syncHistory as Array<Record<string, unknown>>)
+			.slice(0, 10)
+			.map(({ error: _error, ...rest }) => rest);
 	const gdrive = copy.modules?.gdrive;
 	if (gdrive)
 		for (const key of ['clientId', 'accountEmail', 'userId'])

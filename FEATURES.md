@@ -54,7 +54,7 @@ Details: [Setup](TECHNICAL.md#setup).
 - A file that keeps failing is skipped and named instead of blocking the rest,
   and can be retried later.
 - Last sync shows the result in plain words, such as _Can't reach Google_.
-  Logs can be exported.
+  The last 30 syncs are listed with what moved, and the log opens in a window.
 
 ## Private by design
 
