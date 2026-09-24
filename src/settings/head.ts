@@ -31,6 +31,7 @@ export type HeadSettingTranslations = {
 	lastSyncNever: string;
 	lastSyncValue: Snippet<{ time: string; result: string }>;
 	filesSkipped: Snippet<number>;
+	syncHistory: string;
 	completed: string;
 	completedNoop: string;
 	cancelled: string;
@@ -65,6 +66,7 @@ export default function headSettings(
 		isIdle: Ref<boolean>;
 		rerenderSettingTab: () => void;
 		refreshSettingTab: () => void;
+		showSyncHistory: () => void;
 	},
 	getSettingTab: () => PluginSettingTab | undefined,
 ): CallableOrObjectTree {
@@ -81,6 +83,7 @@ export default function headSettings(
 		isIdle,
 		rerenderSettingTab,
 		refreshSettingTab,
+		showSyncHistory,
 	} = ctx;
 	const choose = (key: 'decider' | 'conflictResolver', value: string) => {
 		settings[key] = value;
@@ -131,6 +134,12 @@ export default function headSettings(
 					};
 					recurseLabel(tab.settingItems);
 				});
+				setting.addExtraButton((button) =>
+					button
+						.setIcon('history')
+						.setTooltip(translate('syncHistory'))
+						.onClick(showSyncHistory),
+				);
 				let unsubscribe = () => {};
 				setting.addButton((button) => {
 					button

@@ -14,6 +14,15 @@ const settings = {
 		},
 	},
 	skipState: { failures: { 'secret.md': 1 }, skipped: ['secret.md'] },
+	syncHistory: [
+		{
+			at: 1,
+			counts: { uploaded: 1 },
+			error: 'Google Drive: private/plan.md does not exist.',
+			result: 'failed',
+			trigger: 'interval',
+		},
+	],
 	webhookOnFinish: '',
 	webhookOnStart: 'https://hooks.example.com/token123',
 };

@@ -504,6 +504,12 @@ trust; the payload carries the vault name, not its contents.
   resumed; manual syncs still run. The status bar reads _Auto sync paused_,
   and adds _no sync for a while_ when scheduled syncs have not completed for
   twice their interval.
+- **History and log:** the history icon on the Last sync row (or _Sync
+  history_ in the command palette) lists the last 30 syncs on this device:
+  time, result, trigger, what moved and the error. They are kept on the
+  device, never synced or exported, and name no files. _Sync log_ shows the
+  recent log in a window with a copy button; the general log keeps its last
+  500 lines.
 - **Interrupted syncs:** each task records its result as soon as it finishes.
   If a sync stops halfway (Obsidian closed, offline, cancelled), the next one
   plans only what is left; finished uploads and downloads are not repeated.

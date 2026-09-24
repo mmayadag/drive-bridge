@@ -14,6 +14,7 @@ test('reset puts settings back but keeps the backend, modules and last sync', ()
 		lastSync,
 		modules,
 		remoteFs: 'other',
+		syncHistory: [{ at: 1, counts: {} as never, result: 'noop' as const, trigger: 'interval' }],
 		webhookOnStart: 'https://example.com/hook',
 	};
 	settings.scheduledSync.enabled = false;
@@ -29,6 +30,7 @@ test('reset puts settings back but keeps the backend, modules and last sync', ()
 	expect(settings.modules).toBe(modules);
 	expect(settings.lastSync).toBe(lastSync);
 	expect(settings.keptOnRemote).toStrictEqual({ 'a.md': 'r1' });
+	expect(settings.syncHistory).toHaveLength(1);
 });
 
 test('reset does not share objects with the defaults', () => {
