@@ -5,9 +5,17 @@ import { App, TFile, TFolder } from 'obsidian';
 import type { RootFs, VaultRequest } from '@/fs';
 import type { MaybePromise } from '@/types';
 import { createVaultRequest, VaultFs } from '@/fs';
+import { OS } from '@/modules/event-bus';
 
 const { stream, bytes, file } = testKit;
 const textDecoder = new TextDecoder();
+
+/** What a promise rejected with, or undefined when it resolved. */
+const failure = (promise: Promise<unknown>) =>
+	promise.then(
+		() => {},
+		(error: unknown) => error as Error & { status?: number },
+	);
 
 type VaultFixtureStat = {
 	mtime: number;
@@ -332,4 +340,118 @@ test('LIST should keep using the file tree when the caller does not opt out', as
 		folders: [],
 	});
 	expect(vault.calls.list).toStrictEqual([]);
+});
+
+// A bare app for the request paths the vault stub does not reach.
+function bareRequest(adapter: Record<string, unknown>) {
+	const calls: Array<string> = [];
+	const app = {
+		vault: {
+			adapter: {
+				getResourcePath: (path: string) => `app://local/${path}`,
+				...adapter,
+			},
+			config: {},
+			getAbstractFileByPath: () => {},
+		},
+		workspace: { layoutReady: false },
+	};
+	return { calls, request: createVaultRequest(app as never) };
+}
+
+async function withOS<T>(flags: Partial<typeof OS>, run: () => Promise<T>) {
+	const before = { ...OS };
+	Object.assign(OS, flags);
+	try {
+		return await run();
+	} finally {
+		Object.assign(OS, before);
+	}
+}
+
+test('GET_STREAM streams the file behind its resource path', async () => {
+	const realFetch = globalThis.fetch;
+	const urls: Array<string> = [];
+	globalThis.fetch = ((url: string) => {
+		urls.push(url);
+		return Promise.resolve(new Response('hello'));
+	}) as never;
+	try {
+		const { request } = bareRequest({});
+		await withOS({ iOS: false, iPadOS: false }, async () => {
+			const body = await request('note.md', { method: 'GET_STREAM', size: 5 });
+			expect(textDecoder.decode(await new Response(body).bytes())).toBe('hello');
+		});
+		expect(urls).toStrictEqual(['app://local/note.md']);
+	} finally {
+		globalThis.fetch = realFetch;
+	}
+});
+
+test('on iOS, GET_STREAM reads ranges through a temporary media copy', async () => {
+	const realFetch = globalThis.fetch;
+	const fetched: Array<[string, string | undefined]> = [];
+	globalThis.fetch = ((url: string, init?: { headers?: Record<string, string> }) => {
+		fetched.push([url, init?.headers?.Range]);
+		return Promise.resolve(new Response('abc'));
+	}) as never;
+	const copies: Array<[string, string]> = [];
+	const removed: Array<string> = [];
+	const made: Array<string> = [];
+	try {
+		const { request } = bareRequest({
+			copy: (from: string, to: string) => void copies.push([from, to]),
+			exists: () => false,
+			mkdir: (path: string) => void made.push(path),
+			remove: (path: string) => {
+				removed.push(path);
+				return Promise.resolve();
+			},
+		});
+		await withOS({ iOS: true }, async () => {
+			const body = await request('note.md', { method: 'GET_STREAM', size: 3 });
+			expect(textDecoder.decode(await new Response(body).bytes())).toBe('abc');
+			// Media files stream as they are, without a copy.
+			await new Response(
+				await request('clip.mp4', { method: 'GET_STREAM', size: 3 }),
+			).bytes();
+		});
+		expect(made).toStrictEqual(['.trash']);
+		expect(copies).toHaveLength(1);
+		expect(copies[0]?.[1]).toMatch(/^\.trash\/.+\.mov$/u);
+		expect(removed).toStrictEqual([copies[0]?.[1]]);
+		expect(fetched).toStrictEqual([
+			[`app://local/${copies[0]?.[1]}`, 'bytes=0-2'],
+			['app://local/clip.mp4', 'bytes=0-2'],
+		]);
+	} finally {
+		globalThis.fetch = realFetch;
+	}
+});
+
+test('on Windows, a forbidden character in a name gets a clear error', async () => {
+	const failing = () => Promise.reject(new Error('EINVAL'));
+	const { request } = bareRequest({ mkdir: failing, writeBinary: failing });
+	await withOS({ Windows: true }, async () => {
+		expect(
+			(await failure(request('a:b.md', { method: 'PUT', value: bytes('x') })))?.message,
+		).toContain('Windows forbids character ":"');
+		expect(
+			(await failure(request('fine.md', { method: 'PUT', value: bytes('x') })))?.message,
+		).toContain('EINVAL');
+		expect((await failure(request('what?/', { method: 'MKDIR' })))?.message).toContain('"?"');
+	});
+	await withOS({ Windows: false }, async () => {
+		expect(
+			(await failure(request('a:b.md', { method: 'PUT', value: bytes('x') })))?.message,
+		).toContain('EINVAL');
+	});
+});
+
+test('STAT of a file that is gone fails with its path', async () => {
+	const { request } = bareRequest({ stat: () => Promise.resolve() });
+	expect((await failure(request('gone.md', { method: 'STAT' })))?.message).toContain(
+		'"gone.md" not found',
+	);
+	expect(await request('/', { method: 'MKDIR' })).toBeUndefined();
 });
