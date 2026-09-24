@@ -579,6 +579,15 @@ After a rebuild, run **Reload app without saving** from the command palette
 to load the new code. The developer console (**Cmd+Option+I**) shows errors
 and the plugin's log output.
 
+### Test coverage
+
+`bun coverage` prints the weighted totals and the least covered files, and
+CI fails when they drop below `FLOOR` in `scripts/coverage-summary.ts`. The
+floor follows what the tests already reach: raise it a point or two per
+release as more gets covered, never lower it to let a change through. The
+sync, Drive and vault paths are kept well above it; settings screens and
+modals are covered mostly by the load test and device testing.
+
 ### Release checklist
 
 Unit tests do not run the settings in Obsidian; the strategy page bug in
