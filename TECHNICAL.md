@@ -1,5 +1,17 @@
 # Drive Bridge technical notes
 
+## Install
+
+Drive Bridge is not in Community plugins yet. Install it with
+[BRAT](https://github.com/TfTHacker/obsidian42-brat):
+
+1. Install and enable BRAT from Community plugins.
+2. BRAT → **Add beta plugin** → `https://github.com/mmayadag/drive-bridge`.
+3. Enable **Drive Bridge** in Community plugins.
+
+BRAT installs the files attached to the latest GitHub release and can keep
+them updated.
+
 ## Setup
 
 Do steps 1–3 once. Step 4 is repeated on every device.
@@ -108,7 +120,7 @@ thinking about that limit.
 
 ### 4. Connect each device
 
-In Obsidian, install Drive Bridge (see the README), then open
+In Obsidian, install Drive Bridge (see [Install](#install)), then open
 **Settings → Drive Bridge**:
 
 1. Open **Google account** under Google Drive (it reads _Tap to connect_ or _Click to connect_) and

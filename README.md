@@ -33,32 +33,44 @@ up.
 Most Drive plugins only see the files they created themselves. Drive Bridge
 sees everything in its folder, so notes written by other tools (an AI
 assistant, a script, a teammate) show up in your vault like any other note.
+Seeing more also means more can go wrong, so safety comes first.
 
-Seeing more also means more can go wrong, so safety comes first:
+## Features
 
-- **Nothing is silently lost.** Conflicting edits are merged or kept side by
-  side, never overwritten.
-- **Deletes are confirmed.** Remote deletions ask before touching your vault.
-- **No remote code.** Everything the plugin runs is in this repository.
-- **Your credentials stay yours.** Bring your own Google Cloud client; the
-  refresh token lives in the OS keychain, not in synced files.
+- **Sees every file in the folder**, including notes other apps put there.
+- **Two-way sync on desktop and mobile**: on startup, on a schedule, when you
+  leave Obsidian, as you edit, or by hand.
+- **Nothing silently lost.** Conflicting edits are kept side by side
+  (`note.conflict.md`) or merged, never overwritten.
+- **Deletion safety.** Vault deletions are confirmed in automatic syncs, a
+  sync that would delete many files stops and asks, and _Never delete on
+  Drive_ keeps Drive as an archive.
+- **Recovers on its own.** An interrupted sync picks up where it stopped,
+  requests are retried, and a file that keeps failing is skipped and named
+  instead of blocking the rest.
+- **Clear status.** Last sync shows the result in plain words; logs can be
+  exported.
+- **Clean notes.** No frontmatter, tags or markers are added to your notes.
+- **Your credentials stay yours.** Your own Google Cloud client; the client
+  secret and refresh token live in the device's secure storage. No
+  third-party server, no telemetry, no code downloaded at runtime.
+- **Filters and limits**: glob include and exclude rules, file size and
+  memory limits, request pacing.
 
 ## Install
 
-Drive Bridge is not in the community store. Install it with
-[BRAT](https://github.com/TfTHacker/obsidian42-brat):
-
-1. Install and enable BRAT.
-2. BRAT → **Add beta plugin** → `https://github.com/mmayadag/drive-bridge`
-3. Enable **Drive Bridge** in Community plugins.
+Drive Bridge is not in Community plugins yet. Until it is, install it with
+[BRAT](https://github.com/TfTHacker/obsidian42-brat) by adding
+`mmayadag/drive-bridge` as a beta plugin; the steps are in
+[TECHNICAL.md](TECHNICAL.md#install).
 
 ## Set up
 
 1. Create a Google Cloud OAuth client (Desktop app) with the Drive API enabled.
 2. Get a refresh token once with
    `rclone authorize "drive" <client ID> <client secret>`.
-3. On each device, enter the client ID, secret and token in Drive Bridge
-   settings, pick a Drive folder and run your first sync.
+3. On each device, open **Google account** in Drive Bridge settings, enter the
+   client ID, secret and token, pick a Drive folder and run your first sync.
 
 Step-by-step instructions and the reasoning behind each choice are in
 [TECHNICAL.md](TECHNICAL.md#setup).
