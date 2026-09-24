@@ -23,41 +23,20 @@ server reading them out.
 <p align="center"><img src="docs/how-it-works.svg" alt="Your vault and Google Drive, kept in step by Drive Bridge" width="760"></p>
 
 Drive Bridge keeps your vault and one Google Drive folder in step, on every
-device you install it on. Whatever lands in that folder, from any source,
-comes into your vault on the next sync. How other apps get into the folder is
-up to them and Google Drive's sharing settings; Drive Bridge does not set that
-up.
-
-## Why
-
-Most Drive plugins only see the files they created themselves. Drive Bridge
-sees everything in its folder, so notes written by other tools (an AI
-assistant, a script, a teammate) show up in your vault like any other note.
-Seeing more also means more can go wrong, so safety comes first.
+device you install it on. Unlike plugins that only see the files they created,
+it sees everything in the folder, so notes other tools write (an AI assistant,
+a script, a teammate) show up like any other note. How they get into the folder
+is up to them and Drive's sharing settings. Seeing more also means more can go
+wrong, so safety comes first.
 
 ## Features
 
-- **Sees every file in the folder**, including notes other apps put there.
-- **Two-way sync on desktop and mobile**: on startup, on a schedule, when you
-  leave Obsidian, as you edit, or by hand.
-- **Nothing silently lost.** Conflicting edits are kept side by side
-  (`note.conflict.md`) or merged, never overwritten.
-- **Deletion safety.** Vault deletions are confirmed in automatic syncs, a
-  sync that would delete many files stops and asks, and _Never delete on
-  Drive_ keeps Drive as an archive.
-- **Recovers on its own.** An interrupted sync picks up where it stopped,
-  requests are retried, and a file that keeps failing is skipped and named
-  instead of blocking the rest.
-- **Second device in one step.** Export the settings with the Google account
-  sealed by a passphrase, and import them on the next device.
-- **Clear status.** Last sync shows the result in plain words; logs can be
-  exported.
-- **Clean notes.** No frontmatter, tags or markers are added to your notes.
-- **Your credentials stay yours.** Your own Google Cloud client; the client
-  secret and refresh token live in the device's secure storage. No
-  third-party server, no telemetry, no code downloaded at runtime.
-- **Filters and limits**: glob include and exclude rules, file size and
-  memory limits, request pacing.
+[Two-way sync](FEATURES.md#two-way-sync) ·
+[Sees every file](FEATURES.md#sees-every-file) ·
+[Nothing silently lost](FEATURES.md#nothing-silently-lost) ·
+[Easy setup](FEATURES.md#easy-setup) ·
+[Recovers on its own](FEATURES.md#recovers-on-its-own) ·
+[Private by design](FEATURES.md#private-by-design)
 
 ## Install
 
