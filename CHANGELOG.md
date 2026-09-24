@@ -2,6 +2,49 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.3.0 - 2026-09-24
+
+Control and safety.
+
+- **Undo one change** in the list a manual sync shows first: a row's undo
+  button keeps the other side's version, or brings a deleted file back
+  (folders included), instead of running the change (#74).
+- **Sync this file**: command, note header button and file menu item for the
+  open note (#75).
+- **Exclude from sync** / **Include in sync** in the file and folder menu,
+  with undo in the notice (#98).
+- **Pause automatic sync** on this device, from the Automatic sync page or
+  the command palette; manual syncs still run, and the status bar says so
+  (#99).
+- **Drive scan: Changes only** under Google Drive asks Drive only what changed
+  since the last sync, much faster on a large Drive. It still lists everything
+  on the first sync, once a day and whenever Drive cannot say. The sync log
+  names the scan each time. Full scan stays the default (#73, #124).
+- A sync that would upload, download or resolve more than 100 already synced
+  files, and more than half of them, stops and asks first, like mass
+  deletions (#97).
+- **Sync history**: the last 30 syncs on this device, and the log in a window
+  with a copy button (#56).
+- **Copy problem report** puts versions, settings without secrets and the
+  recent log on the clipboard in one step (#100).
+
+Fixes:
+
+- While a sync waited for confirmation, the progress showed a fixed
+  _0/1 Completed_; the count now starts when the sync runs (#125).
+- Ticking a deletion inside a deleted folder unticked the folder's deletion,
+  so _Select all_ after unselecting all left it out (#74).
+
+Maintenance:
+
+- The built plugin is loaded as a phone and as a desktop in CI, so a crash
+  like 0.2.0's cannot ship again (#117).
+- Tests cover 99.9% of functions and 100% of lines, each test file runs
+  isolated, and CI fails below 99% (#119, #121, #128, #130).
+- The two `fetch` calls, which read large vault files from disk, are marked
+  as such for the Obsidian review; PRIVACY.md says the clipboard is only
+  written, on a copy button, and never read (#134).
+
 ## v0.2.1 - 2026-09-24
 
 Fixes:
