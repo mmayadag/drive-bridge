@@ -4,6 +4,7 @@ import { Notice, Platform, setIcon } from 'obsidian';
 import type { Ref } from '@/shared/reactive';
 import type { SkipState } from '@/sync/skip-list';
 import type { Progress } from '@/types';
+import { copyProblemReport } from '@/settings/support';
 import { getMessage } from '@/shared/error';
 import { computed, ref } from '@/shared/reactive';
 import { describeError } from '@/utils/describe-error';
@@ -353,6 +354,17 @@ export default class Observability {
 				icon: 'play',
 				id: 'resume-automatic-sync',
 				name: this.t('resumeAutomaticSync'),
+			},
+			{
+				callback: () =>
+					void copyProblemReport({
+						getLogs: this.ctx.getLogs,
+						settings: this.settings,
+						translate: this.t,
+					}),
+				icon: 'clipboard-copy',
+				id: 'copy-problem-report',
+				name: this.t('copyProblemReport'),
 			},
 			{
 				callback: () => void this.exportLogs(),

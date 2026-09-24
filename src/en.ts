@@ -67,6 +67,7 @@ const en: Translations = {
 	continueSync: 'Continue',
 	controls: 'Controls',
 	copyExport: 'Copy',
+	copyProblemReport: 'Copy a problem report (versions, settings without secrets, recent log)',
 	createLocalDir: 'Create local folder',
 	createRemoteDir: 'Create remote folder',
 	customHeaders: 'Custom headers',
@@ -204,6 +205,8 @@ const en: Translations = {
 	pauseAutomaticSyncDescription:
 		'Skip every automatic sync on this device until turned off. Manual syncs still run.',
 	pluginVersion: (version) => `Drive Bridge ${version}`,
+	problemReportCopied:
+		'Problem report copied. Paste it into a Bug report; check it first, it includes your filter rules and recent log lines.',
 	realtimeSync: 'Realtime sync',
 	realtimeSyncDescription: 'Sync after a file changes, once the delay in the field passes.',
 	realtimeSyncFastMode: 'Realtime sync fast mode',
