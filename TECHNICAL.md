@@ -495,6 +495,10 @@ trust; the payload carries the vault name, not its contents.
   it out, and Last sync adds _1 file skipped_. **Retry** under Advanced →
   Development → Skipped files, or the _Retry skipped files_ command, clears
   the list.
+- **One file:** _Sync this file_ (command palette, the button in a note's
+  header, or the file menu) syncs only that file and the folders above it,
+  with the usual strategies. Other files and their records are left as they
+  are.
 - **Pausing:** _Pause automatic sync_ (top of the Automatic sync page, or
   the command palette) skips every automatic sync on this device until
   resumed; manual syncs still run. The status bar reads _Auto sync paused_,

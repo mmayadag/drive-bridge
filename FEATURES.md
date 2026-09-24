@@ -8,6 +8,7 @@ A closer look at what Drive Bridge does. Setup steps and every setting are in
 Your vault and one Google Drive folder stay in step, on desktop and on phones.
 Syncs run on startup, on a schedule, when you leave Obsidian, as you edit
 (realtime), or by hand from the ribbon, the command palette or the settings.
+_Sync this file_ syncs just the open note, from its header or the file menu.
 A manual sync can list every planned change for you to confirm first.
 Details: [Sync strategies](TECHNICAL.md#sync-strategies),
 [Sync behavior](TECHNICAL.md#sync-behavior).

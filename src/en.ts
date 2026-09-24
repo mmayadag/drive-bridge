@@ -110,6 +110,7 @@ const en: Translations = {
 	failedTasksDescription: (count) => `${pcOperations(count)} failed during sync:`,
 	fileSkipped: (key) =>
 		`Drive Bridge: "${key}" failed three syncs in a row and is skipped now. Advanced → Development → Skipped files retries it.`,
+	fileSynced: 'Synced',
 	filesSkipped: (count) => `${pc(count, 'file', 'files')} skipped`,
 	filterPlaceholder: 'E.g. temp.md, .trash/**/*',
 	filterRules: 'Filter rules',
@@ -268,6 +269,7 @@ const en: Translations = {
 	syncProgress: 'Sync progress',
 	syncStrategy: 'Sync strategy',
 	syncStrategyDescription: 'How changes flow between this vault and Drive.',
+	syncThisFile: 'Sync this file',
 	undo: 'Undo',
 	upload: 'Upload',
 	walkingRemote: 'Discovering remote files',

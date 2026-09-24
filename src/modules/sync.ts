@@ -1,5 +1,5 @@
 import type { Events, Translations } from '@';
-import type { Command } from 'obsidian';
+import type { App, Command, EventRef } from 'obsidian';
 import { Notice } from 'obsidian';
 import type { Fs, ListReporter } from '@/fs';
 import type { Ref } from '@/shared/reactive';
@@ -23,7 +23,6 @@ import type {
 } from '@/types';
 import type { GlobMatchResult } from '@/utils/glob-match';
 import { getMessage } from '@/shared/error';
-import { isSub } from '@/shared/path';
 import { ref } from '@/shared/reactive';
 import {
 	RemoveLocal,
@@ -37,11 +36,14 @@ import {
 } from '@/sync';
 import { hideKeptOnRemote, keepOnRemote } from '@/sync/keep-on-remote';
 import { findMassChange, findMassDeletion, keepDeletedFiles } from '@/sync/mass-delete';
+import { narrowTo } from '@/sync/narrow';
+import { prepareReporter, sortTasks } from '@/sync/plan-helpers';
 import { countOutcome, withoutSkipped } from '@/sync/skip-list';
 import { prepareGlobMatch } from '@/utils/glob-match';
 import type { Dispatch, On } from './event-bus';
 import type { Snippet, Translate } from './i18n';
 import type { Infras } from './registrar';
+import { registerSyncThisFile } from './sync-this-file';
 
 export type SyncTerminateReason =
 	| { result: 'cancelled' }
@@ -61,6 +63,8 @@ export type SyncOptions = {
 	needConfirmDeletion?: boolean;
 	exclusionRules?: Array<GlobMatchRule>;
 	inclusionRules?: Array<GlobMatchRule>;
+	/** Sync only this vault path (and the folders above it); other records stay as they are. */
+	only?: string;
 };
 
 export default class Sync {
@@ -74,6 +78,9 @@ export default class Sync {
 			getConflictResolver: () => ConflictResolver;
 			saveSettings: () => Promise<void>;
 			addCommand: (command: Command) => Command;
+			app: App;
+			registerEvent: (ref: EventRef) => void;
+			isIdle: Ref<boolean>;
 		},
 	) {
 		ctx.addCommand({
@@ -81,6 +88,7 @@ export default class Sync {
 			id: 'retry-skipped-files',
 			name: ctx.translate('retrySkippedFiles'),
 		});
+		registerSyncThisFile({ ...ctx, executeSync: this.executeSync });
 	}
 
 	private readonly retrySkipped = () => {
@@ -107,6 +115,8 @@ export default class Sync {
 		retrySkippedFiles: string;
 		skippedFilesCleared: string;
 		fileSkipped: Snippet<string>;
+		syncThisFile: string;
+		fileSynced: string;
 	};
 	declare readonly settings: {
 		maxFileSize: TogglableValue;
@@ -238,6 +248,7 @@ export default class Sync {
 			const remoteStats = postProcess(remoteList, remotePruner);
 			if (hideKeptOnRemote(settings.keptOnRemote, localStats, remoteStats))
 				void ctx.saveSettings();
+			if (options.only) narrowTo(options.only, { localStats, records, remoteStats });
 			dispatch(
 				'logSync',
 				`Local ${localStats.size} item(s), remote ${remoteStats.size} item(s), record ${records.size} item(s).`,
@@ -455,45 +466,4 @@ function partition<T, U extends T>(
 function toTaskInfo({ key, name, prettyName, local, remote }: BaseTask): TaskInfo {
 	const isDir = local?.isDir ?? remote?.isDir ?? false;
 	return { isDir, key, name, prettyName };
-}
-
-function sortTasks(tasks: Array<BaseTask>) {
-	const region = (task: BaseTask) => {
-		const isFolder = task.local?.isDir === true || task.remote?.isDir === true;
-		if (task.name === 'removeLocal' || task.name === 'removeRemote') return isFolder ? 3 : 0;
-		if (task.name === 'createLocalDir' || task.name === 'createRemoteDir') return 1;
-		return task.name === 'moveLocal' || task.name === 'moveRemote' ? 2 : 4;
-	};
-	tasks.sort((a, b) => {
-		const aRegion = region(a);
-		const bRegion = region(b);
-		if (aRegion !== bRegion) return aRegion - bRegion;
-		if (aRegion === 3) return b.key.length - a.key.length;
-		if (aRegion === 1 || aRegion === 2) return a.key.length - b.key.length;
-		return 0;
-	});
-}
-
-function prepareReporter(match: (path: string) => GlobMatchResult) {
-	const probes: Array<string> = [];
-	return {
-		// Prune probe folders that need to be excluded
-		pruner: (stats: Array<Stat>) => {
-			const probeSet = new Set(probes);
-			const content = stats.filter((p) => !probeSet.has(p.key));
-			if (content.length === 0) return [];
-			const keptProbes = new Set<string>();
-			for (const probe of probeSet)
-				if (content.some((p) => isSub(probe, p.key, false))) keptProbes.add(probe);
-			return stats.filter((p) => !probeSet.has(p.key) || keptProbes.has(p.key));
-		},
-		reporter: (prog: Required<Progress>) => {
-			const result = match(prog.current);
-			if (result === 'probe') {
-				probes.push(prog.current);
-				return 'advance';
-			}
-			return result;
-		},
-	};
 }
