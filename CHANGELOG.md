@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.2.0 - 2026-09-24
+
+Easy setup.
+
+- **Sign in with Google** on the Google account page: Google opens in the
+  browser, and the address it ends on is pasted back. No rclone or terminal,
+  and it works on phones. Pasting a token still works (#70).
+- The Google account page lists the four Google Cloud steps, each with a
+  button to its Console page. Pasting the downloaded client JSON fills in the
+  client ID and secret, and a client ID that does not look like one is
+  outlined (#71).
+- **Export settings** and **Import settings** under Advanced, and **Set up
+  from another device** on a device that is not connected. The Google account
+  travels only encrypted with a passphrase; device state never travels, and
+  an existing account is only replaced after asking (#5).
+
 ## v0.1.17 - 2026-09-24
 
 Maintenance only; the plugin behaves as in 0.1.16.
