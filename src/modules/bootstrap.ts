@@ -4,6 +4,7 @@ import type { FileTreeTranslations } from '@/components/file-tree';
 import type { BatchOptimizer, Fs, MemoryControlSharedState } from '@/fs';
 import type { ControlsSettingTranslations } from '@/settings/controls';
 import type { DevelopmentSettingTranslations } from '@/settings/development';
+import type { ExcludeMenuTranslations } from '@/settings/exclude-menu';
 import type { FeaturesSettingTranslations } from '@/settings/features';
 import type { FilterSettingTranslations } from '@/settings/filter';
 import type { HeadSettingTranslations } from '@/settings/head';
@@ -112,6 +113,7 @@ export default class Bootstrap {
 		WebhooksSettingTranslations &
 		SupportSettingTranslations &
 		TransferTranslations &
+		ExcludeMenuTranslations &
 		FileTreeTranslations;
 	declare readonly settings: {
 		maxMemoryConsumption: TogglableValue;

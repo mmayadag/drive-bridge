@@ -33,6 +33,7 @@ const settings = {
 function buildTab() {
 	let tab: { getSettingDefinitions: () => Array<SettingDefinitionItem> } | undefined;
 	const setting: InstanceType<typeof Setting> = new Setting({
+		app: { workspace: { on: () => ({}) } },
 		conflictResolverRegistry: new Map<string, unknown>([
 			['renameAndKeepBoth', { order: 10, prettyName: () => 'rename' }],
 			['keepLocal', { lossy: true, order: 50, prettyName: () => 'keepLocal' }],
@@ -53,6 +54,7 @@ function buildTab() {
 		isIdle: ref(true),
 		memoryDB: { getMeta: () => {}, getStore: () => new Map() },
 		on: () => () => {},
+		registerEvent: () => {},
 		registerSetting: (entry: never) => setting.root.registerSetting(entry),
 		remoteFsRegistry: new Map([['gdrive', { prettyName: () => 'Google Drive' }]]),
 		settings,
