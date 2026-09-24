@@ -531,36 +531,44 @@ After a rebuild, run **Reload app without saving** from the command palette
 to load the new code. The developer console (**Cmd+Option+I**) shows errors
 and the plugin's log output.
 
-### First run checklist
+### Release checklist
 
-Things that are easy to break and not covered by unit tests:
+Unit tests do not run the settings in Obsidian; the strategy page bug in
+0.1.11 (#46) shipped because of that. Before tagging a release that touches
+the UI or sync, build (`bun run build`), reload the plugin in the test vault,
+and check on desktop, then on a phone:
 
-- **Settings**: client ID and secret save on blur; Connect with an empty
-  client shows a notice; a malformed token is rejected; a `drive.file` token
-  is rejected with a clear message; a good token shows _Connected as_;
-  **Forget on this device** returns to the Connect row.
-- **Connection check**: the icon on the _Connected as_ row (Google account
-  page) spins, then turns green,
-  or red when offline.
-- **Confirm dialog**: the file tree renders with icons and indentation;
-  **Select all** toggles everything and shows a mixed state when partly
-  selected; deselected rows are dimmed.
-- **Progress**: the modal shows progress and counts; failed tasks list with
-  their error; the status bar text and the spinning ribbon icon reset when
-  idle.
-- **Round trip**: a note created in Obsidian appears in Drive; a Markdown file
-  uploaded to the Drive folder by another app appears in the vault; edits on
-  both sides produce a merge or a kept copy, never a silent overwrite.
+- **Main screen**: Last sync, the two strategy entries, _Never delete on
+  Drive_, the Google Drive group, the sub-page entries, the Help row and the
+  coffee footer all show; labels (Match, Speed) sit next to their names.
+- **Strategy pages**: pick every option twice; each row keeps one radio, the
+  entry value and warning follow, _Merge markers_ shows only with Smart merge.
+- **Google account**: client ID and secret save on blur; Connect with an empty
+  field shows a notice and focuses it; a malformed or `drive.file` token is
+  rejected; a good token shows _Connected as_; **Forget on this device**
+  returns to the Connect row; the connection check icon turns green, or red
+  offline.
+- **Sync**: a manual sync shows the confirm dialog (file tree, **Select all**,
+  dimmed deselected rows) and progress; a note created in Obsidian reaches
+  Drive; a file added to the Drive folder by another app reaches the vault;
+  edits on both sides end merged or as a kept copy.
+- **Safety**: deleting 60 files in `test-files` triggers the mass-deletion
+  question; _Keep them_ brings them back. Last sync shows a readable error
+  when offline.
+- **Dialogs**: Clear records and Reset to defaults ask first; Cancel changes
+  nothing.
+- **Idle state**: after a sync, the status bar text and ribbon icon reset.
 
 ### Releasing
 
-1. Run `bun ver X.Y.Z`. It adds an empty `## vX.Y.Z - YYYY-MM-DD` section to
+1. Go through the [release checklist](#release-checklist).
+2. Run `bun ver X.Y.Z`. It adds an empty `## vX.Y.Z - YYYY-MM-DD` section to
    `CHANGELOG.md` and stops; write the notes there. `bun changelog X.Y.Z`
    prints a draft from the milestone's closed issues (needs the GitHub CLI).
-2. Run `bun ver X.Y.Z` again. It sets the version in `manifest.json` and
+3. Run `bun ver X.Y.Z` again. It sets the version in `manifest.json` and
    `package.json`, adds it to `versions.json` with the current
    `minAppVersion`, and prints the commit, tag and push commands.
-3. Push the `X.Y.Z` tag. CI checks that the tag and release files agree
+4. Push the `X.Y.Z` tag. CI checks that the tag and release files agree
    (`bun ver --check <tag>`), builds the plugin, attests the build and attaches
    `main.js`, `manifest.json` and `styles.css` to the GitHub release, which is
    what BRAT installs from. Tags containing `-` become pre-releases.
