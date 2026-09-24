@@ -18,8 +18,14 @@ test('each seal uses a fresh salt and iv', async () => {
 test('a wrong passphrase or a changed blob is rejected', async () => {
 	const sealed = await seal('secret', 'right');
 	expect(await failure(open(sealed, 'wrong'))).toBeInstanceOf(WrongPassphraseError);
-	const last = sealed.at(-2) === 'A' ? 'B' : 'A';
-	const tampered = `${sealed.slice(0, -2)}${last}${sealed.at(-1)}`;
+	// Flip one ciphertext byte; changing the last base64 character can hit padding bits only.
+	const prefix = 'drive-bridge:v1:';
+	const bytes = Uint8Array.from(
+		atob(sealed.slice(prefix.length)),
+		(char) => char.codePointAt(0) ?? 0,
+	);
+	bytes[bytes.length - 5] ^= 1;
+	const tampered = prefix + btoa(String.fromCodePoint(...bytes));
 	expect(await failure(open(tampered, 'right'))).toBeInstanceOf(WrongPassphraseError);
 	expect(await failure(open('not a secret', 'right'))).toBeInstanceOf(WrongPassphraseError);
 });
