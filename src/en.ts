@@ -83,6 +83,8 @@ const en: Translations = {
 	errorServer: 'Google Drive had a problem. Try again later.',
 	errorSignIn: 'Google no longer accepts the sign-in. Connect the account again.',
 	errorTasksFailed: (count) => `${count} ${p(count, 'file', 'files')} could not be synced.`,
+	excludeFromSync: 'Exclude from sync',
+	excludedFromSync: 'Excluded from sync:',
 	exclusionRules: 'Exclusion rules',
 	exclusionRulesDescription: () =>
 		createFragment((frag) => {
@@ -125,6 +127,8 @@ const en: Translations = {
 	includeAccount: 'Include the Google account',
 	includeAccountDescription:
 		'The client secret and sign-in, sealed with the passphrase below. Anyone with the export and the passphrase gets full access to that Drive.',
+	includeInSync: 'Include in sync',
+	includedInSync: 'Included in sync again:',
 	inclusionRules: 'Inclusion rules',
 	inclusionRulesDescription: () =>
 		createFragment((frag) => {
@@ -255,6 +259,7 @@ const en: Translations = {
 	syncProgress: 'Sync progress',
 	syncStrategy: 'Sync strategy',
 	syncStrategyDescription: 'How changes flow between this vault and Drive.',
+	undo: 'Undo',
 	upload: 'Upload',
 	walkingRemote: 'Discovering remote files',
 	webhookOnFinish: 'After a sync',

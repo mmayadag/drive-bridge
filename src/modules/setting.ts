@@ -3,6 +3,7 @@ import type { Plugin, SettingDefinitionItem } from 'obsidian';
 import { PluginSettingTab } from 'obsidian';
 import controlsSettings from '@/settings/controls';
 import developmentSettings from '@/settings/development';
+import { registerExcludeMenu } from '@/settings/exclude-menu';
 import featuresSettings from '@/settings/features';
 import filterSettings from '@/settings/filter';
 import headSettings from '@/settings/head';
@@ -65,6 +66,7 @@ export default class Setting {
 		registerSetting({ apply: supportSettings(this.ctx as Context), priority: 6000 });
 		this.transfer = createTransfer(this.ctx as Context);
 		registerSetting({ apply: this.transfer.tree, priority: 6500 });
+		registerExcludeMenu(this.ctx as Context);
 	};
 
 	private readonly matchLabel = () => ({

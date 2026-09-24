@@ -419,6 +419,11 @@ one tap away:
 | Exclusion rules | VCS folders, `node_modules`, OS junk files, Office lock files, `.trash`, `.obsidian` | defaults    | Glob patterns that are never synced.               |
 | Inclusion rules | none                                                                                 | none        | Patterns synced even if an exclusion rule matches. |
 
+Right-click a file or folder → **Exclude from sync** adds an exclusion rule
+for exactly that path (`/path/note.md`, or `/path/folder/` for a folder, case
+sensitive); on an excluded one the item reads **Include in sync** and removes
+the rule. The notice has an **Undo** link.
+
 ### Miscellaneous
 
 | Setting                            | Default | Recommended | What it does                                                                                                                                                                    |
