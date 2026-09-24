@@ -591,12 +591,15 @@ and the plugin's log output.
 
 `bun coverage` prints the weighted totals and the least covered files, and
 CI fails when they drop below `FLOOR` in `scripts/coverage-summary.ts`. The
-floor follows what the tests already reach: raise it a point or two per
-release as more gets covered, never lower it to let a change through. The
-sync, Drive and vault paths are kept well above it; settings screens and
-modals are covered mostly by the load test and device testing. Only what ships
-in `main.js` is measured: `bunfig.toml` leaves out `scripts/`, whose tests
-still run but whose command-line glue (git, files, prompts) is not counted.
+plugin is covered (99% floor on functions and lines), including settings rows
+and modals, which render against jsdom in the test preload. A change keeps the
+floor where it is by coming with its tests; never lower it to let a change
+through. The load test and device testing still check what jsdom cannot, the
+real Obsidian layout. Bun miscounts a few functions that do run
+(`src/modules/setting.ts`), which is why the function floor is not 100%. Only
+what ships in `main.js` is measured: `bunfig.toml` leaves out `scripts/`, whose
+tests still run but whose command-line glue (git, files, prompts) is not
+counted.
 
 ### Release checklist
 

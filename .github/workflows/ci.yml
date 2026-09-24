@@ -44,5 +44,5 @@ jobs:
         run: |
           # Without pipefail, tee hides a coverage-summary failure below the floor.
           set -o pipefail
-          bun --preload=./test/support/setup.ts test --coverage
+          bun --preload=./test/support/setup.ts test --isolate --coverage
           bun scripts/coverage-summary.ts | tee -a "$GITHUB_STEP_SUMMARY"

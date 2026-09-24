@@ -25,7 +25,7 @@ This is the repository for Drive Bridge, an Obsidian plugin that syncs vault fil
 - `bun dev`: rebuild on change (unminified, inline source maps).
 - `bun fix`: format and fix fixable lint errors (always run before `bun check`).
 - `bun check`: check types, lint and format (no file change). Lint warnings fail it.
-- `bun tests`: run all tests (do not use `bun test`, it skips the Obsidian mock preload).
+- `bun tests`: run all tests, each file isolated so module mocks cannot leak into the next (do not use `bun test`, it skips the Obsidian mock preload and the isolation).
 - `bun tests <test path>`: run tests in a specific file.
 - `bun coverage`: run all tests with coverage; prints the totals and least covered files and fails below the floor in `scripts/coverage-summary.ts`.
 - `bun ver <x.y.z>`: prepare a release (see Releasing in `TECHNICAL.md`); `bun ver --check [tag]` checks the release files agree.

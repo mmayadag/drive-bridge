@@ -8,11 +8,7 @@ void mock.module('obsidian', () => ({
 	Notice: NoticeSpy,
 	Setting: SettingSpy,
 }));
-// Other files mock this module for the whole run; the query loads a fresh copy on these mocks.
-const fresh = '@/components/confirm-modal.ts?fresh';
-const { default: ConfirmModal } = (await import(
-	fresh
-)) as typeof import('@/components/confirm-modal');
+const { default: ConfirmModal } = await import('@/components/confirm-modal');
 
 beforeEach(resetSpies);
 

@@ -16,11 +16,7 @@ void mock.module('obsidian', () => ({
 	Notice: NoticeSpy,
 	Setting: SettingSpy,
 }));
-// Other files mock this module for the whole run; the query loads a fresh copy on these mocks.
-const fresh = '@/components/transfer-modal.ts?fresh';
-const { ExportModal, ImportModal } = (await import(
-	fresh
-)) as typeof import('@/components/transfer-modal');
+const { ExportModal, ImportModal } = await import('@/components/transfer-modal');
 
 beforeEach(resetSpies);
 
