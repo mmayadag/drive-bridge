@@ -1,11 +1,12 @@
 import type { Events } from '@';
-import { apiVersion, Platform } from 'obsidian';
+import { apiVersion, Notice, Platform } from 'obsidian';
 import type { On } from '@/modules/event-bus';
 import type { Translate } from '@/modules/i18n';
 import type { LastSync } from '@/modules/observability';
 import type { CallableOrObjectTree } from '@/modules/setting';
 import { VERSION } from '@/modules/event-bus';
 import { COFFEE, HELP } from './layout';
+import { buildReport } from './problem-report';
 import { s } from './utils';
 
 const GUIDE_URL = 'https://github.com/mmayadag/drive-bridge#readme';
@@ -24,6 +25,8 @@ export type SupportSettingTranslations = {
 	coffeeFailed: string;
 	buyMeACoffee: string;
 	pluginVersion: (version: string) => string;
+	copyProblemReport: string;
+	problemReportCopied: string;
 };
 
 function platformName() {
@@ -33,6 +36,24 @@ function platformName() {
 	if (Platform.isWin) return 'Windows';
 	if (Platform.isLinux) return 'Linux';
 	return 'unknown';
+}
+
+/** Copies a problem report (versions, settings without secrets, recent log) to paste into a Bug. */
+export async function copyProblemReport(ctx: {
+	settings: object;
+	getLogs: () => string;
+	translate: Translate<SupportSettingTranslations>;
+}) {
+	await navigator.clipboard.writeText(
+		buildReport({
+			log: ctx.getLogs(),
+			obsidian: apiVersion,
+			platform: platformName(),
+			plugin: VERSION,
+			settings: ctx.settings as never,
+		}),
+	);
+	new Notice(ctx.translate('problemReportCopied'), 8000);
 }
 
 export type ReportKind = 'bug' | 'request';
@@ -66,10 +87,12 @@ export default function supportSettings({
 	translate,
 	settings,
 	on,
+	getLogs,
 }: {
 	translate: Translate<SupportSettingTranslations>;
 	settings: { lastSync?: LastSync };
 	on: On<Events>;
+	getLogs: () => string;
 }): CallableOrObjectTree {
 	return {
 		[HELP]: s(
@@ -100,6 +123,19 @@ export default function supportSettings({
 									.setIcon('lightbulb')
 									.setTooltip(translate('requestFeature'))
 									.onClick(() => window.open(reportUrl('request'))),
+							)
+							.addExtraButton((button) =>
+								button
+									.setIcon('clipboard-copy')
+									.setTooltip(translate('copyProblemReport'))
+									.onClick(
+										() =>
+											void copyProblemReport({
+												getLogs,
+												settings,
+												translate,
+											}),
+									),
 							);
 					},
 					search: false,

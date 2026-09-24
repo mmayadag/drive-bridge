@@ -36,5 +36,5 @@ body:
     id: logs
     attributes:
       label: Logs
-      description: Settings → Drive Bridge → Advanced → Export logs to file. Paste the relevant part and remove anything private, such as note names.
+      description: In Drive Bridge settings, the clipboard icon in the Help and support row (or the command *Copy a problem report*) copies versions, settings without secrets and the recent log. Paste it here and remove anything private, such as note names.
       render: text
