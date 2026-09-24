@@ -66,6 +66,11 @@ const en: GdriveTranslations = {
 	pickFolderTitle: 'Choose a Drive folder',
 	pickSubfolder: 'Open a folder first; the whole Drive cannot be the vault folder.',
 	refreshTokenPlaceholder: 'Address from the browser, or a token',
+	remoteScan: 'Drive scan',
+	remoteScanChanges: 'Changes only',
+	remoteScanDescription:
+		'Changes only asks Drive what changed since the last sync, much faster on a large Drive. It still lists everything once a day and whenever Drive cannot say what changed.',
+	remoteScanFull: 'Full scan',
 	setUpFromDevice: 'Set up from another device',
 	setUpFromDeviceDescription:
 		'Import the settings exported on a device that is already connected, with its passphrase.',

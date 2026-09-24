@@ -341,3 +341,48 @@ test('a Drive error carries its status and message', async () => {
 	expect(error).toMatchObject({ status: 429 });
 	expect(String(error)).toContain('Rate limit');
 });
+
+test('changes only lists everything once, then asks only what changed', async () => {
+	const saved = new Map<string, unknown>();
+	const persistentDB = {
+		getStore: () =>
+			({
+				get: (key: string) => Promise.resolve(saved.get(key)),
+				set: (key: string, value: unknown) => Promise.resolve(void saved.set(key, value)),
+			}) as never,
+	};
+	let changesFail = false;
+	const harness = request((url) => {
+		const { pathname } = new URL(url);
+		if (pathname.endsWith('/changes/startPageToken')) return response({ startPageToken: 't1' });
+		if (pathname.endsWith('/changes'))
+			return changesFail
+				? response({ error: { message: 'Invalid page token' } }, 404)
+				: response({
+						changes: [{ file: note('file-2', 'b.md', 'root'), fileId: 'file-2' }],
+						newStartPageToken: 't2',
+					});
+		return response({ files: [note('file-1', 'a.md', 'root')] });
+	});
+	const options = { remoteScan: 'changes' as const, useTrash: true, userId: 'user-1' };
+	const fs = new GdriveFs(harness.request, options, db, persistentDB);
+	const keys = async () => (await fs.list('/', () => 'advance')).map((stat) => stat.key);
+	const paths = () =>
+		harness.calls.splice(0).map((call) => new URL(call.url).pathname.split('/v3')[1]);
+
+	expect(await keys()).toStrictEqual(['a.md']);
+	expect(paths()).toStrictEqual(['/changes/startPageToken', '/files']);
+
+	expect(await keys()).toStrictEqual(['a.md', 'b.md']);
+	expect(paths()).toStrictEqual(['/changes']);
+
+	// A token Drive no longer knows means starting over with a full scan.
+	changesFail = true;
+	expect(await keys()).toStrictEqual(['a.md']);
+	expect(paths()).toStrictEqual(['/changes', '/changes/startPageToken', '/files']);
+
+	// Full scan ignores the snapshot.
+	options.remoteScan = 'full' as never;
+	await keys();
+	expect(paths()).toStrictEqual(['/files']);
+});

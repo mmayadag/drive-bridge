@@ -16,52 +16,55 @@ import type { GdriveSettings } from '.';
 import type { TokenManager } from './auth';
 import type { SetupStepKey } from './client-setup';
 import type { FolderPickerTranslations } from './folder-picker';
+import type { RemoteScanTranslations } from './remote-scan-setting';
 import type { PendingSignIn } from './sign-in';
 import { isClientId, parseClientJson, SETUP_STEPS } from './client-setup';
 import { connectWithToken, findMissingInput } from './connect';
 import FolderPickerModal from './folder-picker';
+import remoteScanSetting from './remote-scan-setting';
 import { exchangeCode, parseRedirect, startSignIn } from './sign-in';
 
-export type GdriveTranslations = FolderPickerTranslations & {
-	gdrive: string;
-	connectAccount: string;
-	accountConnected: string;
-	accountConnectedDescription: Snippet<string>;
-	connectAccountDescription: Fragment;
-	connect: string;
-	connected: string;
-	googleAccount: string;
-	clientIdMissing: string;
-	clientSecretMissing: string;
-	clickToConnect: string;
-	tapToConnect: string;
-	disconnect: string;
-	configureFirst: string;
-	connectSuccess: string;
-	baseDirectory: string;
-	baseDirectoryDescription: Fragment;
-	baseDirectoryPlaceholder: string;
-	useTrash: string;
-	useTrashDescription: string;
-	authorizationFailed: Snippet<string>;
-	setupSteps: Fragment;
-	clientId: string;
-	clientIdDescription: string;
-	clientSecret: string;
-	clientSecretDescription: string;
-	connectFirst: string;
-	enterClientId: string;
-	enterClientSecret: string;
-	enterRefreshToken: string;
-	invalidRefreshToken: string;
-	limitedScope: string;
-	refreshTokenPlaceholder: string;
-	signInWithGoogle: string;
-	setUpFromDevice: string;
-	setUpFromDeviceDescription: string;
-	openConsole: string;
-	clientFromJson: string;
-} & Record<SetupStepKey, string> &
+export type GdriveTranslations = FolderPickerTranslations &
+	RemoteScanTranslations & {
+		gdrive: string;
+		connectAccount: string;
+		accountConnected: string;
+		accountConnectedDescription: Snippet<string>;
+		connectAccountDescription: Fragment;
+		connect: string;
+		connected: string;
+		googleAccount: string;
+		clientIdMissing: string;
+		clientSecretMissing: string;
+		clickToConnect: string;
+		tapToConnect: string;
+		disconnect: string;
+		configureFirst: string;
+		connectSuccess: string;
+		baseDirectory: string;
+		baseDirectoryDescription: Fragment;
+		baseDirectoryPlaceholder: string;
+		useTrash: string;
+		useTrashDescription: string;
+		authorizationFailed: Snippet<string>;
+		setupSteps: Fragment;
+		clientId: string;
+		clientIdDescription: string;
+		clientSecret: string;
+		clientSecretDescription: string;
+		connectFirst: string;
+		enterClientId: string;
+		enterClientSecret: string;
+		enterRefreshToken: string;
+		invalidRefreshToken: string;
+		limitedScope: string;
+		refreshTokenPlaceholder: string;
+		signInWithGoogle: string;
+		setUpFromDevice: string;
+		setUpFromDeviceDescription: string;
+		openConsole: string;
+		clientFromJson: string;
+	} & Record<SetupStepKey, string> &
 	Record<`${SetupStepKey}Description`, string> & {
 		signInWithGoogleDescription: string;
 		signInOpened: string;
@@ -475,6 +478,7 @@ export default function gdriveSetting(
 						);
 					},
 				})),
+				4000: remoteScanSetting(translate, settings, saveSettings),
 			},
 		),
 	};

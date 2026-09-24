@@ -10,6 +10,8 @@ Syncs run on startup, on a schedule, when you leave Obsidian, as you edit
 (realtime), or by hand from the ribbon, the command palette or the settings.
 _Sync this file_ syncs just the open note, from its header or the file menu.
 A manual sync can list every planned change for you to confirm first.
+On a large Drive, _Changes only_ asks Drive what changed instead of listing
+everything each time, with a full scan once a day to be safe.
 Details: [Sync strategies](TECHNICAL.md#sync-strategies),
 [Sync behavior](TECHNICAL.md#sync-behavior).
 

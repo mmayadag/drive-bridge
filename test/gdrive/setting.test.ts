@@ -48,9 +48,9 @@ function setup({
 
 const call = (value: unknown) => (typeof value === 'function' ? (value as () => unknown)() : value);
 
-test('leaves three rows in the Google Drive section', () => {
+test('leaves four rows in the Google Drive section', () => {
 	const names = setup({}).group.items?.map((item) => item.name);
-	expect(names).toStrictEqual(['googleAccount', 'baseDirectory', 'useTrash']);
+	expect(names).toStrictEqual(['googleAccount', 'baseDirectory', 'useTrash', 'remoteScan']);
 });
 
 test('asks for the whole setup until an account is connected', () => {

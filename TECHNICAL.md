@@ -384,14 +384,15 @@ one tap away:
 
 ### Google Drive
 
-| Setting             | Default       | Recommended          | What it does                                                                                                                                                                          |
-| ------------------- | ------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Google account      | Not connected | your account         | Sub-page with the whole account setup. The entry shows the connected email, or what to do next (_Tap/Click to connect_, _Client secret missing_, _Client ID missing_) with a warning. |
-| OAuth client ID     | none          | your client          | On the Google account page. See [Setup](#setup). Saved in plugin settings. Hidden once connected.                                                                                     |
-| OAuth client secret | none          | your client          | On the Google account page. Saved in the device's secure storage. Hidden once connected.                                                                                              |
-| Connect account     | none          | token from rclone    | On the Google account page. Verified before saving. Connect points at the first field still empty instead of calling Google.                                                          |
-| Base directory      | vault name    | same on every device | Drive folder that holds the vault. The folder button next to it browses your Drive and can create a folder. Every device syncing this vault must use the same one.                    |
-| Delete to trash     | on            | on                   | Deletions go to Drive's trash (kept 30 days) instead of being permanent.                                                                                                              |
+| Setting             | Default       | Recommended                   | What it does                                                                                                                                                                          |
+| ------------------- | ------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Google account      | Not connected | your account                  | Sub-page with the whole account setup. The entry shows the connected email, or what to do next (_Tap/Click to connect_, _Client secret missing_, _Client ID missing_) with a warning. |
+| OAuth client ID     | none          | your client                   | On the Google account page. See [Setup](#setup). Saved in plugin settings. Hidden once connected.                                                                                     |
+| OAuth client secret | none          | your client                   | On the Google account page. Saved in the device's secure storage. Hidden once connected.                                                                                              |
+| Connect account     | none          | token from rclone             | On the Google account page. Verified before saving. Connect points at the first field still empty instead of calling Google.                                                          |
+| Base directory      | vault name    | same on every device          | Drive folder that holds the vault. The folder button next to it browses your Drive and can create a folder. Every device syncing this vault must use the same one.                    |
+| Delete to trash     | on            | on                            | Deletions go to Drive's trash (kept 30 days) instead of being permanent.                                                                                                              |
+| Drive scan          | Full scan     | Changes only on a large Drive | How the Drive side is listed each sync. See _Drive scan_ under [Sync behavior](#sync-behavior).                                                                                       |
 
 ### Features
 
@@ -490,6 +491,13 @@ trust; the payload carries the vault name, not its contents.
   anything. A first sync, which copies everything, is never asked.
 - **Layout:** one vault maps to one Drive folder (`baseDirectory`). Listing is
   parent-based, so the real folder structure is mirrored.
+- **Drive scan:** _Full scan_ lists every visible Drive file each sync.
+  _Changes only_ keeps that list on the device (IndexedDB, with a Drive
+  changes token) and asks Drive only what changed since. A folder new to the
+  list, such as one restored from the trash, is listed with its contents. It
+  falls back to a full scan on the first sync, once a day, for another
+  account, and whenever Drive rejects the token or a changes page fails.
+  Clearing records drops the list too.
 - **Files that keep failing:** a file whose sync fails three times in a row
   goes on this device's skip list, with a notice naming it. Later syncs leave
   it out, and Last sync adds _1 file skipped_. **Retry** under Advanced →
