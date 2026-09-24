@@ -14,7 +14,8 @@ them updated.
 
 ## Setup
 
-Do steps 1–3 once. Step 4 is repeated on every device.
+Do steps 1 and 2 once, then step 4 on every device. Step 3 is only needed if
+you prefer a terminal or want a token for another tool.
 
 ### 1. Pick a Google account
 
@@ -43,11 +44,12 @@ account.
 
 You do not need to submit the app for verification. It is only used by you.
 
-### 3. Get a refresh token
+### 3. Get a refresh token (optional)
 
-Drive Bridge does not run a sign-in flow itself (see [why](#why-not-an-in-plugin-sign-in)).
-You obtain a refresh token once and paste it into each device. Pick whichever
-method suits you; all three end with the same kind of token.
+**Sign in with Google** on the Google account page (step 4) does this for you,
+on desktop and on phones. The methods below end with the same kind of token
+and are useful if you want one token for every device, or for rclone on a
+backup server.
 
 In every method Google warns that the app is not verified. Press
 **Advanced → Go to \<app name\> (unsafe)**: it is your own client, so the
@@ -127,9 +129,13 @@ In Obsidian, install Drive Bridge (see [Install](#install)), then open
    paste the **OAuth client ID**.
 2. On the same page, paste the **OAuth client secret**. It is stored in the
    device's secure storage, not in synced files.
-3. **Connect account**, also on that page: paste the token from step 3 above
-   (the `eyJ…` string, the JSON, or only its `refresh_token` value) and press
-   **Connect**.
+3. Press **Sign in with Google**. Google opens in the browser; choose the
+   account from step 1 and allow access (press **Advanced → Go to \<app
+   name\>** at the unverified-app warning; it is your own client). The browser
+   then fails to load a `127.0.0.1` page: copy the whole address from the
+   address bar, paste it under **Connect account** and press **Connect**.
+   A token from step 3 (the `eyJ…` string, the JSON, or only its
+   `refresh_token` value) can be pasted there instead.
 4. **Base directory**: the Drive folder for this vault. It defaults to the
    vault name and is created on the first sync. Every device syncing the same
    vault must use the same folder.
@@ -148,12 +154,17 @@ removes it locally. To revoke it everywhere, remove the app under
 Google Account → Security → Third-party access; every device then needs a new
 token.
 
-### Why not an in-plugin sign-in
+### How Sign in with Google works
 
 Google's device flow (enter a code on another screen) only allows
-`drive.file`. A browser redirect to a local server works on desktop but not on
-mobile. Pasting a token works everywhere and keeps the plugin free of any
-local server code.
+`drive.file`, and a local server to catch the browser's redirect works on
+desktop but not on mobile. Drive Bridge uses the authorization code flow with
+PKCE and a loopback redirect nobody listens on: the browser shows an error
+page whose address carries the code, and you paste it back. The plugin checks
+the `state` value, trades the code at `oauth2.googleapis.com` with your client
+and the PKCE verifier, and verifies the token like a pasted one. The verifier
+lives only in memory until you paste the address; there is no local server
+and no third party in between.
 
 ### Why the full `drive` scope
 

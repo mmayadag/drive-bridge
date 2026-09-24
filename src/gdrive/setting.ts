@@ -10,12 +10,15 @@ import type { LabelDefinition } from '@/settings/utils';
 import type { MaybePromise } from '@/types';
 import { addCheckConnection } from '@/settings/check-connection';
 import { s } from '@/settings/utils';
+import { getMessage } from '@/shared/error';
 import { normalizeBaseDir } from '@/shared/path';
 import type { GdriveSettings } from '.';
 import type { TokenManager } from './auth';
 import type { FolderPickerTranslations } from './folder-picker';
+import type { PendingSignIn } from './sign-in';
 import { connectWithToken, findMissingInput } from './connect';
 import FolderPickerModal from './folder-picker';
+import { exchangeCode, parseRedirect, startSignIn } from './sign-in';
 
 export type GdriveTranslations = FolderPickerTranslations & {
 	gdrive: string;
@@ -51,6 +54,11 @@ export type GdriveTranslations = FolderPickerTranslations & {
 	invalidRefreshToken: string;
 	limitedScope: string;
 	refreshTokenPlaceholder: string;
+	signInWithGoogle: string;
+	signInWithGoogleDescription: string;
+	signInOpened: string;
+	signInStartAgain: string;
+	signInDenied: string;
 };
 
 type AccountHintKey =
@@ -138,6 +146,20 @@ export default function gdriveSetting(
 		rerenderSettingTab();
 	};
 
+	let pending: PendingSignIn | undefined;
+
+	const signIn = async () => {
+		const credentials = tokenManager.getCredentials();
+		const clientId = entered(clientIdField, credentials.clientId);
+		if (!clientId) return demand(clientIdField, translate('enterClientId'));
+		if (!entered(clientSecretField, credentials.clientSecret))
+			return demand(clientSecretField, translate('enterClientSecret'));
+		pending = await startSignIn(clientId);
+		window.open(pending.url);
+		new Notice(translate('signInOpened'), 8000);
+		tokenField?.inputEl.focus();
+	};
+
 	const connect = async (input: string) => {
 		const credentials = tokenManager.getCredentials();
 		const missing = findMissingInput({
@@ -150,7 +172,30 @@ export default function gdriveSetting(
 			return demand(clientSecretField, translate('enterClientSecret'));
 		if (missing === 'token') return demand(tokenField, translate('enterRefreshToken'));
 
-		const result = await connectWithToken(tokenManager, input);
+		// The address the browser ended on after Sign in with Google carries a code to trade
+		// for a refresh token; anything else is taken as a pasted token.
+		const redirect = parseRedirect(input, pending?.state);
+		if (redirect?.status === 'stateMismatch')
+			return demand(tokenField, translate('signInStartAgain'));
+		if (redirect?.status === 'denied') return demand(tokenField, translate('signInDenied'));
+		let token = input;
+		if (redirect && pending) {
+			try {
+				token = await exchangeCode({
+					...tokenManager.getCredentials(),
+					code: redirect.code,
+					verifier: pending.verifier,
+				});
+			} catch (error) {
+				const reason = getMessage(error);
+				new Notice(translate('authorizationFailed', reason), 5000);
+				dispatch('errorGeneral', `Google sign-in failed: \`${reason}\`.`);
+				return;
+			}
+			pending = undefined;
+		}
+
+		const result = await connectWithToken(tokenManager, token);
 		if (result.status === 'connected') {
 			settings.userId = result.account.userId;
 			settings.accountEmail = result.account.email;
@@ -243,6 +288,19 @@ export default function gdriveSetting(
 							},
 							visible: () => !ready(),
 						})),
+						1015: s(() => ({
+							desc: translate('signInWithGoogleDescription'),
+							name: translate('signInWithGoogle'),
+							render: (setting) => {
+								setting.addButton((button) =>
+									button
+										.setButtonText(translate('signInWithGoogle'))
+										.setCta()
+										.onClick(() => void signIn()),
+								);
+							},
+							visible: () => !connected(),
+						})),
 						1020: s(() => ({
 							desc: translate('connectAccountDescription'),
 							name: translate('connectAccount'),
@@ -263,7 +321,6 @@ export default function gdriveSetting(
 									.addButton((button) =>
 										button
 											.setButtonText(translate('connect'))
-											.setCta()
 											.onClick(() => connect(input)),
 									);
 							},

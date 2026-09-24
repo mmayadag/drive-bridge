@@ -33,9 +33,13 @@ const en: GdriveTranslations = {
 	connectAccount: 'Connect account',
 	connectAccountDescription: () =>
 		createFragment((frag) => {
-			frag.appendText('Run ');
-			frag.createEl('code', { text: 'rclone authorize "drive" <client ID> <client secret>' });
-			frag.appendText(' on a computer and paste the token. Kept in secure storage.');
+			frag.appendText(
+				'After signing in, paste the address the browser ends on (it starts with ',
+			);
+			frag.createEl('code', { text: 'http://127.0.0.1' });
+			frag.appendText('). A token from ');
+			frag.createEl('code', { text: 'rclone authorize "drive"' });
+			frag.appendText(' works too. Kept in secure storage.');
 		}),
 	connectFirst: 'Connect your Google account first.',
 	connectSuccess: 'Connected to Google Drive.',
@@ -59,18 +63,25 @@ const en: GdriveTranslations = {
 	pickFolder: 'Browse Drive folders',
 	pickFolderTitle: 'Choose a Drive folder',
 	pickSubfolder: 'Open a folder first; the whole Drive cannot be the vault folder.',
-	refreshTokenPlaceholder: 'Refresh token or rclone output',
+	refreshTokenPlaceholder: 'Address from the browser, or a token',
 	setupSteps: () =>
 		createFragment((frag) => {
 			frag.appendText(
-				'Drive Bridge uses your own Google Cloud OAuth client. Create a "Desktop app" client with the Drive API enabled and get a refresh token for it (see the ',
+				'Drive Bridge uses your own Google Cloud OAuth client. Create a "Desktop app" client with the Drive API enabled (see the ',
 			);
 			frag.createEl('a', {
 				attr: { href: SETUP_GUIDE_URL },
 				text: 'setup guide',
 			});
-			frag.appendText('), then fill in the fields below.');
+			frag.appendText('), enter it below, then Sign in with Google.');
 		}),
+	signInDenied: 'Google access was not allowed. Sign in again and choose Allow.',
+	signInOpened:
+		'Google opened in your browser. After you allow access, the page fails to load: copy its address and paste it under Connect account.',
+	signInStartAgain: 'That address is from another sign-in. Press Sign in with Google again.',
+	signInWithGoogle: 'Sign in with Google',
+	signInWithGoogleDescription:
+		'Opens Google in your browser to allow Drive Bridge access with your client above. No terminal needed.',
 	tapToConnect: 'Tap to connect',
 	useThisFolder: 'Use this folder',
 	useTrash: 'Delete to trash',
