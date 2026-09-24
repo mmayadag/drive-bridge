@@ -59,12 +59,18 @@ for (const mobile of [true, false])
 	test.skipIf(!built)(
 		`the built plugin loads ${mobile ? 'on a phone' : 'on desktop'}`,
 		async () => {
+			const platform = { ...ObsidianMock.Platform };
 			Object.assign(ObsidianMock.Platform, { isDesktop: !mobile, isMobile: mobile });
-			const bundle = (await import(BUNDLE)) as Bundle;
-			const plugin = new bundle.default.default(fakeApp());
-			let failure: unknown;
-			await plugin.onload().catch((error: unknown) => (failure = error));
-			expect(failure).toBeUndefined();
-			plugin.onunload?.();
+			try {
+				const bundle = (await import(BUNDLE)) as Bundle;
+				const plugin = new bundle.default.default(fakeApp());
+				let failure: unknown;
+				await plugin.onload().catch((error: unknown) => (failure = error));
+				expect(failure).toBeUndefined();
+				plugin.onunload?.();
+			} finally {
+				// Other files read the same Platform.
+				Object.assign(ObsidianMock.Platform, platform);
+			}
 		},
 	);

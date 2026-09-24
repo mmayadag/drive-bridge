@@ -4,7 +4,7 @@
 // check-connection.ts touches.
 
 import ObsidianMock from '$/support/obsidian-mock';
-import { expect, mock, test } from 'bun:test';
+import { beforeEach, expect, mock, test } from 'bun:test';
 import { openMemoryDB } from '@/shared/key-value-store';
 
 const notices: Array<{ message: string; timeout?: number }> = [];
@@ -17,6 +17,10 @@ void mock.module('obsidian', () => ({
 	...ObsidianMock,
 	Notice: NoticeSpy,
 }));
+
+beforeEach(() => {
+	notices.length = 0;
+});
 
 const { addCheckConnection } = await import('@/settings/check-connection');
 

@@ -14,6 +14,7 @@ const real = {
 	setInterval: globalThis.setInterval,
 	setTimeout: globalThis.setTimeout,
 };
+const realDocument = globalThis.document;
 const listeners = new Map<string, () => void>();
 let hidden = false;
 
@@ -44,7 +45,8 @@ beforeEach(() => {
 
 afterEach(() => {
 	Object.assign(globalThis, real);
-	delete (globalThis as { document?: unknown }).document;
+	// The preload installs a DOM that later test files need.
+	globalThis.document = realDocument;
 });
 
 const flush = () =>

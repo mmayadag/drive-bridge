@@ -117,7 +117,11 @@ void mock.module('obsidian', () => ({
 	Setting: SettingSpy,
 }));
 
-const { default: FolderPickerModal } = await import('@/gdrive/folder-picker');
+// Another file mocks this module for the whole run; the query loads a fresh copy on this file's mocks.
+const fresh = '@/gdrive/folder-picker.ts?fresh';
+const { default: FolderPickerModal } = (await import(
+	fresh
+)) as typeof import('@/gdrive/folder-picker');
 
 type FolderJson = { id: string; name: string };
 type StubResponse = { json?: unknown; status?: number };
