@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.3.2 - 2026-09-25
+
+Fixes:
+
+- Answering **Stop** at the mass change question now ends the sync as
+  cancelled; Last sync and the history showed it as a failed sync (#141).
+
+Maintenance:
+
+- Coverage counts every source file, not only those a test happened to
+  import. That uncovered 22 untested files, among them the sync pipeline, the
+  progress dialog and the plugin's setup; they are now tested too, and the
+  total over every file is 99.9% of functions and 100% of lines (#139).
+- Tests run in random order in CI, which caught a timing-dependent test (#146).
+- README: a shorter intro with the platforms, no telemetry or tracking, and
+  direct Google Drive sync with your own client; the CI badge shows the 99%
+  coverage floor it enforces (#138, #143, #148, #150).
+
 ## v0.3.1 - 2026-09-24
 
 Fixes:
