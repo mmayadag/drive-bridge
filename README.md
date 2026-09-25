@@ -19,8 +19,9 @@ AI assistants and backup tools.
   - Files move only between your device and your Google Drive, using your own
     Google client credentials.
 
-⚠️ **Back up your vault first.** Two-way sync can overwrite or delete files on
-either side.
+> [!WARNING]
+> **Back up your vault first.** Two-way sync can overwrite or delete files on
+> either side.
 
 ## How it fits together
 
