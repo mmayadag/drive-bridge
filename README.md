@@ -1,8 +1,7 @@
 # Drive Bridge
 
 <p align="left">
-<a href="https://github.com/mmayadag/drive-bridge/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/mmayadag/drive-bridge/ci.yml?branch=main&label=CI&logo=github"></a>
-<a href="TECHNICAL.md#test-coverage"><img alt="Test coverage of every source file, at least 99%, enforced by CI" src="https://img.shields.io/badge/coverage-%E2%89%A599%25-brightgreen"></a>
+<a href="https://github.com/mmayadag/drive-bridge/actions/workflows/ci.yml"><img alt="CI, which fails below 99% test coverage of every source file" src="https://img.shields.io/github/actions/workflow/status/mmayadag/drive-bridge/ci.yml?branch=main&label=CI%20%C2%B7%20%E2%89%A599%25%20coverage&logo=github"></a>
 <a href="https://github.com/mmayadag/drive-bridge/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/mmayadag/drive-bridge?label=release&logo=github"></a>
 <a href="https://github.com/mmayadag/drive-bridge/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/mmayadag/drive-bridge/total?label=downloads&logo=github"></a>
 <a href="https://obsidian.md"><img alt="Obsidian" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fmmayadag%2Fdrive-bridge%2Fmain%2Fmanifest.json&query=%24.minAppVersion&label=Obsidian&color=7c3aed&logo=obsidian&logoColor=white"></a>
