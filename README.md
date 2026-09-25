@@ -1,8 +1,7 @@
 # Drive Bridge
 
 <p align="left">
-<a href="https://github.com/mmayadag/drive-bridge/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/mmayadag/drive-bridge/ci.yml?branch=main&label=CI&logo=github"></a>
-<a href="TECHNICAL.md#test-coverage"><img alt="Test coverage of every source file, at least 99%, enforced by CI" src="https://img.shields.io/badge/coverage-%E2%89%A599%25-brightgreen"></a>
+<a href="https://github.com/mmayadag/drive-bridge/actions/workflows/ci.yml"><img alt="CI, which fails below 99% test coverage of every source file" src="https://img.shields.io/github/actions/workflow/status/mmayadag/drive-bridge/ci.yml?branch=main&label=CI%20%C2%B7%20%E2%89%A599%25%20coverage&logo=github"></a>
 <a href="https://github.com/mmayadag/drive-bridge/releases/latest"><img alt="Release" src="https://img.shields.io/github/v/release/mmayadag/drive-bridge?label=release&logo=github"></a>
 <a href="https://github.com/mmayadag/drive-bridge/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/mmayadag/drive-bridge/total?label=downloads&logo=github"></a>
 <a href="https://obsidian.md"><img alt="Obsidian" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fmmayadag%2Fdrive-bridge%2Fmain%2Fmanifest.json&query=%24.minAppVersion&label=Obsidian&color=7c3aed&logo=obsidian&logoColor=white"></a>
@@ -11,19 +10,18 @@
 <a href="https://buymeacoffee.com/muratmayadag"><img alt="Buy me a coffee" src="https://img.shields.io/badge/Buy%20me%20a%20coffee-FFDD00?logo=buymeacoffee&logoColor=black"></a>
 </p>
 
-Two-way sync between your Obsidian vault and Google Drive, on desktop and on
-iPhone and iPad. Built for a folder that other apps write to as well: an AI
-assistant dropping notes in, a backup server reading them out.
+Two-way sync between Obsidian and Google Drive, on desktop, iPhone and iPad.
+Built for shared folders that other apps can read from and write to, including
+AI assistants and backup tools.
 
-- **No telemetry, no tracking.** Nothing about you, your notes or how you use
-  Drive Bridge is ever sent to the author or any third party.
-- **Your files go only between your device and your own Google Drive,**
-  through your own Google client. No server of ours in between, and no code
-  downloaded at runtime.
+- No telemetry or tracking.
+- Direct Google Drive sync.
+  - Files move only between your device and your Google Drive, using your own
+    Google client credentials.
 
 > [!WARNING]
-> **Back up your vault before you use Drive Bridge.** Sync can delete or
-> overwrite files on both sides, so keep a copy you can restore from.
+> **Back up your vault first.** Two-way sync can overwrite or delete files on
+> either side.
 
 ## How it fits together
 
