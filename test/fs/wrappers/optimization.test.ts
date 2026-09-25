@@ -384,17 +384,16 @@ test('a queued atom rejected by the optimizer without ever being executed propag
 		thisPool: new Set(),
 	});
 
-	const rejectedPending = wrapper.delete('note.md');
+	// Handled from the start: the rejection can land while flushOptimization is awaited,
+	// and a promise nobody listens to yet counts as an unhandled rejection.
+	const rejection = Promise.resolve(wrapper.delete('note.md')).then(
+		() => {},
+		(error: unknown) => error,
+	);
 	const keptPending = wrapper.mkdir('folder/');
 	await flushOptimization();
 
-	let rejection: unknown;
-	try {
-		await rejectedPending;
-	} catch (error) {
-		rejection = error;
-	}
-	expect(rejection).toBe(optimizerError);
+	expect(await rejection).toBe(optimizerError);
 	expect(remote.calls.delete).toStrictEqual([]);
 	await keptPending;
 	expect(remote.calls.mkdir).toStrictEqual(['folder/']);
