@@ -601,12 +601,18 @@ and the plugin's log output.
 ### Test coverage
 
 `bun coverage` prints the weighted totals and the least covered files, and
-CI fails when they drop below `FLOOR` in `scripts/coverage-summary.ts`. The
-plugin is covered (99% floor on functions and lines), including settings rows
-and modals, which render against jsdom in the test preload. A change keeps the
-floor where it is by coming with its tests; never lower it to let a change
-through. The load test and device testing still check what jsdom cannot, the
-real Obsidian layout. Bun miscounts a few functions that do run
+CI fails when they drop below `FLOOR` in `scripts/coverage-summary.ts`. Every
+file under `src/` counts: `test/every-source.test.ts` imports them all, so a
+file no test touches shows up as untested instead of being left out of the
+totals. Settings rows and modals render against jsdom in the test preload. A
+change keeps the floor where it is by coming with its tests; never lower it to
+let a change through. The load test and device testing still check what jsdom
+cannot, the real Obsidian layout.
+
+Read the function figure first. Bun marks the lines of a class field arrow
+function as run when the class loads, so a file can show most of its lines
+covered while none of its functions ran; the function count does not have that
+blind spot. Bun also miscounts a few functions that do run
 (`src/modules/setting.ts`), which is why the function floor is not 100%. Only
 what ships in `main.js` is measured: `bunfig.toml` leaves out `scripts/`, whose
 tests still run but whose command-line glue (git, files, prompts) is not

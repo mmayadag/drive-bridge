@@ -64,7 +64,7 @@ export function summary(files: Array<FileCoverage>, floor = FLOOR) {
 	const text = [
 		'## Test coverage',
 		'',
-		`Functions **${percent(total.functions)}** · Lines **${percent(total.lines)}** (floor ${percent(floor.functions)} / ${percent(floor.lines)}, files the tests load).`,
+		`Functions **${percent(total.functions)}** · Lines **${percent(total.lines)}** (floor ${percent(floor.functions)} / ${percent(floor.lines)}, every source file).`,
 		'',
 		'| Least covered | Lines | Functions |',
 		'| --- | --- | --- |',

@@ -87,3 +87,9 @@ test('select all unticks everything, then ticks everything', () => {
 	header?.click();
 	expect(tree.getState().selected).toHaveLength(4);
 });
+
+test('unmount removes the tree', () => {
+	const { el, tree } = mount(false);
+	tree.unmount();
+	expect(el.querySelector('.drive-bridge-file-tree')).toBeNull();
+});
