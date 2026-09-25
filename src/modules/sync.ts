@@ -397,9 +397,11 @@ export default class Sync {
 						}
 					: { result: 'completed' };
 		} catch (error) {
-			terminateReason = isCancelled()
-				? { result: 'cancelled' }
-				: ({ error: getMessage(error), result: 'failed' } as const);
+			// Stop at a question is the user's choice too, not a failure.
+			terminateReason =
+				isCancelled() || error === syncCancelledError
+					? { result: 'cancelled' }
+					: ({ error: getMessage(error), result: 'failed' } as const);
 		} finally {
 			cleanup();
 			dispatch('syncTerminated', terminateReason);

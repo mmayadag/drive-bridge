@@ -289,8 +289,8 @@ test('a mass change asks first, and declining stops the sync untouched', async (
 
 	const result = await s.run();
 	expect(s.named('requestConfirmMassChange')).toStrictEqual([{ changes: 101, percent: 100 }]);
-	// Declining is reported as a failed sync with the cancel message.
-	expect(result).toStrictEqual({ error: 'Sync cancelled by user.', result: 'failed' });
+	// Stopping is the user's choice: cancelled, not failed (#141).
+	expect(result).toStrictEqual({ result: 'cancelled' });
 	expect(s.named('syncTerminated')).toStrictEqual([result]);
 	expect(s.named('executionStarted')).toStrictEqual([]);
 	expect(s.remoteFs.text('n0.md')).toBe('text 0');
