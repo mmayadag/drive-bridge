@@ -10,9 +10,15 @@
 <a href="https://buymeacoffee.com/muratmayadag"><img alt="Buy me a coffee" src="https://img.shields.io/badge/Buy%20me%20a%20coffee-FFDD00?logo=buymeacoffee&logoColor=black"></a>
 </p>
 
-Two-way sync between your Obsidian vault and Google Drive, built for a folder
-that other apps write to as well: an AI assistant dropping notes in, a backup
-server reading them out.
+Two-way sync between your Obsidian vault and Google Drive, on desktop and on
+iPhone and iPad. Built for a folder that other apps write to as well: an AI
+assistant dropping notes in, a backup server reading them out.
+
+- **No telemetry, no tracking.** Nothing about you, your notes or how you use
+  Drive Bridge is ever sent to the author or any third party.
+- **Your files go only between your device and your own Google Drive,**
+  through your own Google client. No server of ours in between, and no code
+  downloaded at runtime.
 
 > [!WARNING]
 > **Back up your vault before you use Drive Bridge.** Sync can delete or
@@ -59,11 +65,10 @@ Step-by-step instructions and the reasoning behind each choice are in
 
 ## Privacy
 
-Your notes stay between this device and your own Google Drive. The plugin uses
-your own OAuth client, downloads no code at runtime, and sends your files
-nowhere else. It collects no usage statistics and contains no analytics: the
-only requests it makes are to Google, and to a webhook URL if you set one
-yourself. Details in [PRIVACY.md](PRIVACY.md).
+The only requests Drive Bridge makes are to Google, and to a webhook URL if you
+set one yourself. It collects no usage statistics, has no analytics or crash
+reporting, and writes to the clipboard only when you press a copy button.
+Details in [PRIVACY.md](PRIVACY.md).
 
 ## Support
 
