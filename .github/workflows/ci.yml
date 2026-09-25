@@ -44,5 +44,6 @@ jobs:
         run: |
           # Without pipefail, tee hides a coverage-summary failure below the floor.
           set -o pipefail
-          bun --preload=./test/support/setup.ts test --isolate --coverage
+          # Random order, so a test that needs another to run first fails here; bun prints the seed.
+          bun --preload=./test/support/setup.ts test --isolate --randomize --coverage
           bun scripts/coverage-summary.ts | tee -a "$GITHUB_STEP_SUMMARY"

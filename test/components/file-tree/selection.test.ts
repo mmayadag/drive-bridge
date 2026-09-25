@@ -210,3 +210,9 @@ test('ticking a deletion inside a deleted folder leaves the folder deletion tick
 	selection.toggle('folder/note.md', true);
 	expect(selection.isSelected('folder')).toBe(true);
 });
+
+test('without a rule, nothing can be undone', () => {
+	const selection = createSelection([makeTask({ key: 'a.md', name: 'upload' })]);
+	expect(selection.canReverse('a.md')).toBe(false);
+	expect(selection.reverse('a.md', true)).toStrictEqual(new Set());
+});
