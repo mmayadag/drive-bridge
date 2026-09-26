@@ -8,18 +8,19 @@ import type { CallableOrObjectTree } from '@/modules/setting';
 import type { CheckConnectionDB, CheckConnectionTranslations } from '@/settings/check-connection';
 import type { LabelDefinition } from '@/settings/utils';
 import type { MaybePromise } from '@/types';
-import { addCheckConnection } from '@/settings/check-connection';
 import { s } from '@/settings/utils';
 import { getMessage } from '@/shared/error';
 import { normalizeBaseDir } from '@/shared/path';
 import type { GdriveSettings } from '.';
 import type { TokenManager } from './auth';
+import type { ConnectedRowsTranslations } from './connected-rows';
 import type { FolderPickerTranslations } from './folder-picker';
 import type { RemoteScanTranslations } from './remote-scan-setting';
 import type { SetupPageTranslations } from './setup-page';
 import type { PendingSignIn } from './sign-in';
 import { isClientId, parseClientJson } from './client-setup';
 import { connectWithToken, findMissingInput } from './connect';
+import connectedRows from './connected-rows';
 import FolderPickerModal from './folder-picker';
 import remoteScanSetting from './remote-scan-setting';
 import setupPage from './setup-page';
@@ -27,7 +28,8 @@ import { exchangeCode, parseRedirect, startSignIn } from './sign-in';
 
 export type GdriveTranslations = FolderPickerTranslations &
 	RemoteScanTranslations &
-	SetupPageTranslations & {
+	SetupPageTranslations &
+	Omit<ConnectedRowsTranslations, keyof CheckConnectionTranslations | 'exportSettings'> & {
 		gdrive: string;
 		connectAccount: string;
 		accountConnected: string;
@@ -106,9 +108,10 @@ export default function gdriveSetting(
 		getCheckConnection,
 		settings: rootSettings,
 		openImportSettings,
+		openExportSettings,
 	}: {
 		translate: Translate<
-			GdriveTranslations & CheckConnectionTranslations & { importSettings: string }
+			GdriveTranslations & ConnectedRowsTranslations & { importSettings: string }
 		>;
 		saveSettings: () => Promise<void>;
 		matchLabel: () => LabelDefinition;
@@ -121,6 +124,7 @@ export default function gdriveSetting(
 		getCheckConnection: () => () => MaybePromise<CheckConnectionResult>;
 		settings: Settings;
 		openImportSettings: () => void;
+		openExportSettings: () => void;
 	},
 	settings: GdriveSettings,
 	tokenManager: TokenManager,
@@ -154,6 +158,17 @@ export default function gdriveSetting(
 	// A token without this device's client secret cannot refresh, so the client
 	// fields stay reachable until both are there.
 	const ready = () => connected() && tokenManager.hasCredentials();
+
+	const rows = connectedRows({
+		connected,
+		dispatch,
+		getCheckConnection,
+		memoryDB,
+		openExportSettings,
+		ready: () => ready(),
+		settings: rootSettings,
+		translate,
+	});
 
 	const refresh = () => {
 		refreshSettingTab();
@@ -359,17 +374,6 @@ export default function gdriveSetting(
 							desc: translate('accountConnectedDescription', settings.accountEmail),
 							name: translate('accountConnected'),
 							render: (setting) => {
-								const checks = addCheckConnection(
-									setting,
-									{
-										dispatch,
-										getCheckConnection,
-										memoryDB,
-										settings: rootSettings,
-										translate,
-									},
-									connected,
-								);
 								setting.addButton((button) =>
 									button
 										.setButtonText(translate('disconnect'))
@@ -385,10 +389,11 @@ export default function gdriveSetting(
 											refresh();
 										}),
 								);
-								return checks.cleanup;
 							},
 							visible: connected,
 						})),
+						1033: rows.connection,
+						1036: rows.exportForAnotherDevice,
 						// No client yet: the Google Cloud steps, on their own page.
 						1040: setupPage(translate, () => !ready()),
 						// A device that is not set up can copy everything from one that is.

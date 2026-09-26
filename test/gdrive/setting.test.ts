@@ -87,13 +87,20 @@ test('shows only the account once connected', () => {
 	});
 	expect(call(page.status)).toBeFalsy();
 	expect(call(page.displayValue)).toBe('me@test');
-	expect(shown).toStrictEqual(['accountConnected']);
+	expect(shown).toStrictEqual(['accountConnected', 'connection', 'setUpAnotherDevice']);
 });
 
 test('keeps the client fields reachable when this device lacks the secret', () => {
 	const { page, shown } = setup({ clientId: 'client', token: '1//token' });
 	expect(call(page.status)).toBe('warning');
-	expect(shown).toStrictEqual(['clientId', 'clientSecret', 'accountConnected', 'setupPage']);
+	// No export without the whole client on this device.
+	expect(shown).toStrictEqual([
+		'clientId',
+		'clientSecret',
+		'accountConnected',
+		'connection',
+		'setupPage',
+	]);
 });
 
 test('the account entry says what to do next', () => {
