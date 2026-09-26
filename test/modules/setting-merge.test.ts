@@ -77,6 +77,7 @@ test('the small delegate methods run without a settings tab open yet', () => {
 	expect(() => setting.root.rerenderSettingTab()).not.toThrow();
 	expect(() => setting.root.refreshSettingTab()).not.toThrow();
 	expect(() => setting.root.openImportSettings()).not.toThrow();
+	expect(() => setting.root.openExportSettings()).not.toThrow();
 	expect(() => setting.dispose()).not.toThrow();
 });
 

@@ -91,6 +91,7 @@ export default class Setting {
 	root = {
 		addSettingTab: this.addSettingTab,
 		matchLabel: this.matchLabel,
+		openExportSettings: () => this.transfer?.openExport(),
 		openImportSettings: () => this.transfer?.openImport(),
 		refreshSettingTab: this.refreshSettingTab,
 		registerSetting: setRegister(this.settingRegistry),

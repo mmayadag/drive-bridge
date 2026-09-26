@@ -45,6 +45,8 @@ const en: GdriveTranslations = {
 	connectFirst: 'Connect your Google account first.',
 	connectSuccess: 'Connected to Google Drive.',
 	connected: 'Connected',
+	connection: 'Connection',
+	connectionDescription: "Checks that Google Drive answers with this device's sign-in.",
 	create: 'Create',
 	disconnect: 'Forget on this device',
 	enterClientId: 'Enter the OAuth client ID first.',
@@ -71,6 +73,9 @@ const en: GdriveTranslations = {
 	remoteScanDescription:
 		'Changes only asks Drive what changed since the last sync, much faster on a large Drive. It still lists everything once a day and whenever Drive cannot say what changed.',
 	remoteScanFull: 'Full scan',
+	setUpAnotherDevice: 'Set up another device',
+	setUpAnotherDeviceDescription:
+		'Export these settings, with the Google account encrypted by a passphrase. On the new device, use Set up from another device.',
 	setUpFromDevice: 'Set up from another device',
 	setUpFromDeviceDescription:
 		'Import the settings exported on a device that is already connected, with its passphrase.',
@@ -107,6 +112,7 @@ const en: GdriveTranslations = {
 	stepProject: 'Create a Google Cloud project',
 	stepProjectDescription: 'Any name. Use the Google account whose Drive should hold the vault.',
 	tapToConnect: 'Tap to connect',
+	testConnection: 'Test connection',
 	useThisFolder: 'Use this folder',
 	useTrash: 'Delete to trash',
 	useTrashDescription: "Deleted files go to Drive's trash for 30 days instead of being removed.",

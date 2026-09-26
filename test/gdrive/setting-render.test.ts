@@ -107,6 +107,7 @@ function setup({
 	const refreshed: Array<true> = [];
 	const dispatched: Array<{ event: string; message: string }> = [];
 	const opened: Array<true> = [];
+	const exported: Array<true> = [];
 	const ctx = {
 		app: {} as never,
 		dispatch: ((event: string, message: string) =>
@@ -117,6 +118,7 @@ function setup({
 		memoryDB: openMemoryDB<Record<string, unknown>, { lastCheckedFs: string }>(
 			`gdrive-setting-test-${Math.random()}`,
 		),
+		openExportSettings: () => void exported.push(true),
 		openImportSettings: () => void opened.push(true),
 		refreshSettingTab: () => void refreshed.push(true),
 		rerenderSettingTab: () => void rerendered.push(true),
@@ -146,6 +148,7 @@ function setup({
 	const rowByName = (name: string) => allRows.find((item) => item.name === name);
 	return {
 		dispatched,
+		exported,
 		moduleSettings,
 		opened,
 		page,
@@ -677,4 +680,27 @@ test('connected without a client ID, the field is outlined and says why it matte
 	const plain = fakeSetting();
 	render(other.rowByName('clientId'), plain);
 	expect(plain.texts[0]?.text.inputEl.classes.has('drive-bridge-invalid-input')).toBe(false);
+});
+
+test('connected, Test connection checks again and says how it went; export opens the export', async () => {
+	const { exported, rowByName } = setup({
+		clientId: '123-abc.apps.googleusercontent.com',
+		email: 'me@test',
+		secret: 'secret',
+		token: '1//token',
+	});
+	notices.length = 0;
+	const connection = fakeSetting();
+	const cleanup = render(rowByName('connection'), connection);
+	connection.buttons[0]?.trigger();
+	await new Promise((resolve) => {
+		setTimeout(resolve, 0);
+	});
+	expect(notices.map((notice) => notice.message)).toContain('checkConnectionSuccess');
+	(cleanup as (() => void) | undefined)?.();
+
+	const exportRow = fakeSetting();
+	render(rowByName('setUpAnotherDevice'), exportRow);
+	exportRow.buttons[0]?.trigger();
+	expect(exported).toStrictEqual([true]);
 });
