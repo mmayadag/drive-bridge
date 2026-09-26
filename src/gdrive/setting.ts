@@ -51,6 +51,7 @@ export type GdriveTranslations = FolderPickerTranslations &
 		authorizationFailed: Snippet<string>;
 		clientId: string;
 		clientIdDescription: string;
+		clientIdNeeded: string;
 		clientSecret: string;
 		clientSecretDescription: string;
 		connectFirst: string;
@@ -257,7 +258,12 @@ export default function gdriveSetting(
 					}),
 					{
 						1000: s(() => ({
-							desc: translate('clientIdDescription'),
+							// Connected without it: the token works until it needs refreshing.
+							desc: translate(
+								connected() && !settings.clientId
+									? 'clientIdNeeded'
+									: 'clientIdDescription',
+							),
 							name: translate('clientId'),
 							render: (setting) => {
 								setting.addText((text) => {
@@ -281,6 +287,8 @@ export default function gdriveSetting(
 										flag(text.getValue().trim());
 									});
 									flag(settings.clientId);
+									if (connected() && !settings.clientId)
+										text.inputEl.addClass(INVALID);
 									text.inputEl.addEventListener('blur', () => {
 										const value = text.getValue().trim();
 										text.setValue(value);

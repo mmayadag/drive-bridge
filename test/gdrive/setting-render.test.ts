@@ -242,16 +242,19 @@ function fakeText(initial = '') {
 	let value = initial;
 	let onChangeHandler: ((value: string) => void) | undefined;
 	const blurHandlers: Array<() => void> = [];
+	const classes = new Set<string>();
 	const text = {
 		getValue: () => value,
 		inputEl: {
-			addClass: () => {},
+			addClass: (name: string) => void classes.add(name),
 			addEventListener: (event: string, fn: () => void) => {
 				if (event === 'blur') blurHandlers.push(fn);
 			},
+			classes,
 			focus: () => {},
-			removeClass: () => {},
-			toggleClass: () => {},
+			removeClass: (name: string) => void classes.delete(name),
+			toggleClass: (name: string, on: boolean) =>
+				void (on ? classes.add(name) : classes.delete(name)),
 			type: '',
 		},
 		onChange: (fn: (value: string) => void) => {
@@ -660,4 +663,18 @@ test('the trash toggle updates and saves', () => {
 	setting.toggle()?.change(true);
 	expect(moduleSettings.useTrash).toBe(true);
 	expect(saved).toStrictEqual([true]);
+});
+
+test('connected without a client ID, the field is outlined and says why it matters', () => {
+	const { rowByName } = setup({ secret: 'secret', token: '1//token' });
+	expect(rowByName('clientId')?.desc).toBe('clientIdNeeded');
+	const setting = fakeSetting();
+	render(rowByName('clientId'), setting);
+	expect(setting.texts[0]?.text.inputEl.classes.has('drive-bridge-invalid-input')).toBe(true);
+
+	const other = setup({ clientId: '123-abc.apps.googleusercontent.com', secret: 'secret' });
+	expect(other.rowByName('clientId')?.desc).toBe('clientIdDescription');
+	const plain = fakeSetting();
+	render(other.rowByName('clientId'), plain);
+	expect(plain.texts[0]?.text.inputEl.classes.has('drive-bridge-invalid-input')).toBe(false);
 });

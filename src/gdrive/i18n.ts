@@ -25,6 +25,8 @@ const en: GdriveTranslations = {
 	clientId: 'OAuth client ID',
 	clientIdDescription: 'From your Google Cloud project. Saved in plugin settings.',
 	clientIdMissing: 'Client ID missing',
+	clientIdNeeded:
+		'Missing on this device, which is connected. Paste the client ID from your Google Cloud project, or the connection stops when the token needs refreshing.',
 	clientSecret: 'OAuth client secret',
 	clientSecretDescription:
 		"From the same client. Kept in this device's secure storage, never synced.",
