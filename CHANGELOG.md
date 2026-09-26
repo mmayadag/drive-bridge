@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.3.4 - 2026-09-26
+
+- Once connected, the **Google account** page has a **Connection** row with
+  its status and a **Test connection** button (the check used to be an
+  unlabelled icon beside Forget), and **Set up another device** opens the
+  settings export, to import with _Set up from another device_ (#158).
+
 ## v0.3.3 - 2026-09-26
 
 Easier setup.
