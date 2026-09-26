@@ -57,17 +57,24 @@ test('asks for the whole setup until an account is connected', () => {
 	const { page, shown } = setup({ clientId: 'client', secret: 'secret' });
 	expect(call(page.status)).toBe('warning');
 	expect(call(page.displayValue)).toBe('clickToConnect');
+	// The three fields first, then the ways to get them.
 	expect(shown).toStrictEqual([
+		'clientId',
+		'clientSecret',
+		'connectAccount',
+		'signInWithGoogle',
+		'setupPage',
 		'setUpFromDevice',
+	]);
+	const setupPage = (page.items as Array<SettingDefinition>).find(
+		(item) => item.name === 'setupPage',
+	) as SettingDefinitionPage;
+	expect((setupPage.items as Array<SettingDefinition>).map((item) => item.name)).toStrictEqual([
 		'dummy',
 		'1. stepProject',
 		'2. stepDriveApi',
 		'3. stepConsent',
 		'4. stepClient',
-		'clientId',
-		'clientSecret',
-		'signInWithGoogle',
-		'connectAccount',
 	]);
 });
 
@@ -86,16 +93,7 @@ test('shows only the account once connected', () => {
 test('keeps the client fields reachable when this device lacks the secret', () => {
 	const { page, shown } = setup({ clientId: 'client', token: '1//token' });
 	expect(call(page.status)).toBe('warning');
-	expect(shown).toStrictEqual([
-		'dummy',
-		'1. stepProject',
-		'2. stepDriveApi',
-		'3. stepConsent',
-		'4. stepClient',
-		'clientId',
-		'clientSecret',
-		'accountConnected',
-	]);
+	expect(shown).toStrictEqual(['clientId', 'clientSecret', 'accountConnected', 'setupPage']);
 });
 
 test('the account entry says what to do next', () => {

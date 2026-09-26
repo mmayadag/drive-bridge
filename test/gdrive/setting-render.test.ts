@@ -136,7 +136,13 @@ function setup({
 	const page = group.items?.[0] as SettingDefinitionPage & {
 		items: Array<SettingDefinition>;
 	};
-	const allRows = [...((group.items ?? []) as Array<SettingDefinition>), ...page.items];
+	// Rows of sub-pages (the Setup page) count too.
+	const flatten = (items: Array<SettingDefinition>): Array<SettingDefinition> =>
+		items.flatMap((item) => [
+			item,
+			...flatten(((item as SettingDefinitionPage).items ?? []) as Array<SettingDefinition>),
+		]);
+	const allRows = flatten(group.items ?? []);
 	const rowByName = (name: string) => allRows.find((item) => item.name === name);
 	return {
 		dispatched,
