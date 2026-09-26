@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.3.3 - 2026-09-26
+
+Easier setup.
+
+- The **Google account** page starts with what you need to connect: the client
+  ID, the client secret and the **Refresh token** with **Connect**, so with all
+  three at hand you are done in one step. **Sign in with Google** follows for
+  those without a token, and the four Google Cloud steps moved to a page of
+  their own, **Set up a Google client** (#152).
+
+Fixes:
+
+- On phones, the strategy pages kept each option's radio on a line of its own
+  above the name; it now sits beside the name, as on desktop (#154).
+- A device connected without a client ID now outlines the field and says it is
+  needed, instead of only warning on the account entry (#153).
+
 ## v0.3.2 - 2026-09-25
 
 Fixes:
