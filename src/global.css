@@ -544,6 +544,17 @@ a.drive-bridge-coffee-button:hover .drive-bridge-coffee-cup {
 	cursor: pointer;
 }
 
+/* Phones stack setting rows; a choice keeps its radio beside the name, as on desktop. */
+.is-mobile .setting-item.drive-bridge-choice {
+	flex-direction: row;
+	align-items: flex-start;
+}
+
+.setting-item.drive-bridge-choice > .setting-item-info {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
 .drive-bridge-radio {
 	flex: none;
 	box-sizing: border-box;
