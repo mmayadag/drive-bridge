@@ -31,16 +31,14 @@ const en: GdriveTranslations = {
 	clientSecretMissing: 'Client secret missing',
 	configureFirst: 'Enter the OAuth client ID and client secret first.',
 	connect: 'Connect',
-	connectAccount: 'Connect account',
+	connectAccount: 'Refresh token',
 	connectAccountDescription: () =>
 		createFragment((frag) => {
-			frag.appendText(
-				'After signing in, paste the address the browser ends on (it starts with ',
-			);
-			frag.createEl('code', { text: 'http://127.0.0.1' });
-			frag.appendText('). A token from ');
+			frag.appendText('Have one? Paste it and press Connect. A token from ');
 			frag.createEl('code', { text: 'rclone authorize "drive"' });
-			frag.appendText(' works too. Kept in secure storage.');
+			frag.appendText(
+				' works too. After Sign in with Google, paste the address the browser ends on here. Kept in secure storage.',
+			);
 		}),
 	connectFirst: 'Connect your Google account first.',
 	connectSuccess: 'Connected to Google Drive.',
@@ -74,6 +72,8 @@ const en: GdriveTranslations = {
 	setUpFromDevice: 'Set up from another device',
 	setUpFromDeviceDescription:
 		'Import the settings exported on a device that is already connected, with its passphrase.',
+	setupPage: 'Set up a Google client',
+	setupPageDescription: 'No client yet? Four one-time steps in Google Cloud.',
 	setupSteps: () =>
 		createFragment((frag) => {
 			frag.appendText(
@@ -83,15 +83,17 @@ const en: GdriveTranslations = {
 				attr: { href: SETUP_GUIDE_URL },
 				text: 'setup guide',
 			});
-			frag.appendText('). Four one-time steps, then Sign in with Google.');
+			frag.appendText(
+				'). Four one-time steps; then go back and fill in the client ID and secret.',
+			);
 		}),
 	signInDenied: 'Google access was not allowed. Sign in again and choose Allow.',
 	signInOpened:
-		'Google opened in your browser. After you allow access, the page fails to load: copy its address and paste it under Connect account.',
+		'Google opened in your browser. After you allow access, the page fails to load: copy its address and paste it under Refresh token.',
 	signInStartAgain: 'That address is from another sign-in. Press Sign in with Google again.',
 	signInWithGoogle: 'Sign in with Google',
 	signInWithGoogleDescription:
-		'Opens Google in your browser to allow Drive Bridge access with your client above. No terminal needed.',
+		'No token? Opens Google in your browser to allow access with the client above, then paste the address it ends on under Refresh token. No terminal needed.',
 	stepClient: 'Create a Desktop client',
 	stepClientDescription:
 		'Application type Desktop app. Download the JSON and paste it into the client ID below, or copy the ID and secret.',

@@ -14,18 +14,20 @@ import { getMessage } from '@/shared/error';
 import { normalizeBaseDir } from '@/shared/path';
 import type { GdriveSettings } from '.';
 import type { TokenManager } from './auth';
-import type { SetupStepKey } from './client-setup';
 import type { FolderPickerTranslations } from './folder-picker';
 import type { RemoteScanTranslations } from './remote-scan-setting';
+import type { SetupPageTranslations } from './setup-page';
 import type { PendingSignIn } from './sign-in';
-import { isClientId, parseClientJson, SETUP_STEPS } from './client-setup';
+import { isClientId, parseClientJson } from './client-setup';
 import { connectWithToken, findMissingInput } from './connect';
 import FolderPickerModal from './folder-picker';
 import remoteScanSetting from './remote-scan-setting';
+import setupPage from './setup-page';
 import { exchangeCode, parseRedirect, startSignIn } from './sign-in';
 
 export type GdriveTranslations = FolderPickerTranslations &
-	RemoteScanTranslations & {
+	RemoteScanTranslations &
+	SetupPageTranslations & {
 		gdrive: string;
 		connectAccount: string;
 		accountConnected: string;
@@ -47,7 +49,6 @@ export type GdriveTranslations = FolderPickerTranslations &
 		useTrash: string;
 		useTrashDescription: string;
 		authorizationFailed: Snippet<string>;
-		setupSteps: Fragment;
 		clientId: string;
 		clientIdDescription: string;
 		clientSecret: string;
@@ -62,10 +63,7 @@ export type GdriveTranslations = FolderPickerTranslations &
 		signInWithGoogle: string;
 		setUpFromDevice: string;
 		setUpFromDeviceDescription: string;
-		openConsole: string;
 		clientFromJson: string;
-	} & Record<SetupStepKey, string> &
-	Record<`${SetupStepKey}Description`, string> & {
 		signInWithGoogleDescription: string;
 		signInOpened: string;
 		signInStartAgain: string;
@@ -258,46 +256,6 @@ export default function gdriveSetting(
 						type: 'page',
 					}),
 					{
-						// A device that is not set up can copy everything from one that is.
-						10: s(() => ({
-							desc: translate('setUpFromDeviceDescription'),
-							name: translate('setUpFromDevice'),
-							render: (setting) => {
-								setting.addButton((button) =>
-									button
-										.setButtonText(translate('importSettings'))
-										.onClick(openImportSettings),
-								);
-							},
-							visible: () => !connected(),
-						})),
-						100: s(() => ({
-							desc: translate('setupSteps'),
-							name: 'dummy',
-							render: (setting) =>
-								setting.settingEl.addClass('drive-bridge-setting-tip'),
-							search: false,
-							visible: () => !ready(),
-						})),
-						// One row per Google Cloud step, each opening its Console page.
-						...Object.fromEntries(
-							SETUP_STEPS.map(({ key, url }, index) => [
-								200 + index,
-								s(() => ({
-									desc: translate(`${key}Description`),
-									name: `${index + 1}. ${translate(key)}`,
-									render: (setting) => {
-										setting.addButton((button) =>
-											button
-												.setButtonText(translate('openConsole'))
-												.onClick(() => window.open(url)),
-										);
-									},
-									search: false,
-									visible: () => !ready(),
-								})),
-							]),
-						),
 						1000: s(() => ({
 							desc: translate('clientIdDescription'),
 							name: translate('clientId'),
@@ -351,19 +309,6 @@ export default function gdriveSetting(
 							},
 							visible: () => !ready(),
 						})),
-						1015: s(() => ({
-							desc: translate('signInWithGoogleDescription'),
-							name: translate('signInWithGoogle'),
-							render: (setting) => {
-								setting.addButton((button) =>
-									button
-										.setButtonText(translate('signInWithGoogle'))
-										.setCta()
-										.onClick(() => void signIn()),
-								);
-							},
-							visible: () => !connected(),
-						})),
 						1020: s(() => ({
 							desc: translate('connectAccountDescription'),
 							name: translate('connectAccount'),
@@ -386,6 +331,19 @@ export default function gdriveSetting(
 											.setButtonText(translate('connect'))
 											.onClick(() => connect(input)),
 									);
+							},
+							visible: () => !connected(),
+						})),
+						1025: s(() => ({
+							desc: translate('signInWithGoogleDescription'),
+							name: translate('signInWithGoogle'),
+							render: (setting) => {
+								setting.addButton((button) =>
+									button
+										.setButtonText(translate('signInWithGoogle'))
+										.setCta()
+										.onClick(() => void signIn()),
+								);
 							},
 							visible: () => !connected(),
 						})),
@@ -422,6 +380,21 @@ export default function gdriveSetting(
 								return checks.cleanup;
 							},
 							visible: connected,
+						})),
+						// No client yet: the Google Cloud steps, on their own page.
+						1040: setupPage(translate, () => !ready()),
+						// A device that is not set up can copy everything from one that is.
+						1050: s(() => ({
+							desc: translate('setUpFromDeviceDescription'),
+							name: translate('setUpFromDevice'),
+							render: (setting) => {
+								setting.addButton((button) =>
+									button
+										.setButtonText(translate('importSettings'))
+										.onClick(openImportSettings),
+								);
+							},
+							visible: () => !connected(),
 						})),
 					},
 				),

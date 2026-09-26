@@ -142,9 +142,12 @@ below. Otherwise:
    account from step 1 and allow access (press **Advanced → Go to \<app
    name\>** at the unverified-app warning; it is your own client). The browser
    then fails to load a `127.0.0.1` page: copy the whole address from the
-   address bar, paste it under **Connect account** and press **Connect**.
+   address bar, paste it under **Refresh token** and press **Connect**.
    A token from step 3 (the `eyJ…` string, the JSON, or only its
-   `refresh_token` value) can be pasted there instead.
+   `refresh_token` value) can be pasted there instead; with the client ID,
+   secret and a token at hand, those three fields and **Connect** are all it
+   takes. The four Google Cloud steps are on the **Set up a Google client**
+   page, linked from the same page.
 4. **Base directory**: the Drive folder for this vault. It defaults to the
    vault name and is created on the first sync. Every device syncing the same
    vault must use the same folder.
@@ -384,15 +387,15 @@ one tap away:
 
 ### Google Drive
 
-| Setting             | Default       | Recommended                   | What it does                                                                                                                                                                          |
-| ------------------- | ------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Google account      | Not connected | your account                  | Sub-page with the whole account setup. The entry shows the connected email, or what to do next (_Tap/Click to connect_, _Client secret missing_, _Client ID missing_) with a warning. |
-| OAuth client ID     | none          | your client                   | On the Google account page. See [Setup](#setup). Saved in plugin settings. Hidden once connected.                                                                                     |
-| OAuth client secret | none          | your client                   | On the Google account page. Saved in the device's secure storage. Hidden once connected.                                                                                              |
-| Connect account     | none          | token from rclone             | On the Google account page. Verified before saving. Connect points at the first field still empty instead of calling Google.                                                          |
-| Base directory      | vault name    | same on every device          | Drive folder that holds the vault. The folder button next to it browses your Drive and can create a folder. Every device syncing this vault must use the same one.                    |
-| Delete to trash     | on            | on                            | Deletions go to Drive's trash (kept 30 days) instead of being permanent.                                                                                                              |
-| Drive scan          | Full scan     | Changes only on a large Drive | How the Drive side is listed each sync. See _Drive scan_ under [Sync behavior](#sync-behavior).                                                                                       |
+| Setting             | Default       | Recommended                   | What it does                                                                                                                                                                                                                                                                                                                  |
+| ------------------- | ------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Google account      | Not connected | your account                  | Sub-page with the account setup: client ID, client secret and refresh token first, then Sign in with Google, the Google Cloud steps (own page) and Set up from another device. The entry shows the connected email, or what to do next (_Tap/Click to connect_, _Client secret missing_, _Client ID missing_) with a warning. |
+| OAuth client ID     | none          | your client                   | On the Google account page. See [Setup](#setup). Saved in plugin settings. Hidden once connected.                                                                                                                                                                                                                             |
+| OAuth client secret | none          | your client                   | On the Google account page. Saved in the device's secure storage. Hidden once connected.                                                                                                                                                                                                                                      |
+| Refresh token       | none          | token from rclone             | On the Google account page, with **Connect**. Verified before saving. Connect points at the first field still empty instead of calling Google. After Sign in with Google, the browser address goes here.                                                                                                                      |
+| Base directory      | vault name    | same on every device          | Drive folder that holds the vault. The folder button next to it browses your Drive and can create a folder. Every device syncing this vault must use the same one.                                                                                                                                                            |
+| Delete to trash     | on            | on                            | Deletions go to Drive's trash (kept 30 days) instead of being permanent.                                                                                                                                                                                                                                                      |
+| Drive scan          | Full scan     | Changes only on a large Drive | How the Drive side is listed each sync. See _Drive scan_ under [Sync behavior](#sync-behavior).                                                                                                                                                                                                                               |
 
 ### Features
 
