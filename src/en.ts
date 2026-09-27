@@ -150,6 +150,8 @@ const en: Translations = {
 	keepRemoteDescription: 'The Drive version overwrites the vault.',
 	keepRemoteWarning: 'The vault version is replaced without asking.',
 	keepThem: 'Keep them',
+	lastExport: ({ path, time }) =>
+		`Last saved to "${path}" at ${time}. It syncs like any note; delete it once imported.`,
 	lastSync: 'Last sync',
 	lastSyncNever: 'No sync on this device yet.',
 	lastSyncValue: ({ time, result }) => `${time} · ${result}`,
@@ -202,6 +204,7 @@ const en: Translations = {
 	noticeStatusOnMobileDescription:
 		'Show sync progress as a notice on mobile, where there is no status bar.',
 	open: 'Open',
+	openLastExport: (path) => `Open ${path}`,
 	passphrase: 'Passphrase',
 	passphraseDescription:
 		'At least 8 characters. Needed again on the other device; it is not stored.',

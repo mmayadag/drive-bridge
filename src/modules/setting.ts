@@ -28,6 +28,8 @@ export type CallableOrObjectTree = NestedCallableTree | { [key: number]: Callabl
 export type SettingEntry = { priority: number; apply: CallableOrObjectTree };
 
 export default class Setting {
+	/** Where Save to vault last put a settings export, on this device only. */
+	declare readonly settings: { lastExport?: { path: string; at: number } };
 	private readonly cleanupCallbacks: Array<() => void> = [];
 	private settingTab?: SettingTab;
 	private readonly settingRegistry = new Set<SettingEntry>();

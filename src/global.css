@@ -705,3 +705,9 @@ a.drive-bridge-coffee-button:hover .drive-bridge-coffee-cup {
 .setting-item.drive-bridge-or .setting-item-control {
 	display: none;
 }
+
+/* Export settings: where Save to vault last put the file. */
+.drive-bridge-last-export {
+	margin-top: var(--size-4-1);
+	color: var(--text-muted);
+}

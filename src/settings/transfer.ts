@@ -7,7 +7,13 @@ const FORMAT = 'drive-bridge-settings';
 const VERSION = 1;
 
 /** Per-device state that is not a preference and never travels. */
-const DEVICE_STATE = new Set(['lastSync', 'skipState', 'keptOnRemote', 'syncHistory']);
+const DEVICE_STATE = new Set([
+	'lastSync',
+	'skipState',
+	'keptOnRemote',
+	'syncHistory',
+	'lastExport',
+]);
 
 /** Secrets by module id, then by name. */
 export type ModuleSecrets = Record<string, Record<string, string>>;

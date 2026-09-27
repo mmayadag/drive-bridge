@@ -39,3 +39,9 @@ test('reset does not share objects with the defaults', () => {
 	settings.realtimeSync.enabled = true;
 	expect(defaultSettings('.obsidian').realtimeSync.enabled).toBe(false);
 });
+
+test('Reset to defaults keeps where the last export was saved', () => {
+	const settings = { ...defaultSettings('.obsidian'), lastExport: { at: 1, path: 'x.json' } };
+	resetSettings(settings, '.obsidian');
+	expect(settings.lastExport).toStrictEqual({ at: 1, path: 'x.json' });
+});
