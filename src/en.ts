@@ -280,6 +280,9 @@ const en: Translations = {
 	stopSync: 'Stop sync',
 	syncHistory: 'Sync history',
 	syncLog: 'Sync log',
+	syncOnFileOpen: 'Sync a note when you open it',
+	syncOnFileOpenDescription:
+		'Brings in a newer version from Drive before you edit it. Fastest with Drive scan: Changes only.',
 	syncOnLeave: 'Sync when leaving Obsidian',
 	syncOnLeaveDescription: 'Sync when Obsidian goes to the background, if files changed.',
 	syncOverdue: 'no sync for a while',

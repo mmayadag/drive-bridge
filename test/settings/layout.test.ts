@@ -117,6 +117,7 @@ test('each sub-page holds its settings', () => {
 		'startupSync',
 		'scheduledSync',
 		'syncOnLeave',
+		'syncOnFileOpen',
 		'realtimeSyncFastMode',
 	]);
 	expect(names(filters.items)).toStrictEqual(['inclusionRules', 'exclusionRules']);
@@ -177,17 +178,19 @@ test('countAutomaticSyncs counts each independent automatic trigger', () => {
 			realtimeSync: { enabled: false },
 			scheduledSync: { enabled: false },
 			startupSync: { enabled: false },
+			syncOnFileOpen: false,
 			syncOnLeave: false,
 		} as never),
-	).toStrictEqual({ on: 0, total: 4 });
+	).toStrictEqual({ on: 0, total: 5 });
 	expect(
 		countAutomaticSyncs({
 			realtimeSync: { enabled: true },
 			scheduledSync: { enabled: true },
 			startupSync: { enabled: false },
+			syncOnFileOpen: true,
 			syncOnLeave: true,
 		} as never),
-	).toStrictEqual({ on: 3, total: 4 });
+	).toStrictEqual({ on: 4, total: 5 });
 });
 
 test('the automatic-sync page reports how many triggers are on, or that they are paused', () => {

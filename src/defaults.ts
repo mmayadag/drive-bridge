@@ -47,6 +47,7 @@ export function defaultSettings(configDir: string): Settings {
 		skipState: { failures: {}, skipped: [] },
 		startupSync: { enabled: true, value: 5000 },
 		syncHistory: [],
+		syncOnFileOpen: true,
 		syncOnLeave: true,
 		webhookOnFinish: '',
 		webhookOnStart: '',

@@ -1,5 +1,5 @@
 import type { Events } from '@';
-import type { App, EventRef, TAbstractFile } from 'obsidian';
+import type { App, EventRef, TAbstractFile, TFile } from 'obsidian';
 import type { Ref } from '@/shared/reactive';
 import type { GlobMatchRule, TogglableValue } from '@/types';
 import { prepareGlobMatch } from '@/utils/glob-match';
@@ -9,6 +9,9 @@ import type { SyncStage } from './observability';
 import type { SyncOptions, SyncTerminateReason } from './sync';
 
 const LEAVE_SYNC_COOLDOWN = 60_000;
+/** Opening notes asks Drive at most this often, and the same note at most every two minutes. */
+const FILE_OPEN_COOLDOWN = 30_000;
+const SAME_FILE_COOLDOWN = 120_000;
 
 type SyncRequest = {
 	trigger: string;
@@ -24,6 +27,8 @@ export default class Scheduler {
 	private hasLocalChanges = false;
 	private lastLeaveSync = 0;
 	private readonly domCleanups: Array<() => void> = [];
+	private lastFileOpenSync = 0;
+	private readonly fileOpenSyncs = new Map<string, number>();
 
 	constructor(
 		private readonly ctx: {
@@ -43,6 +48,7 @@ export default class Scheduler {
 		scheduledSync: TogglableValue;
 		realtimeSync: TogglableValue;
 		syncOnLeave: boolean;
+		syncOnFileOpen: boolean;
 		exclusionRules: Array<GlobMatchRule>;
 		inclusionRules: Array<GlobMatchRule>;
 		avoidAutoSyncWhenOffline: boolean;
@@ -88,6 +94,7 @@ export default class Scheduler {
 			this.ctx.registerEvent(vault.on('delete', this.onChange));
 			this.ctx.registerEvent(vault.on('modify', this.onChange));
 			this.ctx.registerEvent(vault.on('rename', this.onChange));
+			this.ctx.registerEvent(workspace.on('file-open', this.onFileOpen));
 		});
 		this.listenForLeaving();
 		const { scheduledSync, startupSync } = this.settings;
@@ -168,6 +175,27 @@ export default class Scheduler {
 			() => void this.requestSync('realtime'),
 			realtimeSync.value,
 		);
+	};
+
+	/**
+	 * A note just opened: bring in a newer version from Drive before it is edited, with a
+	 * one-file sync. Skipped while a sync runs (it covers the note), while paused or
+	 * offline, for excluded files, and within the cooldowns.
+	 */
+	private readonly onFileOpen = (file: TFile | null) => {
+		const { settings } = this;
+		if (!file || !settings.syncOnFileOpen || settings.automaticSyncPaused) return;
+		// Only a browser that says it is offline stops it; not knowing is not offline.
+		const { onLine } = navigator as { onLine?: boolean };
+		if (onLine === false || !this.ctx.isIdle()) return;
+		const match = prepareGlobMatch(settings.inclusionRules, settings.exclusionRules);
+		if (match(file.path) === 'exclude') return;
+		const now = Date.now();
+		if (now - this.lastFileOpenSync < FILE_OPEN_COOLDOWN) return;
+		if (now - (this.fileOpenSyncs.get(file.path) ?? 0) < SAME_FILE_COOLDOWN) return;
+		this.lastFileOpenSync = now;
+		this.fileOpenSyncs.set(file.path, now);
+		void this.ctx.executeSync('fileOpen', { only: file.path });
 	};
 
 	private readonly scheduleFlush = async () => {

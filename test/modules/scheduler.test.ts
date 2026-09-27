@@ -16,6 +16,7 @@ const real = {
 };
 const realDocument = globalThis.document;
 const listeners = new Map<string, () => void>();
+const workspaceEvents = new Map<string, (...args: Array<never>) => void>();
 let hidden = false;
 
 beforeEach(() => {
@@ -62,7 +63,13 @@ function scheduler(settings: Record<string, unknown> = {}) {
 	const instance = new Scheduler({
 		app: {
 			vault: { on: () => ({}) },
-			workspace: { onLayoutReady: (fn: () => void) => fn() },
+			workspace: {
+				on: (name: string, fn: (...args: Array<never>) => void) => {
+					workspaceEvents.set(name, fn);
+					return {};
+				},
+				onLayoutReady: (fn: () => void) => fn(),
+			},
 		},
 		dispatch: (event: string, payload: string) => {
 			if (event === 'logGeneral') logs.push(payload);
@@ -87,6 +94,7 @@ function scheduler(settings: Record<string, unknown> = {}) {
 			realtimeSync: { enabled: true, value: 5000 },
 			scheduledSync: { enabled: true, value: 60_000 },
 			startupSync: { enabled: true, value: 1000 },
+			syncOnFileOpen: true,
 			syncOnLeave: true,
 			...settings,
 		},
@@ -222,4 +230,64 @@ test('closing the plugin cancels waiting requests', async () => {
 	const waiting = instance.root.requestSync('interval');
 	instance.dispose();
 	expect(await waiting).toStrictEqual({ result: 'cancelled' });
+});
+
+test('opening a note syncs just that note, at most every 30 s and every 2 min per note', () => {
+	const now = Date.now;
+	let clock = 1_000_000;
+	Date.now = () => clock;
+	try {
+		const { instance, runs } = scheduler();
+		instance.start();
+		const open = (path?: string) =>
+			workspaceEvents.get('file-open')?.((path === undefined ? path : { path }) as never);
+		open('notes/a.md');
+		expect(runs).toStrictEqual([{ options: { only: 'notes/a.md' }, trigger: 'fileOpen' }]);
+		clock += 10_000;
+		open('notes/b.md');
+		expect(runs).toHaveLength(1);
+		clock += 30_000;
+		open('notes/a.md');
+		expect(runs).toHaveLength(1);
+		open('notes/b.md');
+		expect(runs).toHaveLength(2);
+		clock += 120_000;
+		open('notes/a.md');
+		expect(runs).toHaveLength(3);
+		// Closing the last note opens nothing.
+		open();
+		expect(runs).toHaveLength(3);
+		instance.dispose();
+	} finally {
+		Date.now = now;
+	}
+});
+
+test('no sync on open while paused, busy, offline, excluded, or turned off', () => {
+	const cases: Array<[Record<string, unknown>, string, boolean?]> = [
+		[{ automaticSyncPaused: true }, 'notes/a.md'],
+		[{ syncOnFileOpen: false }, 'notes/a.md'],
+		[{}, '.trash/a.md'],
+		[{}, 'notes/a.md', true],
+	];
+	for (const [settings, path, busy] of cases) {
+		const { instance, isIdle, runs } = scheduler(settings);
+		instance.start();
+		if (busy) isIdle(false);
+		workspaceEvents.get('file-open')?.({ path } as never);
+		expect(runs).toStrictEqual([]);
+		instance.dispose();
+	}
+	const onLine = Object.getOwnPropertyDescriptor(navigator, 'onLine');
+	Object.defineProperty(navigator, 'onLine', { configurable: true, get: () => false });
+	try {
+		const { instance, runs } = scheduler();
+		instance.start();
+		workspaceEvents.get('file-open')?.({ path: 'notes/a.md' } as never);
+		expect(runs).toStrictEqual([]);
+		instance.dispose();
+	} finally {
+		if (onLine) Object.defineProperty(navigator, 'onLine', onLine);
+		else delete (navigator as { onLine?: boolean }).onLine;
+	}
 });

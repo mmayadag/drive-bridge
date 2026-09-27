@@ -410,13 +410,14 @@ The main screen is grouped by purpose:
 
 ### Features
 
-| Setting                    | Default    | Recommended               | What it does                                                                                                                                                                                |
-| -------------------------- | ---------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Realtime sync              | off, 5 s   | desktop: on · mobile: off | Syncs shortly after you edit a file.                                                                                                                                                        |
-| Realtime sync fast mode    | on         | on                        | Realtime syncs reuse the last remote listing instead of scanning Drive, so they only push your own changes. Remote changes arrive with the next startup, scheduled or manual sync.          |
-| Sync when leaving Obsidian | on         | on                        | Syncs as soon as Obsidian goes to the background or loses focus, but only if files changed since the last sync. On mobile this is what pushes a note you just wrote before you switch apps. |
-| Startup sync               | on, 5 s    | on                        | Syncs once after Obsidian starts.                                                                                                                                                           |
-| Scheduled sync             | on, 15 min | on, 5–15 min              | Periodic full sync; this is what picks up files other apps add to Drive.                                                                                                                    |
+| Setting                      | Default    | Recommended               | What it does                                                                                                                                                                                                                     |
+| ---------------------------- | ---------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Realtime sync                | off, 5 s   | desktop: on · mobile: off | Syncs shortly after you edit a file.                                                                                                                                                                                             |
+| Realtime sync fast mode      | on         | on                        | Realtime syncs reuse the last remote listing instead of scanning Drive, so they only push your own changes. Remote changes arrive with the next startup, scheduled or manual sync.                                               |
+| Sync when leaving Obsidian   | on         | on                        | Syncs as soon as Obsidian goes to the background or loses focus, but only if files changed since the last sync. On mobile this is what pushes a note you just wrote before you switch apps.                                      |
+| Sync a note when you open it | on         | on                        | Opening a note syncs just that note first, so a newer version from Drive arrives before you edit. At most every 30 s, and every 2 minutes per note; not while paused, offline or syncing. Fastest with Drive scan: Changes only. |
+| Startup sync                 | on, 5 s    | on                        | Syncs once after Obsidian starts.                                                                                                                                                                                                |
+| Scheduled sync               | on, 15 min | on, 5–15 min              | Periodic full sync; this is what picks up files other apps add to Drive.                                                                                                                                                         |
 
 ### Controls
 
