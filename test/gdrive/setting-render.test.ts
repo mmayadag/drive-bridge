@@ -144,7 +144,16 @@ function setup({
 			item,
 			...flatten(((item as SettingDefinitionPage).items ?? []) as Array<SettingDefinition>),
 		]);
-	const allRows = flatten(group.items ?? []);
+	// Rows the module places elsewhere (Deletions, Advanced) count too.
+	const nodes = (node: unknown): Array<SettingDefinition> => {
+		if (typeof node === 'function')
+			return [(node as (self: unknown) => SettingDefinition)(node)];
+		return Object.values(node as object).flatMap(nodes);
+	};
+	const elsewhere = Object.entries(tree)
+		.filter(([key]) => key !== '551' && key !== '16')
+		.flatMap(([, node]) => nodes(node));
+	const allRows = [...flatten(group.items ?? []), ...flatten(elsewhere)];
 	const rowByName = (name: string) => allRows.find((item) => item.name === name);
 	return {
 		dispatched,

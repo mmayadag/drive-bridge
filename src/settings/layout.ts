@@ -8,7 +8,13 @@ import { s } from './utils';
  * Keys of the sub-pages under the main screen. Settings files place their rows at
  * `{ [MORE]: { [page]: { ... } } }`.
  */
-/** Strategy pages on the main screen; modules add rows under the conflict page. */
+/**
+ * Main screen groups, in order: How it syncs (strategies, automatic sync, filters),
+ * Deletions, the backend's own group (Google Drive at 551), then Advanced and Help.
+ */
+export const HOW = 100;
+export const DELETIONS = 300;
+/** Strategy pages inside How it syncs; modules add rows under the conflict page. */
 export const SYNC_STRATEGY = 50;
 export const CONFLICTS = 60;
 export const MORE = 7000;
@@ -22,6 +28,7 @@ export const PAGE = {
 	help: 4000,
 } as const;
 export const ADVANCED = {
+	backend: 1500,
 	controls: 1000,
 	development: 5000,
 	miscellaneous: 2000,
@@ -34,6 +41,8 @@ export type LayoutSettingTranslations = {
 	advanced: string;
 	automaticSync: string;
 	helpAndSupport: string;
+	howItSyncs: string;
+	deletions: string;
 	filterRules: string;
 	xConfigured: (count: number) => string;
 	xOfYOn: (count: { on: number; total: number }) => string;
@@ -59,27 +68,44 @@ export default function layoutSettings(ctx: {
 }): CallableOrObjectTree {
 	const { translate, settings, speedLabel } = ctx;
 	return {
+		[HOW]: s(
+			(self) => ({
+				heading: translate('howItSyncs'),
+				items: items(self) as never,
+				type: 'group',
+			}),
+			{
+				[PAGE.automaticSync]: s((self) => ({
+					displayValue: () =>
+						settings.automaticSyncPaused
+							? translate('automaticSyncPausedStatus')
+							: translate('xOfYOn', countAutomaticSyncs(settings)),
+					items: items(self),
+					name: translate('automaticSync'),
+					type: 'page',
+				})),
+				[PAGE.filters]: s((self) => ({
+					displayValue: () =>
+						translate(
+							'xConfigured',
+							settings.inclusionRules.length + settings.exclusionRules.length,
+						),
+					items: items(self),
+					labels: [speedLabel()],
+					name: translate('filterRules'),
+					type: 'page',
+				})),
+			},
+		),
+		[DELETIONS]: s(
+			(self) => ({
+				heading: translate('deletions'),
+				items: items(self) as never,
+				type: 'group',
+			}),
+			{},
+		),
 		[MORE]: s((self) => ({ items: items(self) as never, type: 'group' }), {
-			[PAGE.automaticSync]: s((self) => ({
-				displayValue: () =>
-					settings.automaticSyncPaused
-						? translate('automaticSyncPausedStatus')
-						: translate('xOfYOn', countAutomaticSyncs(settings)),
-				items: items(self),
-				name: translate('automaticSync'),
-				type: 'page',
-			})),
-			[PAGE.filters]: s((self) => ({
-				displayValue: () =>
-					translate(
-						'xConfigured',
-						settings.inclusionRules.length + settings.exclusionRules.length,
-					),
-				items: items(self),
-				labels: [speedLabel()],
-				name: translate('filterRules'),
-				type: 'page',
-			})),
 			[PAGE.advanced]: s((self) => ({
 				items: items(self),
 				name: translate('advanced'),

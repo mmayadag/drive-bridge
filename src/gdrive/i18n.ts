@@ -43,6 +43,8 @@ const en: GdriveTranslations = {
 			);
 		}),
 	connectFirst: 'Connect your Google account first.',
+	connectPrompt: 'Connect your Google account',
+	connectPromptDescription: 'Start here: Drive Bridge syncs with a folder in your Google Drive.',
 	connectSuccess: 'Connected to Google Drive.',
 	connected: 'Connected',
 	connection: 'Connection',

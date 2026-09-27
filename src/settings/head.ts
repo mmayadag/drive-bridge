@@ -18,7 +18,7 @@ import formatDateTime from '@/utils/format-date';
 import type { CheckConnectionDB } from './check-connection';
 import type { AugmentedSettingDefinitionItem, LabelDefinition } from './utils';
 import { addCheckConnection } from './check-connection';
-import { CONFLICTS, SYNC_STRATEGY } from './layout';
+import { CONFLICTS, DELETIONS, HOW, SYNC_STRATEGY } from './layout';
 import { choiceRows } from './strategy';
 import { addLabel, s } from './utils';
 
@@ -181,92 +181,104 @@ export default function headSettings(
 			// connection check instead.
 			visible: () => remoteFsRegistry.size > 1,
 		})),
-		[SYNC_STRATEGY]: s(() => {
-			const entries = [...deciderRegistry].map(([key, entry]) => ({ entry, key }));
-			const choices = (repair: boolean) =>
-				choiceRows(
-					entries
-						.filter(({ entry }) => Boolean(entry.repair) === repair)
-						.map(({ entry, key }) => ({
-							description: entry.description?.(),
-							flow: entry.flow,
-							key,
-							name: entry.prettyName(),
-							order: entry.order,
-						})),
-					() => settings.decider,
-					(key) => choose('decider', key),
-				);
-			return {
-				desc: warningOr(
-					deciderRegistry.get(settings.decider),
-					translate('syncStrategyDescription'),
-				),
-				displayValue: () => deciderRegistry.get(settings.decider)?.prettyName() ?? '',
-				items: [
-					{ items: choices(false), type: 'group' },
-					{ heading: translate('forRepairs'), items: choices(true), type: 'group' },
-				],
-				name: translate('syncStrategy'),
-				// oxlint-disable-next-line unicorn/no-null -- Obsidian's status type has no undefined
-				status: () => (deciderRegistry.get(settings.decider)?.repair ? 'warning' : null),
-				type: 'page',
-			};
-		}),
-		[CONFLICTS]: s((self) => {
-			const entries = [...conflictResolverRegistry].map(([key, entry]) => ({ entry, key }));
-			const choices = (lossy: boolean) =>
-				choiceRows(
-					entries
-						.filter(({ entry }) => Boolean(entry.lossy) === lossy)
-						.map(({ entry, key }) => ({
-							description: entry.description?.(),
-							example: entry.example?.(),
-							key,
-							name: entry.prettyName(),
-							order: entry.order,
-						})),
-					() => settings.conflictResolver,
-					(key) => choose('conflictResolver', key),
-				);
-			return {
-				desc: warningOr(
-					conflictResolverRegistry.get(settings.conflictResolver),
-					translate('conflictResolveStrategyDescription'),
-				),
-				displayValue: () =>
-					conflictResolverRegistry.get(settings.conflictResolver)?.prettyName() ?? '',
-				items: [
-					{
-						heading: translate('nothingLost'),
-						// Modules add their options' extra rows here, such as Smart merge's markers.
-						items: [
-							...choices(false),
-							...Object.values(self).map((node) => node(node)),
-						],
-						type: 'group',
+		[HOW]: {
+			[SYNC_STRATEGY]: s(() => {
+				const entries = [...deciderRegistry].map(([key, entry]) => ({ entry, key }));
+				const choices = (repair: boolean) =>
+					choiceRows(
+						entries
+							.filter(({ entry }) => Boolean(entry.repair) === repair)
+							.map(({ entry, key }) => ({
+								description: entry.description?.(),
+								flow: entry.flow,
+								key,
+								name: entry.prettyName(),
+								order: entry.order,
+							})),
+						() => settings.decider,
+						(key) => choose('decider', key),
+					);
+				return {
+					desc: warningOr(
+						deciderRegistry.get(settings.decider),
+						translate('syncStrategyDescription'),
+					),
+					displayValue: () => deciderRegistry.get(settings.decider)?.prettyName() ?? '',
+					items: [
+						{ items: choices(false), type: 'group' },
+						{ heading: translate('forRepairs'), items: choices(true), type: 'group' },
+					],
+					name: translate('syncStrategy'),
+					status: () => {
+						const repair = deciderRegistry.get(settings.decider)?.repair;
+						// oxlint-disable-next-line unicorn/no-null -- Obsidian's status type has no undefined
+						return repair ? 'warning' : null;
 					},
-					{
-						heading: translate('replacesOneVersion'),
-						items: choices(true),
-						type: 'group',
+					type: 'page',
+				};
+			}),
+			[CONFLICTS]: s((self) => {
+				const entries = [...conflictResolverRegistry].map(([key, entry]) => ({
+					entry,
+					key,
+				}));
+				const choices = (lossy: boolean) =>
+					choiceRows(
+						entries
+							.filter(({ entry }) => Boolean(entry.lossy) === lossy)
+							.map(({ entry, key }) => ({
+								description: entry.description?.(),
+								example: entry.example?.(),
+								key,
+								name: entry.prettyName(),
+								order: entry.order,
+							})),
+						() => settings.conflictResolver,
+						(key) => choose('conflictResolver', key),
+					);
+				return {
+					desc: warningOr(
+						conflictResolverRegistry.get(settings.conflictResolver),
+						translate('conflictResolveStrategyDescription'),
+					),
+					displayValue: () =>
+						conflictResolverRegistry.get(settings.conflictResolver)?.prettyName() ?? '',
+					items: [
+						{
+							heading: translate('nothingLost'),
+							// Modules add their options' extra rows here, such as Smart merge's markers.
+							items: [
+								...choices(false),
+								...Object.values(self).map((node) => node(node)),
+							],
+							type: 'group',
+						},
+						{
+							heading: translate('replacesOneVersion'),
+							items: choices(true),
+							type: 'group',
+						},
+					] as never,
+					name: translate('conflictResolveStrategy'),
+					status: () => {
+						const lossy = conflictResolverRegistry.get(
+							settings.conflictResolver,
+						)?.lossy;
+						// oxlint-disable-next-line unicorn/no-null -- Obsidian's status type has no undefined
+						return lossy ? 'warning' : null;
 					},
-				] as never,
-				name: translate('conflictResolveStrategy'),
-				status: () => {
-					const lossy = conflictResolverRegistry.get(settings.conflictResolver)?.lossy;
-					// oxlint-disable-next-line unicorn/no-null -- Obsidian's status type has no undefined
-					return lossy ? 'warning' : null;
-				},
-				type: 'page',
-			};
-		}),
-		// A safety switch, so it sits with the strategies rather than under Advanced.
-		[CONFLICTS + 5]: s(() => ({
-			control: { key: 'neverDeleteRemote', type: 'toggle' },
-			desc: translate('neverDeleteRemoteDescription'),
-			name: translate('neverDeleteRemote'),
-		})),
+					type: 'page',
+				};
+			}),
+		},
+		[DELETIONS]: {
+			// A safety switch, on the main screen with the other deletion setting.
+			1000: s(() => ({
+				control: { key: 'neverDeleteRemote', type: 'toggle' },
+				desc: translate('neverDeleteRemoteDescription'),
+				name: translate('neverDeleteRemote'),
+			})),
+		},
 	};
 }
 

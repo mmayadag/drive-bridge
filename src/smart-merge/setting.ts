@@ -1,7 +1,7 @@
 import type { TextComponent } from 'obsidian';
 import type { Translate } from '@/modules/i18n';
 import type { CallableOrObjectTree } from '@/modules/setting';
-import { CONFLICTS } from '@/settings/layout';
+import { CONFLICTS, HOW } from '@/settings/layout';
 import { s } from '@/settings/utils';
 import type { SmartMergeTranslations } from './i18n';
 import type { MergeOptions } from './utils/merge';
@@ -31,50 +31,52 @@ export default function smartMergeSetting(
 		};
 	return {
 		// Under the Smart merge option on the Conflicts page, while it is selected.
-		[CONFLICTS]: {
-			1000: s(
-				(self) => ({
-					items: Object.values(self).map((node) => node(node)),
-					name: translate('mergeMarkers'),
-					type: 'page',
-					visible: isSelected,
-				}),
-				{
-					1000: s(() => ({
-						desc: translate('conflictOursMarkersDescription'),
-						name: translate('conflictOursMarkers'),
-						render: (setting) => {
-							setting
-								.setClass('drive-bridge-togglable-value')
-								.setClass('drive-bridge-marker-setting')
-								.addText(marker('conflictAStart', translate('start')))
-								.addText(marker('conflictAEnd', translate('end')));
-						},
-					})),
-					2000: s(() => ({
-						desc: translate('conflictTheirsMarkersDescription'),
-						name: translate('conflictTheirsMarkers'),
-						render: (setting) => {
-							setting
-								.setClass('drive-bridge-togglable-value')
-								.setClass('drive-bridge-marker-setting')
-								.addText(marker('conflictBStart', translate('start')))
-								.addText(marker('conflictBEnd', translate('end')));
-						},
-					})),
-					3000: s(() => ({
-						desc: translate('deletionMarkersDescription'),
-						name: translate('deletionMarkers'),
-						render: (setting) => {
-							setting
-								.setClass('drive-bridge-togglable-value')
-								.setClass('drive-bridge-marker-setting')
-								.addText(marker('deletionStart', translate('start')))
-								.addText(marker('deletionEnd', translate('end')));
-						},
-					})),
-				},
-			),
+		[HOW]: {
+			[CONFLICTS]: {
+				1000: s(
+					(self) => ({
+						items: Object.values(self).map((node) => node(node)),
+						name: translate('mergeMarkers'),
+						type: 'page',
+						visible: isSelected,
+					}),
+					{
+						1000: s(() => ({
+							desc: translate('conflictOursMarkersDescription'),
+							name: translate('conflictOursMarkers'),
+							render: (setting) => {
+								setting
+									.setClass('drive-bridge-togglable-value')
+									.setClass('drive-bridge-marker-setting')
+									.addText(marker('conflictAStart', translate('start')))
+									.addText(marker('conflictAEnd', translate('end')));
+							},
+						})),
+						2000: s(() => ({
+							desc: translate('conflictTheirsMarkersDescription'),
+							name: translate('conflictTheirsMarkers'),
+							render: (setting) => {
+								setting
+									.setClass('drive-bridge-togglable-value')
+									.setClass('drive-bridge-marker-setting')
+									.addText(marker('conflictBStart', translate('start')))
+									.addText(marker('conflictBEnd', translate('end')));
+							},
+						})),
+						3000: s(() => ({
+							desc: translate('deletionMarkersDescription'),
+							name: translate('deletionMarkers'),
+							render: (setting) => {
+								setting
+									.setClass('drive-bridge-togglable-value')
+									.setClass('drive-bridge-marker-setting')
+									.addText(marker('deletionStart', translate('start')))
+									.addText(marker('deletionEnd', translate('end')));
+							},
+						})),
+					},
+				),
+			},
 		},
 	};
 }

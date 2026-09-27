@@ -4,7 +4,7 @@
 import { expect, test } from 'bun:test';
 import type { ConflictResolverEntry, FsWrapperEntry } from '@/modules/registrar';
 import type { SettingEntry, SettingTree } from '@/modules/setting';
-import { CONFLICTS } from '@/settings/layout';
+import { CONFLICTS, HOW } from '@/settings/layout';
 import { openMemoryDB } from '@/shared/key-value-store';
 import SmartMerge from '@/smart-merge';
 
@@ -113,7 +113,7 @@ test('the marker settings sit under Conflicts and follow the selected strategy',
 	const [entry] = settingEntries;
 	expect(entry.priority).toBe(4048);
 	const tree = entry.apply as unknown as Record<number, Record<number, SettingTree>>;
-	const node = tree[CONFLICTS][1000];
+	const node = tree[HOW][CONFLICTS][1000];
 	const definition = node(node) as unknown as { visible: () => boolean };
 	expect(definition.visible()).toBe(false);
 	settings.conflictResolver = 'smartMerge';

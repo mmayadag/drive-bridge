@@ -5,7 +5,7 @@
 
 import ObsidianMock from '$/support/obsidian-mock';
 import { expect, mock, test } from 'bun:test';
-import { CONFLICTS, SYNC_STRATEGY } from '@/settings/layout';
+import { CONFLICTS, DELETIONS, HOW, SYNC_STRATEGY } from '@/settings/layout';
 import { openMemoryDB } from '@/shared/key-value-store';
 import { ref } from '@/shared/reactive';
 
@@ -257,7 +257,9 @@ test('picking a strategy saves, then re-renders and refreshes the tab', () => {
 			remoteFs: '',
 		},
 	});
-	const item = tree(ctx)[SYNC_STRATEGY]?.() as never as {
+	const item = (tree(ctx)[HOW] as never as Record<number, () => unknown>)[
+		SYNC_STRATEGY
+	]?.() as never as {
 		displayValue: () => string;
 		status: () => 'warning' | null;
 	};
@@ -277,7 +279,9 @@ test('the conflict-resolve status warns for a lossy strategy', () => {
 		]),
 		settings: { conflictResolver: 'renameAndKeepBoth', lastSync: undefined, remoteFs: '' },
 	});
-	const fn = tree(ctx)[CONFLICTS] as unknown as (self: unknown) => unknown;
+	const fn = (tree(ctx)[HOW] as never as Record<number, unknown>)[CONFLICTS] as (
+		self: unknown,
+	) => unknown;
 	const item = fn(fn) as never as {
 		displayValue: () => string;
 		status: () => 'warning' | null;
@@ -315,7 +319,9 @@ test('picking a strategy row saves the choice, then re-renders and refreshes the
 			remoteFs: '',
 		},
 	});
-	const item = tree(ctx)[SYNC_STRATEGY]?.() as never as {
+	const item = (tree(ctx)[HOW] as never as Record<number, () => unknown>)[
+		SYNC_STRATEGY
+	]?.() as never as {
 		items: Array<{ items: Array<{ render: (setting: unknown) => void }> }>;
 	};
 	// items[0] holds the safe choices (bidirectional, already selected); items[1] holds the
@@ -388,7 +394,9 @@ test('a strategy with a warning replaces the description with it', () => {
 		]),
 		settings: { decider: 'mirrorLocal', lastSync: undefined, remoteFs: '' },
 	});
-	const item = tree(ctx)[SYNC_STRATEGY]?.() as never as { desc: DocumentFragment };
+	const item = (tree(ctx)[HOW] as never as Record<number, () => unknown>)[
+		SYNC_STRATEGY
+	]?.() as never as { desc: DocumentFragment };
 	expect(item.desc.textContent).toBe('Deletes!');
 	expect(item.desc.querySelector('.drive-bridge-warning-text')).not.toBeNull();
 });
@@ -406,7 +414,9 @@ test('picking a conflict strategy saves it, and module rows join the safe group'
 		},
 		settings: { conflictResolver: 'renameAndKeepBoth', lastSync: undefined, remoteFs: '' },
 	});
-	const fn = tree(ctx)[CONFLICTS] as unknown as ((self: unknown) => unknown) & {
+	const fn = (tree(ctx)[HOW] as never as Record<number, unknown>)[CONFLICTS] as ((
+		self: unknown,
+	) => unknown) & {
 		markers?: unknown;
 	};
 	const markers = () => ({ name: 'Markers' });
@@ -425,7 +435,9 @@ test('picking a conflict strategy saves it, and module rows join the safe group'
 });
 
 test('the never-delete-remote switch sits after the conflict strategies', () => {
-	const item = tree(baseCtx())[CONFLICTS + 5]?.() as never as { control: unknown };
+	const item = (
+		tree(baseCtx())[DELETIONS] as never as Record<number, () => unknown>
+	)[1000]?.() as never as { control: unknown };
 	expect(item.control).toStrictEqual({ key: 'neverDeleteRemote', type: 'toggle' });
 });
 

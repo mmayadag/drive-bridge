@@ -4,7 +4,7 @@ import type { CallableOrObjectTree } from '@/modules/setting';
 import type { DatabaseSync } from '@/shared/key-value-store';
 import type { GlobMatchRule } from '@/types';
 import { normalizeGlob } from '@/utils/glob-match';
-import { MORE, PAGE } from './layout';
+import { HOW, PAGE } from './layout';
 import { generateEditableList, reactivelyValidate, s } from './utils';
 
 export type FilterSettingTranslations = {
@@ -35,7 +35,7 @@ export default function filterSettings({
 	rerenderSettingTab: () => void;
 }): CallableOrObjectTree {
 	return {
-		[MORE]: {
+		[HOW]: {
 			[PAGE.filters]: {
 				1000: s(
 					(self) => ({

@@ -4,7 +4,7 @@
 import { expect, test } from 'bun:test';
 import type { SettingTree } from '@/modules/setting';
 import type { SmartMergeSettings } from '@/smart-merge/setting';
-import { CONFLICTS } from '@/settings/layout';
+import { CONFLICTS, HOW } from '@/settings/layout';
 import smartMergeSetting from '@/smart-merge/setting';
 
 type Definition = {
@@ -79,7 +79,7 @@ function page(options: { selected?: boolean } = {}) {
 		},
 		settings,
 	) as unknown as Record<number, Record<number, SettingTree>>;
-	const node = tree[CONFLICTS][1000];
+	const node = tree[HOW][CONFLICTS][1000];
 	const definition = node(node) as unknown as Definition;
 	return { definition, saves: () => saves, settings };
 }

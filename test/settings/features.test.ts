@@ -3,7 +3,7 @@
 
 import { expect, test } from 'bun:test';
 import featuresSettings from '@/settings/features';
-import { MORE, PAGE } from '@/settings/layout';
+import { HOW, PAGE } from '@/settings/layout';
 
 type Group = Record<number, () => { render: (setting: unknown) => void }>;
 
@@ -102,9 +102,9 @@ function baseCtx(overrides: Record<string, unknown> = {}) {
 
 function group(ctx: ReturnType<typeof baseCtx>) {
 	const tree = featuresSettings(ctx as never) as never as {
-		[MORE]: { [PAGE.automaticSync]: Group };
+		[HOW]: { [PAGE.automaticSync]: Group };
 	};
-	return tree[MORE][PAGE.automaticSync];
+	return tree[HOW][PAGE.automaticSync];
 }
 
 test('the pause toggle reflects and updates automaticSyncPaused', () => {

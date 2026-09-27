@@ -366,15 +366,24 @@ Drive diagram, the conflict strategies split into _Nothing lost_ and _Replaces
 one version_. The entry shows the current choice, with a warning while a
 Mirror or a version-replacing strategy is selected.
 
-The main screen shows Last sync, Sync strategy, Conflict resolve strategy and
-the Google Drive group, and ends with [Support](#support). Everything else is
-one tap away:
+The main screen is grouped by purpose:
 
-| Entry          | Holds                                                                                                                   |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Automatic sync | [Features](#features); the entry shows how many are on                                                                  |
-| Filter rules   | [Filter rules](#filter-rules); the entry shows the rule count                                                           |
-| Advanced       | [Controls](#controls), [Miscellaneous](#miscellaneous), Smart merge, [Webhooks](#webhooks), [Development](#development) |
+- **Last sync** with Start sync and the history. While this device is not
+  connected, **Connect your Google account** sits right under it and opens the
+  account page.
+- **How it syncs**: Sync strategy, Conflict resolve strategy, Automatic sync
+  (the entry shows how many are on) and Filter rules (the rule count).
+- **Deletions**: Never delete on Drive and Delete to trash.
+- **Google Drive**: Google account and Base directory.
+- **Advanced** and **Help and support**, then the help icons and
+  [Support](#support).
+
+| Entry            | Holds                                                                                                                                              |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Automatic sync   | [Features](#features)                                                                                                                              |
+| Filter rules     | [Filter rules](#filter-rules)                                                                                                                      |
+| Advanced         | [Controls](#controls), Google Drive (Drive scan), [Miscellaneous](#miscellaneous), Smart merge, [Webhooks](#webhooks), [Development](#development) |
+| Help and support | The setup guide, a bug report, a feature request and the problem report                                                                            |
 
 ### General
 
@@ -477,8 +486,8 @@ trust; the payload carries the vault name, not its contents.
   [Conflict resolve strategies](#conflict-resolve-strategies).
 - **Deletes:** remote deletions require confirmation during automatic sync
   (`confirmDeleteInAutoSync`).
-- **Never delete on Drive:** with this switch on (main screen, under the
-  strategies), nothing is deleted on Drive. A file deleted in the vault stays
+- **Never delete on Drive:** with this switch on (main screen, under
+  Deletions), nothing is deleted on Drive. A file deleted in the vault stays
   on Drive and is marked as kept on this device, so later syncs neither
   delete it nor download it again. The mark goes when the file changes on
   Drive (the new version downloads), comes back in the vault, or is removed
