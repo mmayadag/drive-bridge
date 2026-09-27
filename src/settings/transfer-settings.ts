@@ -32,8 +32,9 @@ export type TransferTranslations = {
 	repeatPassphrase: string;
 	passphraseTooShort: string;
 	passphraseMismatch: string;
-	copyExport: string;
-	exportCopied: string;
+	showExport: string;
+	exportShown: string;
+	selectAll: string;
 	saveToVault: string;
 	exportSaved: Snippet<string>;
 	pasteExport: string;
@@ -96,8 +97,6 @@ export function createTransfer(ctx: TransferContext) {
 				return path;
 			},
 			texts: {
-				copied: t('exportCopied'),
-				copy: t('copyExport'),
 				includeAccount: t('includeAccount'),
 				includeAccountDescription: t('includeAccountDescription'),
 				passphrase: t('passphrase'),
@@ -107,6 +106,9 @@ export function createTransfer(ctx: TransferContext) {
 				repeatPassphrase: t('repeatPassphrase'),
 				saveToVault: t('saveToVault'),
 				saved: (path) => t('exportSaved', path),
+				selectAll: t('selectAll'),
+				show: t('showExport'),
+				shown: t('exportShown'),
 				title: t('exportSettings'),
 			},
 		}).open();

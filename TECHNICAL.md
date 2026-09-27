@@ -454,10 +454,10 @@ trust; the payload carries the vault name, not its contents.
 
 ### Support
 
-| Setting          | What it does                                                                                                                                                                                                                                                                                                                                                                                |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Help and support | Icons for the setup guide, a bug report, a feature request, and **Copy a problem report**: versions, settings with secrets, addresses and file names removed, and the last 300 log lines, to paste into a bug report. Both reports open GitHub's issue form with the plugin version, Obsidian version and platform filled in. Nothing leaves the device until you submit the form yourself. |
-| Buy me a coffee  | The yellow footer at the bottom of the settings; opens the donation page. The line above it follows the last sync: _It works! Coffee time?_ after a good sync, a setup hint before the first one, and a pointer to the bug report after a failure. The version below it is the installed plugin version.                                                                                    |
+| Setting          | What it does                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Help and support | Icons for the setup guide, a bug report, a feature request, and **Problem report**: versions, settings with secrets, addresses and file names removed, and the last 300 log lines, shown in a window to select and paste into a bug report. Both reports open GitHub's issue form with the plugin version, Obsidian version and platform filled in. Nothing leaves the device until you submit the form yourself. |
+| Buy me a coffee  | The yellow footer at the bottom of the settings; opens the donation page. The line above it follows the last sync: _It works! Coffee time?_ after a good sync, a setup hint before the first one, and a pointer to the bug report after a failure. The version below it is the installed plugin version.                                                                                                          |
 
 ### Development
 
@@ -524,7 +524,7 @@ trust; the payload carries the vault name, not its contents.
   history_ in the command palette) lists the last 30 syncs on this device:
   time, result, trigger, what moved and the error. They are kept on the
   device, never synced or exported, and name no files. _Sync log_ shows the
-  recent log in a window with a copy button; the general log keeps its last
+  recent log in a window with **Select all**; the general log keeps its last
   500 lines.
 - **Undo one change:** in the list a manual sync shows first, a row's undo
   button runs the opposite instead: a pending upload downloads the Drive

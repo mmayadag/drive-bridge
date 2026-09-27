@@ -1,3 +1,4 @@
+import { ModalSpy, SettingSpy } from '$/support/modal-spies';
 import ObsidianMock from '$/support/obsidian-mock';
 import { expect, mock, test } from 'bun:test';
 
@@ -10,16 +11,27 @@ function NoticeSpy(message: string, timeout?: number) {
 // platformName()'s other branches, since the module binds to this same object by reference.
 const platform: Record<string, boolean> = { isMacOS: true };
 
+// Every window the tests open, with what it shows.
+const windows: Array<ModalSpy> = [];
+class WindowSpy extends ModalSpy {
+	open() {
+		windows.push(this);
+		super.open();
+	}
+}
+
 void mock.module('obsidian', () => ({
 	...ObsidianMock,
+	Modal: WindowSpy,
 	Notice: NoticeSpy,
 	Platform: platform,
+	Setting: SettingSpy,
 	apiVersion: '1.13.7',
 }));
 
 const {
 	coffeeQuestion,
-	copyProblemReport,
+	showProblemReport,
 	default: supportSettings,
 	reportUrl,
 } = await import('@/settings/support');
@@ -79,28 +91,27 @@ test('reportUrl names every platform branch', () => {
 	}
 });
 
-test('copyProblemReport writes the report to the clipboard and notifies', async () => {
-	const written: Array<string> = [];
-	const originalClipboard = navigator.clipboard as unknown;
-	Object.assign(navigator, { clipboard: { writeText: (text: string) => written.push(text) } });
+test('the problem report opens in a window to select, without touching the clipboard', () => {
+	windows.length = 0;
 	notices.length = 0;
-	try {
-		await copyProblemReport({
-			getLogs: () => 'log line',
-			settings: { remoteFs: 'gdrive' },
-			translate: ((key: string) => key) as never,
-		});
-		expect(written).toHaveLength(1);
-		expect(written[0]).toContain('## Environment');
-		expect(written[0]).toContain('log line');
-		expect(notices).toStrictEqual([{ message: 'problemReportCopied', timeout: 8000 }]);
-	} finally {
-		Object.assign(navigator, { clipboard: originalClipboard });
-	}
+	showProblemReport({
+		app: {} as never,
+		getLogs: () => 'log line',
+		settings: { remoteFs: 'gdrive' },
+		translate: ((key: string) => key) as never,
+	});
+	expect(windows).toHaveLength(1);
+	expect(windows[0]?.title).toBe('problemReport');
+	const area = windows[0]?.contentEl.querySelector('textarea');
+	expect(area?.value).toContain('## Environment');
+	expect(area?.value).toContain('log line');
+	expect(windows[0]?.contentEl.textContent).toContain('problemReportHint');
+	expect(notices).toStrictEqual([]);
 });
 
 function helpItem() {
 	const tree = supportSettings({
+		app: {} as never,
 		getLogs: () => '',
 		on: () => () => {},
 		settings: {},
@@ -135,7 +146,7 @@ function fakeExtraButton() {
 	return button;
 }
 
-test('the help row wires up the guide, bug, feature and copy-report buttons', async () => {
+test('the help row wires up the guide, bug, feature and problem report buttons', () => {
 	const buttons: Array<ReturnType<typeof fakeExtraButton>> = [];
 	const setting = {
 		addExtraButton: (cb: (b: ReturnType<typeof fakeExtraButton>) => void) => {
@@ -152,7 +163,7 @@ test('the help row wires up the guide, bug, feature and copy-report buttons', as
 		'book-open',
 		'bug',
 		'lightbulb',
-		'clipboard-copy',
+		'file-text',
 	]);
 
 	const opened: Array<string | URL> = [];
@@ -172,17 +183,9 @@ test('the help row wires up the guide, bug, feature and copy-report buttons', as
 		window.open = originalOpen;
 	}
 
-	const written: Array<string> = [];
-	const originalClipboard = navigator.clipboard as unknown;
-	Object.assign(navigator, { clipboard: { writeText: (text: string) => written.push(text) } });
-	try {
-		buttons[3]?.trigger();
-		await Promise.resolve();
-		await Promise.resolve();
-		expect(written).toHaveLength(1);
-	} finally {
-		Object.assign(navigator, { clipboard: originalClipboard });
-	}
+	windows.length = 0;
+	buttons[3]?.trigger();
+	expect(windows).toHaveLength(1);
 });
 
 let onSyncTerminated: (() => void) | undefined;
@@ -190,6 +193,7 @@ let onSyncTerminated: (() => void) | undefined;
 test('the coffee row draws the question, the button and the plugin version', () => {
 	const settings: { lastSync?: { at: number; result: string } } = { lastSync: undefined };
 	const tree = supportSettings({
+		app: {} as never,
 		getLogs: () => '',
 		on: ((_event: string, fn: () => void) => {
 			onSyncTerminated = fn;

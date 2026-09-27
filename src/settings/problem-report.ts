@@ -1,6 +1,6 @@
 // A problem report for the Bug form: versions, settings without secrets or private
-// values, the last sync and the end of the log. Built on the device and copied to the
-// clipboard; the plugin sends it nowhere.
+// values, the last sync and the end of the log. Built on the device and shown in a window
+// for the user to copy; the plugin sends it nowhere.
 
 const LOG_LINES = 300;
 const SET = '<set>';

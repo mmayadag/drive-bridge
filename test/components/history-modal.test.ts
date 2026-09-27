@@ -85,31 +85,20 @@ test('with no history it says so, and show log closes it and opens the log', asy
 	expect(modal.contentEl.childElementCount).toBe(0);
 });
 
-test('the log shows read-only and copies to the clipboard', async () => {
-	const copied: Array<string> = [];
-	const clipboard = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
-	Object.defineProperty(navigator, 'clipboard', {
-		configurable: true,
-		value: { writeText: (text: string) => Promise.resolve(void copied.push(text)) },
+test('the log shows read-only, to select; nothing touches the clipboard', () => {
+	const modal = new LogModal({} as never, {
+		log: 'line 1\nline 2',
+		selectAll: 'Select all',
+		title: 'Log',
 	});
-	try {
-		const modal = new LogModal({} as never, {
-			copied: 'Copied',
-			copy: 'Copy',
-			log: 'line 1\nline 2',
-			title: 'Log',
-		});
-		modal.open();
-		expect((modal as unknown as ModalSpy).title).toBe('Log');
-		const pre = modal.contentEl.querySelector('pre.drive-bridge-log');
-		expect(pre?.textContent).toBe('line 1\nline 2');
-		await button('Copy').click();
-		expect(copied).toStrictEqual(['line 1\nline 2']);
-		expect(notices).toStrictEqual(['Copied']);
-		modal.close();
-		expect(modal.contentEl.childElementCount).toBe(0);
-	} finally {
-		if (clipboard) Object.defineProperty(navigator, 'clipboard', clipboard);
-		else delete (navigator as { clipboard?: unknown }).clipboard;
-	}
+	modal.open();
+	expect((modal as unknown as ModalSpy).title).toBe('Log');
+	const area = modal.contentEl.querySelector('textarea') as HTMLTextAreaElement;
+	expect(area.value).toBe('line 1\nline 2');
+	expect(area.hasAttribute('readonly')).toBe(true);
+	void button('Select all').click();
+	expect([area.selectionStart, area.selectionEnd]).toStrictEqual([0, area.value.length]);
+	expect(notices).toStrictEqual([]);
+	modal.close();
+	expect(modal.contentEl.childElementCount).toBe(0);
 });

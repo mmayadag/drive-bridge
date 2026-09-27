@@ -6,7 +6,7 @@ import type { SyncCounts, SyncSummary } from '@/sync/history';
 import type { SkipState } from '@/sync/skip-list';
 import type { Progress } from '@/types';
 import { HistoryModal, LogModal } from '@/components/history-modal';
-import { copyProblemReport } from '@/settings/support';
+import { showProblemReport } from '@/settings/support';
 import { getMessage } from '@/shared/error';
 import { computed, ref } from '@/shared/reactive';
 import { addToHistory, countTasks, emptyCounts } from '@/sync/history';
@@ -118,8 +118,7 @@ export default class Observability {
 		syncLog: string;
 		historyEmpty: string;
 		historyCounts: Snippet<SyncCounts>;
-		copyLog: string;
-		logCopied: string;
+		selectAll: string;
 		showProgress: string;
 		exportLogsToFile: string;
 		exportLogsFailed: string;
@@ -394,14 +393,16 @@ export default class Observability {
 			},
 			{
 				callback: () =>
-					void copyProblemReport({
+					showProblemReport({
+						app: this.ctx.app,
 						getLogs: this.ctx.getLogs,
 						settings: this.settings,
 						translate: this.t,
 					}),
-				icon: 'clipboard-copy',
+				icon: 'file-text',
+				// The id stays as it was, so hotkeys set for it keep working.
 				id: 'copy-problem-report',
-				name: this.t('copyProblemReport'),
+				name: this.t('problemReport'),
 			},
 			{
 				callback: () => void this.exportLogs(),
@@ -437,9 +438,8 @@ export default class Observability {
 	private readonly showSyncLog = () => {
 		const { t } = this;
 		new LogModal(this.ctx.app, {
-			copied: t('logCopied'),
-			copy: t('copyLog'),
 			log: this.ctx.getLogs(),
+			selectAll: t('selectAll'),
 			title: t('syncLog'),
 		}).open();
 	};

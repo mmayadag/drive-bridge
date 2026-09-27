@@ -21,8 +21,6 @@ const { ExportModal, ImportModal } = await import('@/components/transfer-modal')
 beforeEach(resetSpies);
 
 const exportTexts = {
-	copied: 'Copied',
-	copy: 'Copy',
 	includeAccount: 'Include account',
 	includeAccountDescription: '',
 	passphrase: 'Passphrase',
@@ -32,6 +30,9 @@ const exportTexts = {
 	repeatPassphrase: 'Repeat',
 	saveToVault: 'Save',
 	saved: (path: string) => `Saved ${path}`,
+	selectAll: 'Select all',
+	show: 'Show',
+	shown: 'Paste it on the other device',
 	title: 'Export',
 };
 
@@ -68,31 +69,25 @@ test('an export with the account needs a long, repeated passphrase', async () =>
 	expect(modal.contentEl.childElementCount).toBe(0);
 });
 
-test('without the account, the export copies as it is', async () => {
-	const copied: Array<string> = [];
-	const clipboard = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
-	Object.defineProperty(navigator, 'clipboard', {
-		configurable: true,
-		value: { writeText: (text: string) => Promise.resolve(void copied.push(text)) },
-	});
-	try {
-		const { built, row } = openExport();
-		await row('Include account')?.toggles[0]?.(false);
-		expect(row('Passphrase')?.settingEl.style.display).toBe('none');
-		await button('Copy').click();
-		expect(built).toStrictEqual([undefined]);
-		expect(copied).toStrictEqual(['export:plain']);
-		expect(notices).toStrictEqual(['Copied']);
-	} finally {
-		if (clipboard) Object.defineProperty(navigator, 'clipboard', clipboard);
-		else delete (navigator as { clipboard?: unknown }).clipboard;
-	}
+test('without the account, the export is shown as it is, to select', async () => {
+	const { built, modal, row } = openExport();
+	await row('Include account')?.toggles[0]?.(false);
+	expect(row('Passphrase')?.settingEl.style.display).toBe('none');
+	await button('Show').click();
+	expect(built).toStrictEqual([undefined]);
+	const area = modal.contentEl.querySelector('textarea') as HTMLTextAreaElement;
+	expect(area.value).toBe('export:plain');
+	expect(modal.contentEl.textContent).toContain('Paste it on the other device');
+	void button('Select all').click();
+	expect(area.selectionEnd).toBe(area.value.length);
+	expect(notices).toStrictEqual([]);
 });
 
-test('a copy that is not ready copies nothing', async () => {
-	openExport();
-	await button('Copy').click();
+test('an export that is not ready shows nothing', async () => {
+	const { modal } = openExport();
+	await button('Show').click();
 	expect(notices).toStrictEqual(['Too short']);
+	expect(modal.contentEl.querySelector('textarea')).toBeNull();
 });
 
 function openImport(apply: (text: string, passphrase: string) => Promise<void>) {

@@ -66,9 +66,6 @@ const en: Translations = {
 	conflictResolveStrategyDescription: 'What to do when a file changed on both sides.',
 	continueSync: 'Continue',
 	controls: 'Controls',
-	copyExport: 'Copy',
-	copyLog: 'Copy',
-	copyProblemReport: 'Copy a problem report (versions, settings without secrets, recent log)',
 	createLocalDir: 'Create local folder',
 	createRemoteDir: 'Create remote folder',
 	customHeaders: 'Custom headers',
@@ -97,7 +94,6 @@ const en: Translations = {
 		}),
 	executing: 'Executing',
 	export: 'Export',
-	exportCopied: 'Settings copied. Paste them into Import settings on the other device.',
 	exportLogsDescription: 'Save plugin logs to the vault folder in the field.',
 	exportLogsDirectoryPlaceholder: 'Set the directory to export logs to',
 	exportLogsFailed: 'Failed to export logs',
@@ -107,6 +103,7 @@ const en: Translations = {
 	exportSettings: 'Export settings',
 	exportSettingsDescription:
 		'Copy every setting, and optionally the Google account sealed with a passphrase, to set up another device or keep a backup. Webhook URLs and plain-text headers are included as they are.',
+	exportShown: 'Select it, copy it, and paste it into Import settings on the other device.',
 	failed: 'Failed',
 	failedTasksDescription: (count) => `${pcOperations(count)} failed during sync:`,
 	fileSkipped: (key) =>
@@ -155,7 +152,6 @@ const en: Translations = {
 	latestSurviveDescription:
 		'The newer modified time wins. A device with a wrong clock can pick the old edit.',
 	latestSurviveWarning: 'The older edit is replaced without asking.',
-	logCopied: 'Log copied.',
 	massChangeMessage: ({ changes, percent }) =>
 		`This sync would change ${pc(changes, 'file', 'files')} that were already in sync (${percent}% of the vault). That usually means a wrong setting or a problem rather than edits. Stop to look first, or continue if you expected it.`,
 	massChangeTitle: 'Change many files?',
@@ -211,8 +207,9 @@ const en: Translations = {
 	pauseAutomaticSyncDescription:
 		'Skip every automatic sync on this device until turned off. Manual syncs still run.',
 	pluginVersion: (version) => `Drive Bridge ${version}`,
-	problemReportCopied:
-		'Problem report copied. Paste it into a Bug report; check it first, it includes your filter rules and recent log lines.',
+	problemReport: 'Problem report (versions, settings without secrets, recent log)',
+	problemReportHint:
+		'Check it first; it includes your filter rules and recent log lines. Select all, copy it, and paste it into a Bug report.',
 	realtimeSync: 'Realtime sync',
 	realtimeSyncDescription: 'Sync after a file changes, once the delay in the field passes.',
 	realtimeSyncFastMode: 'Realtime sync fast mode',
@@ -251,6 +248,7 @@ const en: Translations = {
 	selectAll: 'Select all',
 	settingsImported: 'Settings imported.',
 	settingsReset: 'Settings reset to defaults',
+	showExport: 'Show',
 	showProgress: 'Show progress',
 	skip: 'Skip',
 	skipDescription: 'Nothing changes; the conflict comes back on the next sync.',

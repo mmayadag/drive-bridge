@@ -52,13 +52,11 @@ const real = {
 	setTimeout: globalThis.setTimeout,
 };
 const realPlatform = { ...ObsidianMock.Platform };
-const clipboard: Array<string> = [];
 
 beforeEach(() => {
 	timers = [];
 	modals.length = 0;
 	notices.length = 0;
-	clipboard.length = 0;
 	const capture = (callback: () => void, delay: number) => timers.push({ callback, delay });
 	const clear = (id: number) => (timers[id - 1] = undefined);
 	Object.assign(globalThis, {
@@ -66,10 +64,6 @@ beforeEach(() => {
 		clearTimeout: clear,
 		setInterval: capture,
 		setTimeout: capture,
-	});
-	Object.defineProperty(navigator, 'clipboard', {
-		configurable: true,
-		value: { writeText: (text: string) => Promise.resolve(void clipboard.push(text)) },
 	});
 });
 
@@ -278,9 +272,8 @@ test('the history command opens the history, which describes each sync', () => {
 	options.showLog();
 	expect(modals).toHaveLength(2);
 	expect(modals[1].options).toStrictEqual({
-		copied: 'logCopied',
-		copy: 'copyLog',
 		log: 'the log',
+		selectAll: 'selectAll',
 		title: 'syncLog',
 	});
 });
@@ -291,13 +284,13 @@ test('the log command opens the log', () => {
 	expect(modals[0].options).toMatchObject({ log: 'the log', title: 'syncLog' });
 });
 
-test('the problem report command copies a report with the log', async () => {
+test('the problem report command shows a report with the log, to select', () => {
 	const { command } = setup();
 	command('copy-problem-report').callback?.();
-	await flush();
-	expect(clipboard).toHaveLength(1);
-	expect(clipboard[0]).toContain('the log');
-	expect(notices.map((notice) => notice.message)).toEqual(['problemReportCopied']);
+	expect(modals).toHaveLength(1);
+	expect(modals[0].options).toMatchObject({ selectAll: 'selectAll', title: 'problemReport' });
+	expect((modals[0].options as { text: string }).text).toContain('the log');
+	expect(notices).toStrictEqual([]);
 });
 
 test('export logs writes the log into a new note in the logs folder and opens it', async () => {
