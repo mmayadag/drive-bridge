@@ -280,3 +280,39 @@ test('the help title opens the same items as a labelled list, each doing what it
 	setting.infoEl.dispatchEvent(new Key('keydown', { key: 'x' }));
 	expect(windows).toHaveLength(1);
 });
+
+test('help page rows run their item and undo their decoration when the tab re-renders', () => {
+	const tree = supportSettings({
+		app: {} as never,
+		getLogs: () => '',
+		on: () => () => {},
+		settings: {},
+		translate: ((key: string) => key) as never,
+	}) as unknown as Record<
+		number,
+		Record<
+			number,
+			Record<number, () => { name: string; render: (setting: unknown) => () => void }>
+		>
+	>;
+	const page = tree[7000][4000];
+	const row = page[1000]();
+	expect(row.name).toBe('guideTitle');
+	const settingEl = document.createElement('div');
+	const cleanup = row.render({ settingEl });
+	expect(settingEl.querySelectorAll('.drive-bridge-help-icon')).toHaveLength(1);
+
+	const opened: Array<string | URL> = [];
+	const originalOpen = window.open;
+	window.open = ((url: string | URL) => void opened.push(url)) as never;
+	try {
+		settingEl.click();
+		expect(opened).toStrictEqual(['https://github.com/mmayadag/drive-bridge#readme']);
+		cleanup();
+		expect(settingEl.querySelectorAll('.drive-bridge-help-icon')).toHaveLength(0);
+		settingEl.click();
+		expect(opened).toHaveLength(1);
+	} finally {
+		window.open = originalOpen;
+	}
+});
