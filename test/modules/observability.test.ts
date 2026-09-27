@@ -494,3 +494,11 @@ test('dispose unsubscribes, stops the timers and leaves the status alone', () =>
 	emit('syncStarted', { trigger: 'manual' });
 	expect(status()).toBe('completed');
 });
+
+test('a preview is not a sync: Last sync and the history stay as they were', () => {
+	const { emit, settings } = setup();
+	emit('syncStarted', { trigger: 'preview' });
+	emit('syncTerminated', { result: 'noop' });
+	expect(settings.lastSync).toBeUndefined();
+	expect(settings.syncHistory).toStrictEqual([]);
+});

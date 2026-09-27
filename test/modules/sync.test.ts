@@ -557,3 +557,60 @@ test('sync this file runs a one-file sync for the active note', async () => {
 	expect([...s.remoteFs.files.keys()]).toStrictEqual(['note.md']);
 	expect(notices).toContain('fileSynced note.md');
 });
+
+test('a preview shows the plan and changes nothing', async () => {
+	const s = setup({
+		local: { 'a.md': 'new here' },
+		remote: { 'b.md': 'new there' },
+		synced: many(60),
+	});
+	for (const key of Object.keys(many(60))) s.localFs.remove(key);
+	const recordsBefore = new Map(s.records);
+
+	expect(await s.run('preview', { preview: true })).toStrictEqual({ result: 'noop' });
+	// The whole plan, without asking about the mass deletion it contains.
+	const plan = keys(s.named('requestPreview')[0]);
+	expect(plan).toContain('upload a.md');
+	expect(plan).toContain('download b.md');
+	expect(plan.filter((task) => task.startsWith('removeRemote'))).toHaveLength(60);
+	expect(s.named('requestConfirmMassDelete')).toStrictEqual([]);
+	expect(s.named('executionStarted')).toStrictEqual([]);
+	expect(s.remoteFs.text('a.md')).toBeUndefined();
+	expect(s.localFs.text('b.md')).toBeUndefined();
+	expect(s.records).toStrictEqual(recordsBefore);
+	expect(s.saves()).toBe(0);
+});
+
+test('a preview with never delete on Drive leaves the kept marks alone', async () => {
+	const s = setup({
+		settings: { keptOnRemote: { 'stale.md': 'old' }, neverDeleteRemote: true },
+		synced: { 'a.md': 'A' },
+	});
+	s.localFs.remove('a.md');
+	await s.run('preview', { preview: true });
+	// The plan forgets the record instead of deleting on Drive, as a real sync would.
+	expect(keys(s.named('requestPreview')[0])).toStrictEqual([]);
+	expect(s.settings.keptOnRemote).toStrictEqual({ 'stale.md': 'old' });
+	expect(s.saves()).toBe(0);
+});
+
+test('a preview of a vault in sync says so', async () => {
+	const s = setup({ synced: { 'a.md': 'A' } });
+	expect(await s.run('preview', { preview: true })).toStrictEqual({ result: 'noop' });
+	expect(s.named('requestPreview')).toStrictEqual([[]]);
+});
+
+test('the preview command runs only while idle', async () => {
+	const s = setup({ synced: { 'a.md': 'A' } });
+	s.sync.start();
+	const command = s.commands.find((item) => item.id === 'preview-sync') as Command;
+	s.isIdle(false);
+	expect(command.checkCallback?.(true)).toBe(false);
+	s.isIdle(true);
+	expect(command.checkCallback?.(true)).toBe(true);
+	command.checkCallback?.(false);
+	await new Promise((resolve) => {
+		setTimeout(resolve, 0);
+	});
+	expect(s.named('syncStarted')).toMatchObject([{ trigger: 'preview' }]);
+});

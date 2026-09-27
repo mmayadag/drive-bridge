@@ -217,23 +217,26 @@ export default class Observability {
 						mobileSyncNotice?.hide();
 						mobileSyncNotice = undefined;
 					}, MOBILE_SYNC_NOTICE_HIDE_DELAY);
-				this.lastSyncTime = Date.now();
-				this.settings.lastSync = {
-					at: this.lastSyncTime,
-					...(reason.result === 'failed' ? { error: reason.error } : {}),
-					result: reason.result,
-					...(this.settings.skipState.skipped.length
-						? { skipped: this.settings.skipState.skipped.length }
-						: {}),
-				};
-				addToHistory(settings.syncHistory, {
-					at: this.lastSyncTime,
-					counts: currentCounts,
-					...(reason.result === 'failed' ? { error: reason.error } : {}),
-					result: reason.result,
-					trigger: currentTrigger,
-				});
-				void ctx.saveSettings();
+				// A preview only showed a plan: it is not a sync for Last sync or the history.
+				if (currentTrigger !== 'preview') {
+					this.lastSyncTime = Date.now();
+					this.settings.lastSync = {
+						at: this.lastSyncTime,
+						...(reason.result === 'failed' ? { error: reason.error } : {}),
+						result: reason.result,
+						...(this.settings.skipState.skipped.length
+							? { skipped: this.settings.skipState.skipped.length }
+							: {}),
+					};
+					addToHistory(settings.syncHistory, {
+						at: this.lastSyncTime,
+						counts: currentCounts,
+						...(reason.result === 'failed' ? { error: reason.error } : {}),
+						result: reason.result,
+						trigger: currentTrigger,
+					});
+					void ctx.saveSettings();
+				}
 				const setUpdateInterval = () =>
 					(updateInterval = window.setInterval(() => {
 						const sinceNow = Date.now() - this.lastSyncTime;

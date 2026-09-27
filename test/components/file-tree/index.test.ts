@@ -93,3 +93,21 @@ test('unmount removes the tree', () => {
 	tree.unmount();
 	expect(el.querySelector('.drive-bridge-file-tree')).toBeNull();
 });
+
+test('read-only, the tree only shows the tasks', () => {
+	const el = document.createElement('div');
+	const tasks = [
+		new Upload({ ...options, key: 'a.md', local: file('a.md') }),
+		new Upload({ ...options, key: 'b.md', local: file('b.md') }),
+	];
+	const tree = mountFileTree(el, tasks, translate, { readOnly: true });
+	expect(el.querySelector('.drive-bridge-file-tree')?.classList.contains('is-read-only')).toBe(
+		true,
+	);
+	// No Select all, no visible boxes, and a click selects nothing away.
+	expect(el.querySelector('.drive-bridge-file-tree-count')).toBeNull();
+	const boxes = [...el.querySelectorAll('input')];
+	expect(boxes.every((box) => box.style.display === 'none')).toBe(true);
+	el.querySelector<HTMLElement>('.drive-bridge-file-tree-row')?.click();
+	expect(tree.getState().selected).toHaveLength(2);
+});

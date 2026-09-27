@@ -1,5 +1,12 @@
 import type { ButtonSpy } from '$/support/modal-spies';
-import { ModalSpy, NoticeSpy, SettingSpy, resetSpies, settings } from '$/support/modal-spies';
+import {
+	ModalSpy,
+	NoticeSpy,
+	SettingSpy,
+	button,
+	resetSpies,
+	settings,
+} from '$/support/modal-spies';
 import ObsidianMock from '$/support/obsidian-mock';
 import testKit from '$/support/test-kit';
 import { beforeEach, expect, mock, test } from 'bun:test';
@@ -355,4 +362,19 @@ test('dispose closes the modal and stops listening', () => {
 	expect([...listeners.values()].every((set) => set.size === 0)).toBe(true);
 	emit('syncStarted', { trigger: 'manual' });
 	expect(modal.contentEl.childElementCount).toBe(0);
+});
+
+test('a preview opens its own window with the plan, or says everything is in sync', () => {
+	const { emit } = setup();
+	const upload = new Upload({ ...options, key: 'a.md', local: file('a.md') });
+	emit('requestPreview', [upload]);
+	const window = button('done');
+	const content = settings.at(-1)?.settingEl.parentElement;
+	expect(content?.textContent).toContain('previewIntro confirmTasksDescription');
+	expect(content?.querySelector('.drive-bridge-file-tree.is-read-only')).not.toBeNull();
+	void window.click();
+
+	resetSpies();
+	emit('requestPreview', []);
+	expect(settings.at(-1)?.settingEl.parentElement?.textContent).toContain('previewNothing');
 });
