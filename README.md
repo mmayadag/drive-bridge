@@ -66,7 +66,7 @@ Step-by-step instructions and the reasoning behind each choice are in
 
 The only requests Drive Bridge makes are to Google, and to a webhook URL if you
 set one yourself. It collects no usage statistics, has no analytics or crash
-reporting, and writes to the clipboard only when you press a copy button.
+reporting, and never touches the clipboard.
 Details in [PRIVACY.md](PRIVACY.md).
 
 ## Support

@@ -13,10 +13,11 @@ file names, folder names or Google account.
   OAuth client. The author has no access to any of it.
 - Your Google client secret and refresh token are kept in the operating
   system's secure storage on each device, never in a synced file.
-- **Export settings** writes to your clipboard or a file in your vault, nowhere
-  else. The Google account part is encrypted with your passphrase, or left out.
-- The clipboard is only written, and only when you press a copy button (the
-  sync log, the problem report, an export). The plugin never reads it.
+- **Export settings** shows the export in a window for you to copy, or saves it
+  to a file in your vault, nowhere else. The Google account part is encrypted
+  with your passphrase, or left out.
+- The plugin never touches the clipboard. The sync log, the problem report and
+  an export are shown in a window with **Select all**; copying is up to you.
 - The two uses of `fetch` read large files of this vault from disk, in pieces;
   they never reach the network.
 - **Sign in with Google** opens Google's own sign-in page in your browser.

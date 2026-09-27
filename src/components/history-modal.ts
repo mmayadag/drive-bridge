@@ -1,6 +1,7 @@
 import type { App } from 'obsidian';
-import { Modal, Notice, Setting } from 'obsidian';
+import { Modal, Setting } from 'obsidian';
 import type { SyncSummary } from '@/sync/history';
+import { renderSelectableText } from './selectable-text';
 
 export type HistoryTexts = {
 	title: string;
@@ -44,28 +45,19 @@ export class HistoryModal extends Modal {
 	}
 }
 
-/** The recent log, read-only, with a copy button. */
+/** The recent log, read-only, to select and copy. */
 export class LogModal extends Modal {
 	constructor(
 		app: App,
-		private readonly options: { title: string; log: string; copy: string; copied: string },
+		private readonly options: { title: string; log: string; selectAll: string },
 	) {
 		super(app);
 	}
 
 	onOpen() {
-		const { title, log, copy, copied } = this.options;
+		const { title, log, selectAll } = this.options;
 		this.setTitle(title);
-		this.contentEl.createEl('pre', { cls: 'drive-bridge-log', text: log });
-		new Setting(this.contentEl).addButton((button) =>
-			button
-				.setButtonText(copy)
-				.setCta()
-				.onClick(async () => {
-					await navigator.clipboard.writeText(log);
-					new Notice(copied);
-				}),
-		);
+		renderSelectableText(this.contentEl, log, { selectAll });
 	}
 
 	onClose() {

@@ -1,5 +1,6 @@
 import type { App } from 'obsidian';
 import { Modal, Notice, Setting } from 'obsidian';
+import { renderSelectableText } from './selectable-text';
 
 const MIN_PASSPHRASE = 8;
 
@@ -12,8 +13,9 @@ export type ExportTexts = {
 	repeatPassphrase: string;
 	passphraseTooShort: string;
 	passphraseMismatch: string;
-	copy: string;
-	copied: string;
+	show: string;
+	shown: string;
+	selectAll: string;
 	saveToVault: string;
 	saved: (path: string) => string;
 };
@@ -77,14 +79,17 @@ export class ExportModal extends Modal {
 			)
 			.addButton((button) =>
 				button
-					.setButtonText(texts.copy)
+					.setButtonText(texts.show)
 					.setCta()
 					.onClick(async () => {
 						const text = await produce();
 						if (!text) return;
-						await navigator.clipboard.writeText(text);
-						new Notice(texts.copied);
-						this.close();
+						// The export replaces the form, to be selected and copied by hand.
+						this.contentEl.empty();
+						renderSelectableText(this.contentEl, text, {
+							hint: texts.shown,
+							selectAll: texts.selectAll,
+						});
 					}),
 			);
 	}

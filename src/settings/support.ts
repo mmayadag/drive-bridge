@@ -1,9 +1,11 @@
 import type { Events } from '@';
-import { apiVersion, Notice, Platform } from 'obsidian';
+import type { App } from 'obsidian';
+import { apiVersion, Platform } from 'obsidian';
 import type { On } from '@/modules/event-bus';
 import type { Translate } from '@/modules/i18n';
 import type { LastSync } from '@/modules/observability';
 import type { CallableOrObjectTree } from '@/modules/setting';
+import { TextModal } from '@/components/selectable-text';
 import { VERSION } from '@/modules/event-bus';
 import { COFFEE, HELP } from './layout';
 import { buildReport } from './problem-report';
@@ -25,8 +27,9 @@ export type SupportSettingTranslations = {
 	coffeeFailed: string;
 	buyMeACoffee: string;
 	pluginVersion: (version: string) => string;
-	copyProblemReport: string;
-	problemReportCopied: string;
+	problemReport: string;
+	problemReportHint: string;
+	selectAll: string;
 };
 
 function platformName() {
@@ -38,22 +41,25 @@ function platformName() {
 	return 'unknown';
 }
 
-/** Copies a problem report (versions, settings without secrets, recent log) to paste into a Bug. */
-export async function copyProblemReport(ctx: {
+/** Shows a problem report (versions, settings without secrets, recent log) to paste into a Bug. */
+export function showProblemReport(ctx: {
+	app: App;
 	settings: object;
 	getLogs: () => string;
 	translate: Translate<SupportSettingTranslations>;
 }) {
-	await navigator.clipboard.writeText(
-		buildReport({
+	new TextModal(ctx.app, {
+		hint: ctx.translate('problemReportHint'),
+		selectAll: ctx.translate('selectAll'),
+		text: buildReport({
 			log: ctx.getLogs(),
 			obsidian: apiVersion,
 			platform: platformName(),
 			plugin: VERSION,
 			settings: ctx.settings as never,
 		}),
-	);
-	new Notice(ctx.translate('problemReportCopied'), 8000);
+		title: ctx.translate('problemReport'),
+	}).open();
 }
 
 export type ReportKind = 'bug' | 'request';
@@ -84,11 +90,13 @@ export function coffeeQuestion(lastSync?: LastSync): CoffeeQuestion {
 }
 
 export default function supportSettings({
+	app,
 	translate,
 	settings,
 	on,
 	getLogs,
 }: {
+	app: App;
 	translate: Translate<SupportSettingTranslations>;
 	settings: { lastSync?: LastSync };
 	on: On<Events>;
@@ -126,15 +134,10 @@ export default function supportSettings({
 							)
 							.addExtraButton((button) =>
 								button
-									.setIcon('clipboard-copy')
-									.setTooltip(translate('copyProblemReport'))
-									.onClick(
-										() =>
-											void copyProblemReport({
-												getLogs,
-												settings,
-												translate,
-											}),
+									.setIcon('file-text')
+									.setTooltip(translate('problemReport'))
+									.onClick(() =>
+										showProblemReport({ app, getLogs, settings, translate }),
 									),
 							);
 					},
