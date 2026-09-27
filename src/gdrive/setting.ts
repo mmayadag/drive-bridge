@@ -24,7 +24,7 @@ import { isClientId, parseClientJson } from './client-setup';
 import { connectWithToken, findMissingInput } from './connect';
 import connectedRows from './connected-rows';
 import remoteScanSetting from './remote-scan-setting';
-import setupPage from './setup-page';
+import setupPage, { labelSetupEntryLater } from './setup-page';
 import { exchangeCode, parseRedirect, startSignIn } from './sign-in';
 
 export type GdriveTranslations = BaseDirectoryTranslations &
@@ -285,6 +285,7 @@ export default function gdriveSetting(
 						),
 						name: translate('clientId'),
 						render: (setting) => {
+							labelSetupEntryLater(setting.settingEl, translate);
 							setting.addText((text) => {
 								clientIdField = markValid(text);
 								const flag = (value: string) =>
