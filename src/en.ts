@@ -264,6 +264,9 @@ const en: Translations = {
 	settingsReset: 'Settings reset to defaults',
 	showExport: 'Show',
 	showProgress: 'Show progress',
+	showStatusText: 'Show status text',
+	showStatusTextDescription:
+		'The status bar shows the sync status next to its icon. Off leaves only the icon; hover it for the status, click it for these settings.',
 	skip: 'Skip',
 	skipDescription: 'Nothing changes; the conflict comes back on the next sync.',
 	skippedFiles: 'Skipped files',

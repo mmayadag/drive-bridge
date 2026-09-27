@@ -522,3 +522,11 @@ test('on a phone, syncing an opened note shows no notice', () => {
 	expect(notices).toStrictEqual([]);
 	emit('syncTerminated', { result: 'noop' });
 });
+
+test('clicking the status bar item opens the settings, or the history when it cannot', () => {
+	const { statusBar } = setup();
+	// The test app has no settings window: the history opens instead.
+	statusBar[0].click();
+	expect(modals).toHaveLength(1);
+	expect(modals[0].options).toHaveProperty('history');
+});

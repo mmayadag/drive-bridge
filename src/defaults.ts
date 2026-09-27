@@ -44,6 +44,7 @@ export function defaultSettings(configDir: string): Settings {
 		realtimeSyncFastMode: true,
 		remoteFs: 'gdrive',
 		scheduledSync: { enabled: true, value: 15 * 60 * 1000 },
+		showStatusText: true,
 		skipState: { failures: {}, skipped: [] },
 		startupSync: { enabled: true, value: 5000 },
 		syncHistory: [],
