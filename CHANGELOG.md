@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.3.7 - 2026-09-27
+
+- The main screen is grouped by what the settings are for: **How it syncs**
+  (the two strategies, Automatic sync, Filter rules), **Deletions** (Never
+  delete on Drive, Delete to trash) and **Google Drive** (account and folder).
+  Drive scan moved into Advanced (#171).
+- Before a device is connected, **Connect your Google account** sits right under
+  Last sync and opens the account page (#171).
+
 ## v0.3.6 - 2026-09-27
 
 - **Help and support ›** is now also a page under Advanced, listing the setup
