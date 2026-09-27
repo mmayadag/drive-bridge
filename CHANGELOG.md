@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.4.2 - 2026-09-27
+
+- The **status bar** item shows the whole status when you hover it, and opens
+  Drive Bridge's settings when you click it. **Show status text** (Advanced →
+  Miscellaneous) leaves only the icon when off (#180).
+- The export, sync log and problem report windows show their text at the full
+  width of the window, in a monospace font (#183).
+- Filter rules no longer carry the Speed label: they decide what syncs (#179).
+
 ## v0.4.1 - 2026-09-27
 
 - The main screen has a single **Help and support**: the card with its icons.
