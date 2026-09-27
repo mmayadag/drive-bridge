@@ -292,3 +292,42 @@ test('editing the header key to a new valid value saves it on blur', () => {
 	blurHandlers.forEach((fn) => fn());
 	expect(ctx.settings.customHeaders[0]?.key).toBe('X-New-Name');
 });
+
+test('Show status text saves the choice and tells the status bar at once', () => {
+	const dispatched: Array<[string, unknown]> = [];
+	const settings = { customHeaders: [], showStatusText: true };
+	let saves = 0;
+	const tree = miscellaneousSettings(
+		baseCtx({
+			dispatch: (name: string, value: unknown) => void dispatched.push([name, value]),
+			saveSettings: () => {
+				saves++;
+				return Promise.resolve();
+			},
+			settings,
+		}) as never,
+	) as never as { [MORE]: { [PAGE.advanced]: { [ADVANCED.miscellaneous]: Group } } };
+	const row = tree[MORE][PAGE.advanced][ADVANCED.miscellaneous][1900]() as {
+		name: string;
+		render: (setting: unknown) => void;
+	};
+	expect(row.name).toBe('showStatusText');
+	let change: (value: boolean) => void = () => {};
+	let initial: boolean | undefined;
+	const toggle = {
+		onChange: (fn: (value: boolean) => void) => {
+			change = fn;
+			return toggle;
+		},
+		setValue: (value: boolean) => {
+			initial = value;
+			return toggle;
+		},
+	};
+	row.render({ addToggle: (cb: (t: typeof toggle) => void) => cb(toggle) });
+	expect(initial).toBe(true);
+	change(false);
+	expect(settings.showStatusText).toBe(false);
+	expect(saves).toBe(1);
+	expect(dispatched).toStrictEqual([['showStatusTextChanged', false]]);
+});

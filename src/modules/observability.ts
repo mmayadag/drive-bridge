@@ -1,11 +1,12 @@
 import type { Events, Translations } from '@';
 import type { App, Command, DataAdapter, IconName } from 'obsidian';
-import { Notice, Platform, setIcon } from 'obsidian';
+import { Notice, Platform } from 'obsidian';
 import type { Ref } from '@/shared/reactive';
 import type { SyncCounts, SyncSummary } from '@/sync/history';
 import type { SkipState } from '@/sync/skip-list';
 import type { Progress } from '@/types';
 import { HistoryModal, LogModal } from '@/components/history-modal';
+import { mountStatusBar, openPluginSettings } from '@/components/status-bar';
 import { showProblemReport } from '@/settings/support';
 import { getMessage } from '@/shared/error';
 import { computed, ref } from '@/shared/reactive';
@@ -95,8 +96,13 @@ export default class Observability {
 		},
 	);
 
+	declare readonly events: {
+		showStatusTextChanged: boolean;
+	};
+
 	declare readonly settings: {
 		noticeStatusOnMobile: boolean;
+		showStatusText: boolean;
 		exportLogsDirectory: string;
 		/** Result of the last sync on this device. Not synced, `data.json` is device-local. */
 		lastSync?: LastSync;
@@ -301,22 +307,15 @@ export default class Observability {
 	};
 
 	private readonly setupStatus = () => {
-		const { ctx, t, progressText } = this;
-		const { isIdle, addStatusBarItem } = ctx;
-		const statusEl = addStatusBarItem();
-		setIcon(statusEl, 'refresh-cw');
-		const status = statusEl.createSpan({ cls: 'drive-bridge-status-text', text: t('idle') });
-		this.cleanupCallbacks.push(
-			isIdle.subscribe(
-				(idle) => {
-					const icon = statusEl.firstElementChild;
-					if (!icon) return;
-					icon.toggleClass('drive-bridge-spin', !idle);
-				},
-				{ immediate: true },
-			),
-			progressText.subscribe((text) => status.setText(text)),
-		);
+		const { ctx } = this;
+		const bar = mountStatusBar(ctx.addStatusBarItem(), {
+			idle: ctx.isIdle,
+			idleText: this.t('idle'),
+			onClick: () => openPluginSettings(ctx.app, 'drive-bridge') || this.showSyncHistory(),
+			showText: this.settings.showStatusText,
+			text: this.progressText,
+		});
+		this.cleanupCallbacks.push(bar.cleanup, ctx.on('showStatusTextChanged', bar.showText));
 	};
 
 	private readonly setupCommands = () =>

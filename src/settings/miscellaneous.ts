@@ -1,6 +1,7 @@
-import type { Settings } from '@';
+import type { Events, Settings } from '@';
 import type { App, SettingGroupItem } from 'obsidian';
 import { Notice, SecretComponent } from 'obsidian';
+import type { Dispatch } from '@/modules/event-bus';
 import type { Snippet, Translate } from '@/modules/i18n';
 import type { CallableOrObjectTree } from '@/modules/setting';
 import type { DatabaseSync } from '@/shared/key-value-store';
@@ -21,6 +22,8 @@ export type MiscellaneousSettingTranslations = {
 	skip: string;
 	noticeStatusOnMobile: string;
 	noticeStatusOnMobileDescription: string;
+	showStatusText: string;
+	showStatusTextDescription: string;
 	confirmTasksInSync: string;
 	confirmTasksInSyncDescription: string;
 	confirmDeleteInAutoSync: string;
@@ -46,7 +49,9 @@ export default function miscellaneousSettings({
 	memoryDB,
 	rerenderSettingTab,
 	app,
+	dispatch,
 }: {
+	dispatch: Dispatch<Events>;
 	translate: Translate<MiscellaneousSettingTranslations>;
 	saveSettings: () => Promise<void>;
 	settings: Settings;
@@ -174,6 +179,19 @@ export default function miscellaneousSettings({
 								),
 							},
 						),
+						1900: s(() => ({
+							desc: translate('showStatusTextDescription'),
+							name: translate('showStatusText'),
+							render: (setting) => {
+								setting.addToggle((toggle) =>
+									toggle.setValue(settings.showStatusText).onChange((value) => {
+										settings.showStatusText = value;
+										void saveSettings();
+										dispatch('showStatusTextChanged', value);
+									}),
+								);
+							},
+						})),
 						2000: s(() => ({
 							control: { key: 'noticeStatusOnMobile', type: 'toggle' },
 							desc: translate('noticeStatusOnMobileDescription'),
