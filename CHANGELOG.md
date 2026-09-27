@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.4.4 - 2026-09-27
+
+- After **Save to vault**, the Export settings row says where the file is and
+  when it was saved, with a button that opens it, while it is still in the
+  vault; it syncs like any note, so delete it once imported (#189).
+
+Fixes:
+
+- The **Guide** label now shows on Set up a Google client, and the _or_
+  between the two ways to connect sits alone, without lines (#187).
+
 ## v0.4.3 - 2026-09-27
 
 - The **Google account** page shows the two ways to connect side by side: the
