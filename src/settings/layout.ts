@@ -1,7 +1,6 @@
 import type { Settings } from '@';
 import type { Translate } from '@/modules/i18n';
 import type { CallableOrObjectTree, SettingTree } from '@/modules/setting';
-import type { LabelDefinition } from './utils';
 import { s } from './utils';
 
 /**
@@ -68,9 +67,8 @@ export function countAutomaticSyncs(settings: Settings) {
 export default function layoutSettings(ctx: {
 	translate: Translate<LayoutSettingTranslations>;
 	settings: Settings;
-	speedLabel: () => LabelDefinition;
 }): CallableOrObjectTree {
-	const { translate, settings, speedLabel } = ctx;
+	const { translate, settings } = ctx;
 	return {
 		[HOW]: s(
 			(self) => ({
@@ -95,7 +93,6 @@ export default function layoutSettings(ctx: {
 							settings.inclusionRules.length + settings.exclusionRules.length,
 						),
 					items: items(self),
-					labels: [speedLabel()],
 					name: translate('filterRules'),
 					type: 'page',
 				})),
