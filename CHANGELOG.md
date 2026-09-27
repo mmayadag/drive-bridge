@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.4.1 - 2026-09-27
+
+- The main screen has a single **Help and support**: the card with its icons.
+  Tapping its title opens the Help and support page; the extra entry above it
+  is gone. The help descriptions no longer repeat their titles (#177).
+
 ## v0.4.0 - 2026-09-27
 
 Fewer surprises.
