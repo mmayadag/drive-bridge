@@ -2,7 +2,7 @@ import type { Settings } from '@';
 import type { Translate } from '@/modules/i18n';
 import type { CallableOrObjectTree } from '@/modules/setting';
 import type { LabelDefinition } from './utils';
-import { MORE, PAGE } from './layout';
+import { HOW, PAGE } from './layout';
 import { renderTogglableValue, s } from './utils';
 
 export type FeaturesSettingTranslations = {
@@ -42,7 +42,7 @@ export default function featuresSettings(ctx: {
 		speedLabel,
 	} = ctx;
 	return {
-		[MORE]: {
+		[HOW]: {
 			[PAGE.automaticSync]: {
 				1000: s(() => ({
 					desc: translate('realtimeSyncDescription'),

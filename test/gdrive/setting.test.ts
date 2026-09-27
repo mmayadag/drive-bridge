@@ -6,6 +6,7 @@ void mock.module('obsidian', () => ObsidianMock);
 
 const { TokenManager } = await import('@/gdrive/auth');
 const { default: gdriveSetting, describeAccount } = await import('@/gdrive/setting');
+const { ADVANCED, DELETIONS, MORE, PAGE } = await import('@/settings/layout');
 
 const SECRET_ID = 'drive-bridge-gdrive-client-secret';
 const REFRESH_ID = 'drive-bridge-gdrive-refresh-token';
@@ -39,18 +40,42 @@ function setup({
 		new TokenManager(storage as never, () => clientId),
 	) as Record<number, (self: unknown) => SettingDefinitionGroup>;
 	const group = tree[551](tree[551]);
+	const prompt = tree[16](tree[16]) as unknown as SettingDefinitionPage;
 	const page = group.items?.[0] as SettingDefinitionPage;
 	const shown = (page.items as Array<SettingDefinition>)
 		.filter((item) => call(item.visible ?? true))
 		.map((item) => item.name);
-	return { group, page, shown };
+	return { group, page, prompt, shown, tree };
 }
 
 const call = (value: unknown) => (typeof value === 'function' ? (value as () => unknown)() : value);
 
-test('leaves four rows in the Google Drive section', () => {
-	const names = setup({}).group.items?.map((item) => item.name);
-	expect(names).toStrictEqual(['googleAccount', 'baseDirectory', 'useTrash', 'remoteScan']);
+test('leaves the account and the folder in the Google Drive section', () => {
+	const { group, tree } = setup({});
+	expect(group.items?.map((item) => item.name)).toStrictEqual(['googleAccount', 'baseDirectory']);
+	// Delete to trash sits with the other deletion setting, Drive scan under Advanced.
+	const others = tree as unknown as Record<number, Record<number, unknown>>;
+	const trash = (others[DELETIONS][2000] as () => SettingDefinition)();
+	expect(trash.name).toBe('useTrash');
+	const advanced = others[MORE][PAGE.advanced] as Record<
+		number,
+		(self: unknown) => SettingDefinitionGroup
+	>;
+	const backend = advanced[ADVANCED.backend](advanced[ADVANCED.backend]);
+	expect(backend.heading).toBe('gdrive');
+	expect(backend.items?.map((item) => item.name)).toStrictEqual(['remoteScan']);
+});
+
+test('a device that is not connected sees the account page first, as Connect your Google account', () => {
+	const { prompt } = setup({});
+	expect(prompt.type).toBe('page');
+	expect(prompt.name).toBe('connectPrompt');
+	expect(call(prompt.visible)).toBe(true);
+	expect((prompt.items as Array<SettingDefinition>).map((item) => item.name)).toContain(
+		'clientId',
+	);
+	const connected = setup({ clientId: 'client', secret: 'secret', token: '1//token' });
+	expect(call(connected.prompt.visible)).toBe(false);
 });
 
 test('asks for the whole setup until an account is connected', () => {

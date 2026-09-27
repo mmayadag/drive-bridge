@@ -73,6 +73,7 @@ const en: Translations = {
 	customHeadersDescription:
 		'Extra HTTP headers on every Drive request, in plain text or the OS keychain. Drive needs none.',
 	deleteThem: 'Delete them',
+	deletions: 'Deletions',
 	development: 'Development',
 	diffMatchPatch: 'Merge',
 	done: 'Done',
@@ -125,6 +126,7 @@ const en: Translations = {
 	historyCounts: ({ uploaded, downloaded, deletedHere, deletedOnDrive, conflicts, failed }) =>
 		`↑${uploaded} ↓${downloaded} · deleted ${deletedHere} here, ${deletedOnDrive} on Drive · ${pc(conflicts, 'conflict', 'conflicts')}${failed ? ` · ${failed} failed` : ''}`,
 	historyEmpty: 'No sync on this device yet.',
+	howItSyncs: 'How it syncs',
 	idle: 'Idle',
 	importAction: 'Import',
 	importSettings: 'Import settings',

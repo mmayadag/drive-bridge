@@ -74,23 +74,25 @@ const names = (items: Array<Named> | undefined) =>
 
 test('the main screen keeps daily settings and links to the sub-pages', () => {
 	const top = buildTab() as Array<Named>;
+	// Grouped by purpose: how it syncs, deletions, then more pages, help and coffee.
 	expect(names(top)).toStrictEqual([
 		'lastSync',
 		'backend',
+		'howItSyncs',
+		'deletions',
+		'group',
+		'group',
+		'group',
+	]);
+	const [how, deletions, more, help, coffee] = top.slice(-5);
+	expect(names(how.items)).toStrictEqual([
 		'syncStrategy',
 		'conflictResolveStrategy',
-		'neverDeleteRemote',
-		'group',
-		'group',
-		'group',
-	]);
-	const [more, help, coffee] = top.slice(-3);
-	expect(names(more.items)).toStrictEqual([
 		'automaticSync',
 		'filterRules',
-		'advanced',
-		'helpAndSupport',
 	]);
+	expect(names(deletions.items)).toStrictEqual(['neverDeleteRemote']);
+	expect(names(more.items)).toStrictEqual(['advanced', 'helpAndSupport']);
 	// The help page lists the same items as the card's icons.
 	const helpPage = (more.items as Array<{ name: string; items?: Array<{ name: string }> }>).at(
 		-1,
@@ -106,8 +108,9 @@ test('the main screen keeps daily settings and links to the sub-pages', () => {
 });
 
 test('each sub-page holds its settings', () => {
-	const pages = (buildTab().at(-3) as Named).items ?? [];
-	const [automatic, filters, advanced] = pages;
+	const tab = buildTab();
+	const [automatic, filters] = ((tab.at(-5) as Named).items ?? []).slice(2);
+	const [advanced] = (tab.at(-3) as Named).items ?? [];
 	expect(names(automatic.items)).toStrictEqual([
 		'pauseAutomaticSync',
 		'realtimeSync',
@@ -129,8 +132,13 @@ test('each sub-page holds its settings', () => {
 
 type Page = Named & { displayValue: () => string; status: () => string | null };
 
+/** The pages in the How it syncs group. */
+const howItSyncs = () =>
+	((buildTab() as Array<Page>).find((item) => item.heading === 'howItSyncs')?.items ??
+		[]) as Array<Page & { desc?: unknown }>;
+
 test('the strategy pages group safe and risky choices and warn on the risky ones', () => {
-	const top = buildTab() as Array<Page>;
+	const top = howItSyncs();
 	const strategy = top.find((item) => item.name === 'syncStrategy');
 	const conflicts = top.find((item) => item.name === 'conflictResolveStrategy');
 	expect(strategy?.type).toBe('page');
@@ -155,10 +163,7 @@ test('the strategy pages group safe and risky choices and warn on the risky ones
 });
 
 test('a risky strategy replaces the entry description with its warning', () => {
-	const entry = () =>
-		(buildTab() as Array<Page & { desc?: unknown }>).find(
-			(item) => item.name === 'syncStrategy',
-		);
+	const entry = () => howItSyncs().find((item) => item.name === 'syncStrategy');
 	expect(entry()?.desc).toBe('syncStrategyDescription');
 	settings.decider = 'mirrorLocal';
 	expect(entry()?.desc).not.toBe('syncStrategyDescription');
@@ -186,8 +191,7 @@ test('countAutomaticSyncs counts each independent automatic trigger', () => {
 });
 
 test('the automatic-sync page reports how many triggers are on, or that they are paused', () => {
-	const [more] = (buildTab() as Array<Page>).slice(-3);
-	const automatic = more?.items?.[0] as Page;
+	const automatic = howItSyncs().find((item) => item.name === 'automaticSync') as Page;
 	// The fake translate() in this file ignores its argument, so only the key is asserted;
 	// countAutomaticSyncs itself is checked above.
 	expect(automatic.displayValue()).toBe('xOfYOn');
@@ -198,7 +202,6 @@ test('the automatic-sync page reports how many triggers are on, or that they are
 });
 
 test('the filters page reports how many rules are configured', () => {
-	const [more] = (buildTab() as Array<Page>).slice(-3);
-	const filters = more?.items?.[1] as Page;
+	const filters = howItSyncs().find((item) => item.name === 'filterRules') as Page;
 	expect(filters.displayValue()).toBe('xConfigured');
 });

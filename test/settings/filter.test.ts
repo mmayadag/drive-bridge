@@ -4,7 +4,7 @@
 // are duck-typed to just what filter.ts touches.
 
 import { expect, test } from 'bun:test';
-import { PAGE, MORE } from '@/settings/layout';
+import { HOW, PAGE } from '@/settings/layout';
 import { openMemoryDB } from '@/shared/key-value-store';
 
 const { default: filterSettings } = await import('@/settings/filter');
@@ -30,9 +30,9 @@ function baseCtx(overrides: Record<string, unknown> = {}) {
 
 function ruleList(ctx: ReturnType<typeof baseCtx>, page: 1000 | 2000): EditableList {
 	const tree = filterSettings(ctx as never) as never as {
-		[MORE]: { [PAGE.filters]: Group };
+		[HOW]: { [PAGE.filters]: Group };
 	};
-	const group = tree[MORE][PAGE.filters];
+	const group = tree[HOW][PAGE.filters];
 	const pageNode = group[page] as never as Group;
 	return pageNode[1000]() as EditableList;
 }
@@ -205,9 +205,9 @@ test('the exclusion page reads and writes settings.exclusionRules independently'
 test('the inclusion and exclusion pages report how many rules are configured', () => {
 	const ctx = baseCtx();
 	const tree = filterSettings(ctx as never) as never as {
-		[MORE]: { [PAGE.filters]: Group };
+		[HOW]: { [PAGE.filters]: Group };
 	};
-	const group = tree[MORE][PAGE.filters];
+	const group = tree[HOW][PAGE.filters];
 	const inclusionFn = group[1000] as never as (self: unknown) => { displayValue: () => string };
 	const exclusionFn = group[2000] as never as (self: unknown) => { displayValue: () => string };
 	const inclusionPage = inclusionFn(inclusionFn);
