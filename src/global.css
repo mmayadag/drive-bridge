@@ -628,6 +628,20 @@ a.drive-bridge-coffee-button:hover .drive-bridge-coffee-cup {
 	font-size: var(--font-ui-smaller);
 }
 
+/* Text to select and copy (export, log, problem report): the full width of the window. */
+.drive-bridge-selectable-text {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 14em;
+	max-height: 60vh;
+	resize: vertical;
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-smaller);
+	white-space: pre;
+	overflow: auto;
+}
+
 /* Sync log window. */
 .drive-bridge-log {
 	max-height: 60vh;
