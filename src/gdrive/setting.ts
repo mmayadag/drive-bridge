@@ -16,6 +16,7 @@ import type { GdriveSettings } from '.';
 import type { TokenManager } from './auth';
 import type { ConnectedRowsTranslations } from './connected-rows';
 import type { FolderPickerTranslations } from './folder-picker';
+import type { Quota } from './quota';
 import type { RemoteScanTranslations } from './remote-scan-setting';
 import type { SetupPageTranslations } from './setup-page';
 import type { PendingSignIn } from './sign-in';
@@ -58,6 +59,7 @@ export type GdriveTranslations = FolderPickerTranslations &
 		clientSecret: string;
 		clientSecretDescription: string;
 		connectFirst: string;
+		driveAlmostFull: Snippet<{ used: string; limit: string }>;
 		connectPrompt: string;
 		connectPromptDescription: string;
 		enterClientId: string;
@@ -131,6 +133,7 @@ export default function gdriveSetting(
 	},
 	settings: GdriveSettings,
 	tokenManager: TokenManager,
+	getQuota: () => Quota | undefined = () => {},
 ): CallableOrObjectTree {
 	// The three fields Connect needs, all on the Google account page. Kept here so
 	// Connect can point at whichever one is still empty instead of spending a
@@ -166,6 +169,7 @@ export default function gdriveSetting(
 		connected,
 		dispatch,
 		getCheckConnection,
+		getQuota,
 		memoryDB,
 		openExportSettings,
 		ready: () => ready(),

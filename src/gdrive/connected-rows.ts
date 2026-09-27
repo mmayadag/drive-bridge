@@ -6,10 +6,13 @@ import type { CheckConnectionDB, CheckConnectionTranslations } from '@/settings/
 import type { MaybePromise } from '@/types';
 import { addCheckConnection } from '@/settings/check-connection';
 import { s } from '@/settings/utils';
+import type { Quota } from './quota';
+import { formatBytes } from './quota';
 
 export type ConnectedRowsTranslations = CheckConnectionTranslations & {
 	connection: string;
 	connectionDescription: string;
+	connectionUsage: (sizes: { used: string; limit: string }) => string;
 	testConnection: string;
 	setUpAnotherDevice: string;
 	setUpAnotherDeviceDescription: string;
@@ -24,6 +27,8 @@ export default function connectedRows(ctx: {
 	memoryDB: CheckConnectionDB;
 	settings: Settings;
 	connected: () => boolean;
+	/** The last quota Drive reported, if any, shown on the Connection row. */
+	getQuota: () => Quota | undefined;
 	/** Connected with the client ID and secret too: only then is there a whole setup to export. */
 	ready: () => boolean;
 	openExportSettings: () => void;
@@ -31,7 +36,7 @@ export default function connectedRows(ctx: {
 	const { translate: t, connected } = ctx;
 	return {
 		connection: s(() => ({
-			desc: t('connectionDescription'),
+			desc: describeConnection(ctx.getQuota(), t),
 			name: t('connection'),
 			render: (setting) => {
 				// The icon shows the last result; the button runs the check again and says how it went.
@@ -56,4 +61,13 @@ export default function connectedRows(ctx: {
 			visible: ctx.ready,
 		})),
 	};
+}
+
+/** How much of Drive is used, once known; otherwise what the check does. */
+export function describeConnection(
+	quota: Quota | undefined,
+	t: Translate<ConnectedRowsTranslations>,
+) {
+	if (!quota?.limit) return t('connectionDescription');
+	return t('connectionUsage', { limit: formatBytes(quota.limit), used: formatBytes(quota.used) });
 }
