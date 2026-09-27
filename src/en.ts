@@ -23,6 +23,7 @@ const en: Translations = {
 	backendDescription: 'Where this vault syncs to.',
 	bidirectional: 'Bidirectional',
 	bidirectionalDescription: 'Changes on either side are copied to the other. Use this normally.',
+	bugTitle: 'Report a bug',
 	buyMeACoffee: 'Buy me a coffee',
 	cancel: 'Cancel',
 	cancelled: 'Cancelled',
@@ -35,9 +36,9 @@ const en: Translations = {
 	clearRecordsConfirm:
 		'Drive Bridge forgets what it knew about the last sync. The next sync compares everything again and may upload, download or flag conflicts it would otherwise skip. Your files are not changed now.',
 	clearRecordsDescription: 'Forget the stored sync state. The next sync may decide differently.',
-	coffeeFailed: 'Not working yet? Report it above.',
+	coffeeFailed: 'Need help?',
 	coffeeQuestion: 'Did Drive Bridge save you a headache?',
-	coffeeSetUp: "Set it up, then let's talk coffee.",
+	coffeeSetUp: "Let's get you connected first, then coffee.",
 	coffeeWorks: 'It works! Coffee time?',
 	completed: 'Completed',
 	completedNoop: 'Already synced',
@@ -106,6 +107,7 @@ const en: Translations = {
 	exportShown: 'Select it, copy it, and paste it into Import settings on the other device.',
 	failed: 'Failed',
 	failedTasksDescription: (count) => `${pcOperations(count)} failed during sync:`,
+	featureTitle: 'Request a feature',
 	fileSkipped: (key) =>
 		`Drive Bridge: "${key}" failed three syncs in a row and is skipped now. Advanced → Development → Skipped files retries it.`,
 	fileSynced: 'Synced',
@@ -113,6 +115,7 @@ const en: Translations = {
 	filterPlaceholder: 'E.g. temp.md, .trash/**/*',
 	filterRules: 'Filter rules',
 	forRepairs: 'For repairs: switch back after one sync',
+	guideTitle: 'Setup guide',
 	headerKeyPlaceholder: 'Header key',
 	headerValuePlaceholder: 'Header value',
 	help: 'Setup guide and every setting explained',
@@ -210,6 +213,7 @@ const en: Translations = {
 	problemReport: 'Problem report (versions, settings without secrets, recent log)',
 	problemReportHint:
 		'Check it first; it includes your filter rules and recent log lines. Select all, copy it, and paste it into a Bug report.',
+	problemReportTitle: 'Problem report',
 	realtimeSync: 'Realtime sync',
 	realtimeSyncDescription: 'Sync after a file changes, once the delay in the field passes.',
 	realtimeSyncFastMode: 'Realtime sync fast mode',

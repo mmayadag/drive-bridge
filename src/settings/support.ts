@@ -7,6 +7,8 @@ import type { LastSync } from '@/modules/observability';
 import type { CallableOrObjectTree } from '@/modules/setting';
 import { TextModal } from '@/components/selectable-text';
 import { VERSION } from '@/modules/event-bus';
+import type { HelpItem } from './help-list';
+import { HelpListModal } from './help-list';
 import { COFFEE, HELP } from './layout';
 import { buildReport } from './problem-report';
 import { s } from './utils';
@@ -28,6 +30,10 @@ export type SupportSettingTranslations = {
 	buyMeACoffee: string;
 	pluginVersion: (version: string) => string;
 	problemReport: string;
+	problemReportTitle: string;
+	guideTitle: string;
+	bugTitle: string;
+	featureTitle: string;
 	problemReportHint: string;
 	selectAll: string;
 };
@@ -113,33 +119,53 @@ export default function supportSettings({
 					desc: translate('helpAndSupportDescription'),
 					name: translate('helpAndSupport'),
 					render: (setting) => {
-						setting
-							.addExtraButton((button) =>
-								button
-									.setIcon('book-open')
-									.setTooltip(translate('help'))
-									.onClick(() => window.open(GUIDE_URL)),
-							)
-							.addExtraButton((button) =>
-								button
-									.setIcon('bug')
-									.setTooltip(translate('reportBug'))
-									.onClick(() => window.open(reportUrl('bug'))),
-							)
-							.addExtraButton((button) =>
-								button
-									.setIcon('lightbulb')
-									.setTooltip(translate('requestFeature'))
-									.onClick(() => window.open(reportUrl('request'))),
-							)
-							.addExtraButton((button) =>
-								button
-									.setIcon('file-text')
-									.setTooltip(translate('problemReport'))
-									.onClick(() =>
-										showProblemReport({ app, getLogs, settings, translate }),
-									),
+						const items: Array<HelpItem> = [
+							{
+								desc: translate('help'),
+								icon: 'book-open',
+								name: translate('guideTitle'),
+								run: () => window.open(GUIDE_URL),
+							},
+							{
+								desc: translate('reportBug'),
+								icon: 'bug',
+								name: translate('bugTitle'),
+								run: () => window.open(reportUrl('bug')),
+							},
+							{
+								desc: translate('requestFeature'),
+								icon: 'lightbulb',
+								name: translate('featureTitle'),
+								run: () => window.open(reportUrl('request')),
+							},
+							{
+								desc: translate('problemReport'),
+								icon: 'file-text',
+								name: translate('problemReportTitle'),
+								run: () => showProblemReport({ app, getLogs, settings, translate }),
+							},
+						];
+						for (const { icon, desc, run } of items)
+							setting.addExtraButton((button) =>
+								button.setIcon(icon).setTooltip(desc).onClick(run),
 							);
+						// The title and description open the same items as a labelled list.
+						const openList = () =>
+							new HelpListModal(app, {
+								items,
+								title: translate('helpAndSupport'),
+							}).open();
+						const info = setting.infoEl;
+						info.addClass('drive-bridge-clickable');
+						info.setAttr('role', 'button');
+						info.setAttr('tabindex', '0');
+						info.addEventListener('click', openList);
+						info.addEventListener('keydown', (event) => {
+							if (event.key === 'Enter' || event.key === ' ') {
+								event.preventDefault();
+								openList();
+							}
+						});
 					},
 					search: false,
 				})),
