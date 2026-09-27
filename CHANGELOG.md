@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.4.3 - 2026-09-27
+
+- The **Google account** page shows the two ways to connect side by side: the
+  client ID and secret, then **Refresh token** with **Connect**, _or_ **Sign in
+  with Google**, both buttons equally prominent. Setting up a client and setting
+  up from another device sit in a section of their own (#185).
+- **Set up a Google client** is labelled **Guide** and ends with a fifth step,
+  Sign in with Google (#185).
+
 ## v0.4.2 - 2026-09-27
 
 - The **status bar** item shows the whole status when you hover it, and opens
