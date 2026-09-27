@@ -109,6 +109,20 @@ test('the problem report opens in a window to select, without touching the clipb
 	expect(notices).toStrictEqual([]);
 });
 
+function helpRow() {
+	const buttons: Array<ReturnType<typeof fakeExtraButton>> = [];
+	const setting = {
+		addExtraButton: (cb: (b: ReturnType<typeof fakeExtraButton>) => void) => {
+			const button = fakeExtraButton();
+			buttons.push(button);
+			cb(button);
+			return setting;
+		},
+		infoEl: document.createElement('div'),
+	};
+	return { buttons, setting };
+}
+
 function helpItem() {
 	const tree = supportSettings({
 		app: {} as never,
@@ -147,15 +161,7 @@ function fakeExtraButton() {
 }
 
 test('the help row wires up the guide, bug, feature and problem report buttons', () => {
-	const buttons: Array<ReturnType<typeof fakeExtraButton>> = [];
-	const setting = {
-		addExtraButton: (cb: (b: ReturnType<typeof fakeExtraButton>) => void) => {
-			const button = fakeExtraButton();
-			buttons.push(button);
-			cb(button);
-			return setting;
-		},
-	};
+	const { buttons, setting } = helpRow();
 	helpItem().render(setting);
 
 	expect(buttons).toHaveLength(4);
@@ -231,4 +237,46 @@ test('the coffee row draws the question, the button and the plugin version', () 
 	);
 
 	expect(typeof cleanup).toBe('function');
+});
+
+test('the help title opens the same items as a labelled list, each doing what its icon does', () => {
+	const { setting } = helpRow();
+	helpItem().render(setting);
+	windows.length = 0;
+	setting.infoEl.click();
+	expect(windows).toHaveLength(1);
+	const list = windows[0];
+	expect(list.title).toBe('helpAndSupport');
+	const rows = [...list.contentEl.querySelectorAll<HTMLElement>('.drive-bridge-help-item')];
+	expect(rows).toHaveLength(4);
+	expect(rows.every((row) => row.querySelector('.drive-bridge-help-icon'))).toBe(true);
+
+	const opened: Array<string | URL> = [];
+	const originalOpen = window.open;
+	window.open = ((url: string | URL) => void opened.push(url)) as never;
+	try {
+		rows[0]?.click();
+		expect(list.closed).toBe(true);
+		expect(opened).toStrictEqual(['https://github.com/mmayadag/drive-bridge#readme']);
+		const { KeyboardEvent: Key } = rows[1].ownerDocument
+			.defaultView as unknown as typeof globalThis;
+		rows[1]?.dispatchEvent(new Key('keydown', { key: 'Enter' }));
+		expect(new URL(String(opened[1])).searchParams.get('template')).toBe('bug.yml');
+		rows[2]?.dispatchEvent(new Key('keydown', { key: 'a' }));
+		expect(opened).toHaveLength(2);
+	} finally {
+		window.open = originalOpen;
+	}
+	// The last row opens the problem report window.
+	windows.length = 0;
+	rows[3]?.click();
+	expect(windows[0]?.title).toBe('problemReport');
+
+	// The keyboard reaches the list too.
+	windows.length = 0;
+	const { KeyboardEvent: Key } = setting.infoEl.ownerDocument
+		.defaultView as unknown as typeof globalThis;
+	setting.infoEl.dispatchEvent(new Key('keydown', { key: ' ' }));
+	setting.infoEl.dispatchEvent(new Key('keydown', { key: 'x' }));
+	expect(windows).toHaveLength(1);
 });
