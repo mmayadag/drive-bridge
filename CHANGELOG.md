@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.4.0 - 2026-09-27
+
+Fewer surprises.
+
+- **Sync a note when you open it**: opening a note syncs just that note first,
+  so an edit made on another device arrives before you start typing. At most
+  every 30 seconds, and every two minutes per note; not while paused, offline
+  or syncing. On by default, under Automatic sync; cheapest with Drive scan:
+  Changes only (#160).
+- **Preview sync**, under Advanced → Controls and in the command palette, shows
+  what a sync would do now, read-only, and changes nothing (#162).
+- A notice when **Google Drive is almost full** (over 95%, or under 200 MB
+  left), at most once a day, since uploads fail once it is full. The Connection
+  row shows how much of Drive is used (#161).
+
 ## v0.3.7 - 2026-09-27
 
 - The main screen is grouped by what the settings are for: **How it syncs**
