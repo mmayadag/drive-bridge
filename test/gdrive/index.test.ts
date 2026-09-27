@@ -353,7 +353,9 @@ test('after a check, the Connection row says how much of Drive is used', async (
 	type Tree = Record<number, Record<number, (self: unknown) => Page>>;
 	const account = (env.settingEntries[0].apply as unknown as Tree)[551][1000];
 	const page = account(account);
-	const connection = page.items.find((item) => item.name === 'connection');
+	const connection = (
+		page.items as unknown as Array<{ items: Array<{ name: string; desc?: unknown }> }>
+	)[0].items.find((item) => item.name === 'connection');
 	expect(connection?.desc).toBe('connectionUsage([object Object])');
 	env.gdrive.dispose();
 });

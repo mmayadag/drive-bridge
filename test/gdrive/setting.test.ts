@@ -42,10 +42,20 @@ function setup({
 	const group = tree[551](tree[551]);
 	const prompt = tree[16](tree[16]) as unknown as SettingDefinitionPage;
 	const page = group.items?.[0] as SettingDefinitionPage;
-	const shown = (page.items as Array<SettingDefinition>)
+	// The page's rows sit in two groups: connecting, and where the client comes from.
+	const shown = rows(page)
 		.filter((item) => call(item.visible ?? true))
 		.map((item) => item.name);
 	return { group, page, prompt, shown, tree };
+}
+
+/** A page's rows, through its groups, leaving out groups that are hidden. */
+function rows(page: SettingDefinitionPage) {
+	return (
+		page.items as Array<SettingDefinition & { type?: string; items?: Array<SettingDefinition> }>
+	).flatMap((item) =>
+		item.type === 'group' ? (call(item.visible ?? true) ? (item.items ?? []) : []) : [item],
+	);
 }
 
 const call = (value: unknown) => (typeof value === 'function' ? (value as () => unknown)() : value);
@@ -71,9 +81,7 @@ test('a device that is not connected sees the account page first, as Connect you
 	expect(prompt.type).toBe('page');
 	expect(prompt.name).toBe('connectPrompt');
 	expect(call(prompt.visible)).toBe(true);
-	expect((prompt.items as Array<SettingDefinition>).map((item) => item.name)).toContain(
-		'clientId',
-	);
+	expect(rows(prompt).map((item) => item.name)).toContain('clientId');
 	const connected = setup({ clientId: 'client', secret: 'secret', token: '1//token' });
 	expect(call(connected.prompt.visible)).toBe(false);
 });
@@ -82,25 +90,29 @@ test('asks for the whole setup until an account is connected', () => {
 	const { page, shown } = setup({ clientId: 'client', secret: 'secret' });
 	expect(call(page.status)).toBe('warning');
 	expect(call(page.displayValue)).toBe('clickToConnect');
-	// The three fields first, then the ways to get them.
+	// The client, then two ways to connect with an "or" between them, then the ways to get it.
 	expect(shown).toStrictEqual([
 		'clientId',
 		'clientSecret',
 		'connectAccount',
+		'or',
 		'signInWithGoogle',
 		'setupPage',
 		'setUpFromDevice',
 	]);
-	const setupPage = (page.items as Array<SettingDefinition>).find(
-		(item) => item.name === 'setupPage',
-	) as SettingDefinitionPage;
+	const setupPage = rows(page).find((item) => item.name === 'setupPage') as SettingDefinitionPage;
 	expect((setupPage.items as Array<SettingDefinition>).map((item) => item.name)).toStrictEqual([
 		'dummy',
 		'1. stepProject',
 		'2. stepDriveApi',
 		'3. stepConsent',
 		'4. stepClient',
+		'5. signInWithGoogle',
 	]);
+	// The setup page is marked as a guide.
+	expect(
+		(setupPage as { labels?: Array<{ text: string }> }).labels?.map((label) => label.text),
+	).toStrictEqual(['guide']);
 });
 
 test('shows only the account once connected', () => {

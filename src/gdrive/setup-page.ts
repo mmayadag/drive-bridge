@@ -8,6 +8,10 @@ export type SetupPageTranslations = {
 	setupPageDescription: string;
 	setupSteps: Fragment;
 	openConsole: string;
+	guide: string;
+	guideLabelDescription: string;
+	signInWithGoogle: string;
+	stepSignInDescription: string;
 } & Record<SetupStepKey, string> &
 	Record<`${SetupStepKey}Description`, string>;
 
@@ -18,11 +22,13 @@ export type SetupPageTranslations = {
 export default function setupPage(
 	translate: Translate<SetupPageTranslations>,
 	visible: () => boolean,
+	signIn: () => void,
 ) {
 	return s(
 		(self) => ({
 			desc: translate('setupPageDescription'),
 			items: Object.values(self).map((node) => node(node)),
+			labels: [{ text: translate('guide'), tooltip: translate('guideLabelDescription') }],
 			name: translate('setupPage'),
 			type: 'page',
 			visible,
@@ -52,6 +58,20 @@ export default function setupPage(
 					})),
 				]),
 			),
+			// The last step: the client is ready, so sign in with it.
+			[200 + SETUP_STEPS.length]: s(() => ({
+				desc: translate('stepSignInDescription'),
+				name: `${SETUP_STEPS.length + 1}. ${translate('signInWithGoogle')}`,
+				render: (setting) => {
+					setting.addButton((button) =>
+						button
+							.setButtonText(translate('signInWithGoogle'))
+							.setCta()
+							.onClick(signIn),
+					);
+				},
+				search: false,
+			})),
 		},
 	);
 }
