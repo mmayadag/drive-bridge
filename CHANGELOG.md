@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.3.6 - 2026-09-27
+
+- **Help and support ›** is now also a page under Advanced, listing the setup
+  guide, bug report, feature request and problem report one per row with their
+  icons. The Help and support card on the main screen stays as it was (#169).
+
 ## v0.3.5 - 2026-09-27
 
 - **No clipboard.** Drive Bridge no longer touches the clipboard at all. The
