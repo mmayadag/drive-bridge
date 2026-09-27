@@ -19,6 +19,7 @@ export const PAGE = {
 	advanced: 3000,
 	automaticSync: 1000,
 	filters: 2000,
+	help: 4000,
 } as const;
 export const ADVANCED = {
 	controls: 1000,
@@ -32,6 +33,7 @@ export const ADVANCED = {
 export type LayoutSettingTranslations = {
 	advanced: string;
 	automaticSync: string;
+	helpAndSupport: string;
 	filterRules: string;
 	xConfigured: (count: number) => string;
 	xOfYOn: (count: { on: number; total: number }) => string;
@@ -81,6 +83,12 @@ export default function layoutSettings(ctx: {
 			[PAGE.advanced]: s((self) => ({
 				items: items(self),
 				name: translate('advanced'),
+				type: 'page',
+			})),
+			// The same help as the card below, as a page of its own.
+			[PAGE.help]: s((self) => ({
+				items: items(self),
+				name: translate('helpAndSupport'),
 				type: 'page',
 			})),
 		}),

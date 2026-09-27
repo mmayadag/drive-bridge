@@ -85,7 +85,22 @@ test('the main screen keeps daily settings and links to the sub-pages', () => {
 		'group',
 	]);
 	const [more, help, coffee] = top.slice(-3);
-	expect(names(more.items)).toStrictEqual(['automaticSync', 'filterRules', 'advanced']);
+	expect(names(more.items)).toStrictEqual([
+		'automaticSync',
+		'filterRules',
+		'advanced',
+		'helpAndSupport',
+	]);
+	// The help page lists the same items as the card's icons.
+	const helpPage = (more.items as Array<{ name: string; items?: Array<{ name: string }> }>).at(
+		-1,
+	);
+	expect(names(helpPage?.items as never)).toStrictEqual([
+		'guideTitle',
+		'bugTitle',
+		'featureTitle',
+		'problemReportTitle',
+	]);
 	expect(names(help.items)).toStrictEqual(['helpAndSupport']);
 	expect(names(coffee.items)).toStrictEqual(['buyMeACoffee']);
 });

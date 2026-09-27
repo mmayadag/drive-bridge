@@ -8,8 +8,8 @@ import type { CallableOrObjectTree } from '@/modules/setting';
 import { TextModal } from '@/components/selectable-text';
 import { VERSION } from '@/modules/event-bus';
 import type { HelpItem } from './help-list';
-import { HelpListModal } from './help-list';
-import { COFFEE, HELP } from './layout';
+import { asHelpRow, HelpListModal } from './help-list';
+import { COFFEE, HELP, MORE, PAGE } from './layout';
 import { buildReport } from './problem-report';
 import { s } from './utils';
 
@@ -108,7 +108,51 @@ export default function supportSettings({
 	on: On<Events>;
 	getLogs: () => string;
 }): CallableOrObjectTree {
+	const helpItems = (): Array<HelpItem> => [
+		{
+			desc: translate('help'),
+			icon: 'book-open',
+			name: translate('guideTitle'),
+			run: () => window.open(GUIDE_URL),
+		},
+		{
+			desc: translate('reportBug'),
+			icon: 'bug',
+			name: translate('bugTitle'),
+			run: () => window.open(reportUrl('bug')),
+		},
+		{
+			desc: translate('requestFeature'),
+			icon: 'lightbulb',
+			name: translate('featureTitle'),
+			run: () => window.open(reportUrl('request')),
+		},
+		{
+			desc: translate('problemReport'),
+			icon: 'file-text',
+			name: translate('problemReportTitle'),
+			run: () => showProblemReport({ app, getLogs, settings, translate }),
+		},
+	];
 	return {
+		// The help page under Advanced: the same items, one per row.
+		[MORE]: {
+			[PAGE.help]: Object.fromEntries(
+				// Texts are read when the page renders, after the translations are in.
+				[0, 1, 2, 3].map((index) => [
+					1000 + index,
+					s(() => {
+						const item = helpItems()[index];
+						return {
+							desc: item.desc,
+							name: item.name,
+							render: (setting) => asHelpRow(setting.settingEl, item),
+							search: false,
+						};
+					}),
+				]),
+			),
+		},
 		[HELP]: s(
 			(self) => ({
 				items: Object.values(self).map((node) => node(node)) as never,
@@ -119,32 +163,7 @@ export default function supportSettings({
 					desc: translate('helpAndSupportDescription'),
 					name: translate('helpAndSupport'),
 					render: (setting) => {
-						const items: Array<HelpItem> = [
-							{
-								desc: translate('help'),
-								icon: 'book-open',
-								name: translate('guideTitle'),
-								run: () => window.open(GUIDE_URL),
-							},
-							{
-								desc: translate('reportBug'),
-								icon: 'bug',
-								name: translate('bugTitle'),
-								run: () => window.open(reportUrl('bug')),
-							},
-							{
-								desc: translate('requestFeature'),
-								icon: 'lightbulb',
-								name: translate('featureTitle'),
-								run: () => window.open(reportUrl('request')),
-							},
-							{
-								desc: translate('problemReport'),
-								icon: 'file-text',
-								name: translate('problemReportTitle'),
-								run: () => showProblemReport({ app, getLogs, settings, translate }),
-							},
-						];
+						const items = helpItems();
 						for (const { icon, desc, run } of items)
 							setting.addExtraButton((button) =>
 								button.setIcon(icon).setTooltip(desc).onClick(run),
