@@ -20,6 +20,9 @@ export const CONFLICTS = 60;
 export const MORE = 7000;
 /** Help row and the coffee footer, after the sub-pages. */
 export const HELP = 8000;
+/** The hidden entry of the help page, just before the Help and support card. */
+export const HELP_LINK = 7900;
+export const HELP_LINK_CLASS = 'drive-bridge-help-link';
 export const COFFEE = 9000;
 export const PAGE = {
 	advanced: 3000,
@@ -112,12 +115,17 @@ export default function layoutSettings(ctx: {
 				name: translate('advanced'),
 				type: 'page',
 			})),
-			// The same help as the card below, as a page of its own.
-			[PAGE.help]: s((self) => ({
-				items: items(self),
-				name: translate('helpAndSupport'),
-				type: 'page',
-			})),
 		}),
+		// The help page. Its entry is hidden: the Help and support card below opens it.
+		[HELP_LINK]: s(
+			(self) => ({ cls: HELP_LINK_CLASS, items: items(self) as never, type: 'group' }),
+			{
+				[PAGE.help]: s((self) => ({
+					items: items(self),
+					name: translate('helpAndSupport'),
+					type: 'page',
+				})),
+			},
+		),
 	};
 }

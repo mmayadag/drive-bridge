@@ -639,7 +639,11 @@ a.drive-bridge-coffee-button:hover .drive-bridge-coffee-cup {
 	white-space: pre-wrap;
 }
 
-/* Help and support: the title opens the list; each list row is one help item. */
+/* Help and support: the card's title opens the page; the page's own entry stays hidden. */
+.drive-bridge-help-link {
+	display: none;
+}
+
 .drive-bridge-clickable {
 	cursor: pointer;
 }

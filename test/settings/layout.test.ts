@@ -83,8 +83,9 @@ test('the main screen keeps daily settings and links to the sub-pages', () => {
 		'group',
 		'group',
 		'group',
+		'group',
 	]);
-	const [how, deletions, more, help, coffee] = top.slice(-5);
+	const [how, deletions, more, helpLink, help, coffee] = top.slice(-6);
 	expect(names(how.items)).toStrictEqual([
 		'syncStrategy',
 		'conflictResolveStrategy',
@@ -92,11 +93,12 @@ test('the main screen keeps daily settings and links to the sub-pages', () => {
 		'filterRules',
 	]);
 	expect(names(deletions.items)).toStrictEqual(['neverDeleteRemote']);
-	expect(names(more.items)).toStrictEqual(['advanced', 'helpAndSupport']);
-	// The help page lists the same items as the card's icons.
-	const helpPage = (more.items as Array<{ name: string; items?: Array<{ name: string }> }>).at(
-		-1,
-	);
+	expect(names(more.items)).toStrictEqual(['advanced']);
+	// The help page's entry sits in a group of its own, hidden; the card opens it.
+	expect((helpLink as Named & { cls?: string }).cls).toBe('drive-bridge-help-link');
+	const helpPage = (
+		helpLink.items as Array<{ name: string; items?: Array<{ name: string }> }>
+	).at(-1);
 	expect(names(helpPage?.items as never)).toStrictEqual([
 		'guideTitle',
 		'bugTitle',
@@ -109,8 +111,8 @@ test('the main screen keeps daily settings and links to the sub-pages', () => {
 
 test('each sub-page holds its settings', () => {
 	const tab = buildTab();
-	const [automatic, filters] = ((tab.at(-5) as Named).items ?? []).slice(2);
-	const [advanced] = (tab.at(-3) as Named).items ?? [];
+	const [automatic, filters] = ((tab.at(-6) as Named).items ?? []).slice(2);
+	const [advanced] = (tab.at(-4) as Named).items ?? [];
 	expect(names(automatic.items)).toStrictEqual([
 		'pauseAutomaticSync',
 		'realtimeSync',

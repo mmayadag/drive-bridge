@@ -9,7 +9,7 @@ import { TextModal } from '@/components/selectable-text';
 import { VERSION } from '@/modules/event-bus';
 import type { HelpItem } from './help-list';
 import { asHelpRow, HelpListModal } from './help-list';
-import { COFFEE, HELP, MORE, PAGE } from './layout';
+import { COFFEE, HELP, HELP_LINK, HELP_LINK_CLASS, PAGE } from './layout';
 import { buildReport } from './problem-report';
 import { s } from './utils';
 
@@ -136,7 +136,7 @@ export default function supportSettings({
 	];
 	return {
 		// The help page under Advanced: the same items, one per row.
-		[MORE]: {
+		[HELP_LINK]: {
 			[PAGE.help]: Object.fromEntries(
 				// Texts are read when the page renders, after the translations are in.
 				[0, 1, 2, 3].map((index) => [
@@ -168,12 +168,20 @@ export default function supportSettings({
 							setting.addExtraButton((button) =>
 								button.setIcon(icon).setTooltip(desc).onClick(run),
 							);
-						// The title and description open the same items as a labelled list.
-						const openList = () =>
-							new HelpListModal(app, {
-								items,
-								title: translate('helpAndSupport'),
-							}).open();
+						// The title and description open the help page, through its hidden entry:
+						// Obsidian has no call to open a settings page. Without it, a window.
+						const openList = () => {
+							const entry =
+								setting.settingEl.ownerDocument.querySelector<HTMLElement>(
+									`.${HELP_LINK_CLASS} .setting-item`,
+								);
+							if (entry) entry.click();
+							else
+								new HelpListModal(app, {
+									items,
+									title: translate('helpAndSupport'),
+								}).open();
+						};
 						const info = setting.infoEl;
 						info.addClass('drive-bridge-clickable');
 						info.setAttr('role', 'button');
