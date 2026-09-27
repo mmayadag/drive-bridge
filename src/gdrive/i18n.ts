@@ -49,8 +49,12 @@ const en: GdriveTranslations = {
 	connected: 'Connected',
 	connection: 'Connection',
 	connectionDescription: "Checks that Google Drive answers with this device's sign-in.",
+	connectionUsage: ({ used, limit }) =>
+		`${used} of ${limit} used on Google Drive. Test connection checks this device's sign-in.`,
 	create: 'Create',
 	disconnect: 'Forget on this device',
+	driveAlmostFull: ({ used, limit }) =>
+		`Google Drive is almost full: ${used} of ${limit} used. Uploads fail once it is full; free some space in Drive.`,
 	enterClientId: 'Enter the OAuth client ID first.',
 	enterClientSecret: 'Enter the OAuth client secret first.',
 	enterRefreshToken: 'Paste a refresh token first.',

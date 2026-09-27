@@ -10,8 +10,13 @@ type HttpResponse = { json?: unknown; status?: number };
 let responses: Array<HttpResponse> = [];
 const requests: Array<RequestParam & { url?: string }> = [];
 
+const notices: Array<string> = [];
+
 void mock.module('obsidian', () => ({
 	...ObsidianMock,
+	Notice: function Notice(message: string) {
+		notices.push(message);
+	},
 	requestUrl: (params: RequestParam & { url?: string }) => {
 		requests.push(params);
 		const response = responses.shift();
@@ -42,16 +47,28 @@ function setup(entries: Array<[string, string]> = []) {
 	const settingEntries: Array<SettingEntry> = [];
 	const removed: Array<string> = [];
 	const logs: Array<unknown> = [];
+	const layoutReady: Array<() => void> = [];
+	const local = new Map<string, unknown>();
+	const driveRequests: Array<string> = [];
+	let driveAnswer: () => Promise<unknown> = () =>
+		Promise.resolve({ json: () => ({}), status: 200 });
 	const ctx = {
 		app: {
+			loadLocalStorage: (key: string) => local.get(key),
+			saveLocalStorage: (key: string, value: unknown) => void local.set(key, value),
 			secretStorage: {
 				deleteSecret: (id: string) => void secrets.delete(id),
 				getSecret: (id: string) => secrets.get(id),
 				setSecret: (id: string, value: string) => void secrets.set(id, value),
 			},
 			vault: { getName: () => 'My vault' },
+			workspace: { onLayoutReady: (fn: () => void) => void layoutReady.push(fn) },
 		},
 		dispatch: (name: string, payload: unknown) => void logs.push([name, payload]),
+		getRequest: () => (url: string) => {
+			driveRequests.push(url);
+			return driveAnswer();
+		},
 		indexedDB: openMemoryDB('gdrive-index-test-snapshots'),
 		memoryDB: openMemoryDB('gdrive-index-test'),
 		registerRemoteFs: (id: string, entry: RemoteFsEntry) => {
@@ -80,7 +97,11 @@ function setup(entries: Array<[string, string]> = []) {
 	const gdrive = new Gdrive(ctx as never);
 	Object.assign(gdrive, { settings: { remoteFs: 'gdrive' } });
 	return {
+		answer: (next: () => Promise<unknown>) => (driveAnswer = next),
+		driveRequests,
 		gdrive,
+		layoutReady,
+		local,
 		logs,
 		middlewares,
 		remoteFs,
@@ -242,4 +263,97 @@ test('dispose removes everything start registered, once', () => {
 	expect(removed.toSorted()).toEqual(['middleware', 'remoteFs', 'setting', 'wrapper']);
 	gdrive.dispose();
 	expect(removed).toHaveLength(4);
+});
+
+const GB = 1024 ** 3;
+const quotaAnswer = (used: number, limit?: number) => () =>
+	Promise.resolve({
+		json: () => ({
+			storageQuota: {
+				limit: limit === undefined ? undefined : String(limit),
+				usage: String(used),
+			},
+		}),
+		status: 200,
+	});
+
+function started(entries: Array<[string, string]> = [[REFRESH_ID, '1//token']]) {
+	const env = setup(entries);
+	env.gdrive.start();
+	return env;
+}
+
+const runQuotaCheck = async (env: ReturnType<typeof started>) => {
+	for (const ready of env.layoutReady.splice(0)) ready();
+	await new Promise((resolve) => {
+		setTimeout(resolve, 0);
+	});
+};
+
+test('a nearly full Drive gets a notice and a log line, once a day', async () => {
+	notices.length = 0;
+	const env = started();
+	env.answer(quotaAnswer(14.5 * GB, 15 * GB));
+	await runQuotaCheck(env);
+	expect(env.driveRequests).toHaveLength(1);
+	expect(env.driveRequests[0]).toContain('/about?fields=storageQuota');
+	expect(notices).toStrictEqual(['driveAlmostFull([object Object])']);
+	expect(env.logs.at(-1)).toStrictEqual([
+		'logGeneral',
+		'Google Drive is nearly full: 14.5 GB of 15 GB.',
+	]);
+
+	// The same day, the next start does not ask again.
+	env.gdrive.start();
+	await runQuotaCheck(env);
+	expect(env.driveRequests).toHaveLength(1);
+	env.gdrive.dispose();
+});
+
+test('plenty of room, or unlimited storage: no notice', async () => {
+	notices.length = 0;
+	for (const answer of [quotaAnswer(2 * GB, 15 * GB), quotaAnswer(900 * GB)]) {
+		const env = started();
+		env.answer(answer);
+		await runQuotaCheck(env);
+		expect(env.driveRequests).toHaveLength(1);
+		env.gdrive.dispose();
+	}
+	expect(notices).toStrictEqual([]);
+});
+
+test('no check without a connected Drive account', async () => {
+	const env = started([]);
+	await runQuotaCheck(env);
+	Object.assign(env.gdrive, { settings: { remoteFs: 'other' } });
+	await runQuotaCheck(env);
+	expect(env.driveRequests).toStrictEqual([]);
+	env.gdrive.dispose();
+});
+
+test('a failed check is only logged', async () => {
+	notices.length = 0;
+	const env = started();
+	env.answer(() => Promise.reject(new Error('offline')));
+	await runQuotaCheck(env);
+	expect(notices).toStrictEqual([]);
+	expect(env.logs.at(-1)).toStrictEqual(['logGeneral', 'Drive quota check failed: `offline`.']);
+	env.gdrive.dispose();
+});
+
+test('after a check, the Connection row says how much of Drive is used', async () => {
+	const env = started([
+		[REFRESH_ID, '1//token'],
+		[SECRET_ID, 'secret'],
+	]);
+	env.gdrive.moduleSettings.clientId = '123-abc.apps.googleusercontent.com';
+	env.answer(quotaAnswer(2 * GB, 15 * GB));
+	await runQuotaCheck(env);
+	type Page = { items: Array<{ name: string; desc?: unknown }> };
+	type Tree = Record<number, Record<number, (self: unknown) => Page>>;
+	const account = (env.settingEntries[0].apply as unknown as Tree)[551][1000];
+	const page = account(account);
+	const connection = page.items.find((item) => item.name === 'connection');
+	expect(connection?.desc).toBe('connectionUsage([object Object])');
+	env.gdrive.dispose();
 });

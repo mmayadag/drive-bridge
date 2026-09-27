@@ -543,6 +543,10 @@ trust; the payload carries the vault name, not its contents.
   brings the folder back too, and undoing a folder deletion brings back what
   was deleted inside it. New files and conflicts have no undo; untick them to
   skip them. The row's icon shows what will run.
+- **Drive storage:** once a day on each device, at startup, Drive Bridge asks
+  Google for the account's storage quota. When Drive is over 95% full or has
+  under 200 MB left, a notice says so, since uploads fail once it is full. The
+  Connection row on the Google account page shows how much is used.
 - **Interrupted syncs:** each task records its result as soon as it finishes.
   If a sync stops halfway (Obsidian closed, offline, cancelled), the next one
   plans only what is left; finished uploads and downloads are not repeated.
