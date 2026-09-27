@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.3.5 - 2026-09-27
+
+- **No clipboard.** Drive Bridge no longer touches the clipboard at all. The
+  sync log, the problem report and a settings export are shown in a window with
+  **Select all**, for you to copy; an export can still be saved to the vault
+  (#163).
+- Tapping the **Help and support** title opens its items as a labelled list:
+  setup guide, report a bug, request a feature, problem report. The icons stay.
+  The line above the coffee button now reads _Let's get you connected first,
+  then coffee._ before the first sync, and _Need help?_ after a failed one
+  (#166).
+
 ## v0.3.4 - 2026-09-26
 
 - Once connected, the **Google account** page has a **Connection** row with
