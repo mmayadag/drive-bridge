@@ -713,3 +713,26 @@ test('connected, Test connection checks again and says how it went; export opens
 	exportRow.buttons[0]?.trigger();
 	expect(exported).toStrictEqual([true]);
 });
+
+test('the or row marks itself, and the last setup step signs in', async () => {
+	const { rowByName } = setup({
+		clientId: '123-abc.apps.googleusercontent.com',
+		secret: 'secret',
+	});
+	const settingEl = document.createElement('div');
+	render(rowByName('or'), { settingEl });
+	expect(settingEl.classList.contains('drive-bridge-or')).toBe(true);
+
+	const opened: Array<string | URL> = [];
+	const originalOpen = window.open;
+	window.open = ((url: string | URL) => void opened.push(url)) as never;
+	try {
+		const step = fakeSetting();
+		render(rowByName('5. signInWithGoogle'), step);
+		step.buttons[0]?.trigger();
+		await waitUntil(() => opened.length > 0);
+	} finally {
+		window.open = originalOpen;
+	}
+	expect(String(opened[0])).toContain('accounts.google.com');
+});

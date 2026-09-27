@@ -62,6 +62,8 @@ const en: GdriveTranslations = {
 	folderNameSlash: 'A folder name cannot contain a slash.',
 	gdrive: 'Google Drive',
 	googleAccount: 'Google account',
+	guide: 'Guide',
+	guideLabelDescription: 'Step-by-step instructions.',
 	invalidRefreshToken: 'That does not look like a refresh token or rclone token output.',
 	limitedScope:
 		'This token only has limited Drive access (drive.file). Create it with rclone\'s default "drive" scope.',
@@ -70,6 +72,7 @@ const en: GdriveTranslations = {
 	newFolderPrompt: 'New folder name',
 	noSubfolders: 'No folders here yet.',
 	openConsole: 'Open',
+	or: 'or',
 	pickFolder: 'Browse Drive folders',
 	pickFolderTitle: 'Choose a Drive folder',
 	pickSubfolder: 'Open a folder first; the whole Drive cannot be the vault folder.',
@@ -117,6 +120,8 @@ const en: GdriveTranslations = {
 	stepDriveApiDescription: 'In the new project, open the Drive API page and press Enable.',
 	stepProject: 'Create a Google Cloud project',
 	stepProjectDescription: 'Any name. Use the Google account whose Drive should hold the vault.',
+	stepSignInDescription:
+		'With the client ID and secret filled in on the Google account page. Then paste the address the browser ends on under Refresh token.',
 	tapToConnect: 'Tap to connect',
 	testConnection: 'Test connection',
 	useThisFolder: 'Use this folder',

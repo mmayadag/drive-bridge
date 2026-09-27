@@ -681,3 +681,36 @@ a.drive-bridge-coffee-button:hover .drive-bridge-coffee-cup {
 	flex: none;
 	color: var(--icon-color);
 }
+
+/* Google account page: "or" between the two ways to connect, a line on each side. */
+.setting-item.drive-bridge-or {
+	padding-block: var(--size-2-2);
+	border-top: none;
+}
+
+.setting-item.drive-bridge-or + .setting-item {
+	border-top: none;
+}
+
+.setting-item.drive-bridge-or .setting-item-info {
+	display: flex;
+	align-items: center;
+	gap: var(--size-4-3);
+}
+
+.setting-item.drive-bridge-or .setting-item-info::before,
+.setting-item.drive-bridge-or .setting-item-info::after {
+	content: '';
+	flex: 1;
+	border-top: 1px solid var(--background-modifier-border);
+}
+
+.setting-item.drive-bridge-or .setting-item-name {
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+
+.setting-item.drive-bridge-or .setting-item-description,
+.setting-item.drive-bridge-or .setting-item-control {
+	display: none;
+}

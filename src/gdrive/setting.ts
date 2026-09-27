@@ -11,24 +11,23 @@ import type { MaybePromise } from '@/types';
 import { ADVANCED, DELETIONS, MORE, PAGE } from '@/settings/layout';
 import { s } from '@/settings/utils';
 import { getMessage } from '@/shared/error';
-import { normalizeBaseDir } from '@/shared/path';
 import type { GdriveSettings } from '.';
 import type { TokenManager } from './auth';
+import type { BaseDirectoryTranslations } from './base-directory-setting';
 import type { ConnectedRowsTranslations } from './connected-rows';
-import type { FolderPickerTranslations } from './folder-picker';
 import type { Quota } from './quota';
 import type { RemoteScanTranslations } from './remote-scan-setting';
 import type { SetupPageTranslations } from './setup-page';
 import type { PendingSignIn } from './sign-in';
+import baseDirectorySetting from './base-directory-setting';
 import { isClientId, parseClientJson } from './client-setup';
 import { connectWithToken, findMissingInput } from './connect';
 import connectedRows from './connected-rows';
-import FolderPickerModal from './folder-picker';
 import remoteScanSetting from './remote-scan-setting';
 import setupPage from './setup-page';
 import { exchangeCode, parseRedirect, startSignIn } from './sign-in';
 
-export type GdriveTranslations = FolderPickerTranslations &
+export type GdriveTranslations = BaseDirectoryTranslations &
 	RemoteScanTranslations &
 	SetupPageTranslations &
 	Omit<ConnectedRowsTranslations, keyof CheckConnectionTranslations | 'exportSettings'> & {
@@ -47,9 +46,6 @@ export type GdriveTranslations = FolderPickerTranslations &
 		disconnect: string;
 		configureFirst: string;
 		connectSuccess: string;
-		baseDirectory: string;
-		baseDirectoryDescription: Fragment;
-		baseDirectoryPlaceholder: string;
 		useTrash: string;
 		useTrashDescription: string;
 		authorizationFailed: Snippet<string>;
@@ -59,6 +55,7 @@ export type GdriveTranslations = FolderPickerTranslations &
 		clientSecret: string;
 		clientSecretDescription: string;
 		connectFirst: string;
+		or: string;
 		driveAlmostFull: Snippet<{ used: string; limit: string }>;
 		connectPrompt: string;
 		connectPromptDescription: string;
@@ -272,137 +269,175 @@ export default function gdriveSetting(
 			type: 'page',
 		}),
 		{
-			1000: s(() => ({
-				// Connected without it: the token works until it needs refreshing.
-				desc: translate(
-					connected() && !settings.clientId ? 'clientIdNeeded' : 'clientIdDescription',
-				),
-				name: translate('clientId'),
-				render: (setting) => {
-					setting.addText((text) => {
-						clientIdField = markValid(text);
-						const flag = (value: string) =>
-							text.inputEl.toggleClass(INVALID, Boolean(value) && !isClientId(value));
-						text.setValue(settings.clientId).onChange((value) => {
-							// The downloaded client_secret.json fills both fields at once.
-							const client = parseClientJson(value);
-							if (client) {
-								text.setValue(client.clientId);
-								clientSecretField?.setValue(client.clientSecret);
-								settings.clientId = client.clientId;
-								tokenManager.setClientSecret(client.clientSecret);
-								void saveSettings();
-								new Notice(translate('clientFromJson'));
-							}
-							flag(text.getValue().trim());
-						});
-						flag(settings.clientId);
-						if (connected() && !settings.clientId) text.inputEl.addClass(INVALID);
-						text.inputEl.addEventListener('blur', () => {
-							const value = text.getValue().trim();
-							text.setValue(value);
-							if (value === settings.clientId) return;
-							settings.clientId = value;
-							void saveSettings();
-						});
-					});
-				},
-				visible: () => !ready(),
-			})),
-			1010: s(() => ({
-				desc: translate('clientSecretDescription'),
-				name: translate('clientSecret'),
-				render: (setting) => {
-					setting.addText((text) => {
-						clientSecretField = markValid(text);
-						text.inputEl.type = 'password';
-						text.setValue(tokenManager.getCredentials().clientSecret);
-						text.inputEl.addEventListener('blur', () => {
-							const value = text.getValue().trim();
-							text.setValue(value);
-							tokenManager.setClientSecret(value);
-						});
-					});
-				},
-				visible: () => !ready(),
-			})),
-			1020: s(() => ({
-				desc: translate('connectAccountDescription'),
-				name: translate('connectAccount'),
-				render: (setting) => {
-					let input = '';
-					// The token is long. This row gives the field and the button a line
-					// of their own under the description, instead of squeezing both
-					// into the control column.
-					setting.settingEl.addClass('drive-bridge-stacked-setting');
-					setting
-						.addText((text) => {
-							tokenField = markValid(text);
-							text.inputEl.type = 'password';
-							text.setPlaceholder(translate('refreshTokenPlaceholder')).onChange(
-								(value) => (input = value),
+			// Connecting: the client, then a token or Sign in with Google.
+			100: s(
+				(self) => ({
+					items: Object.values(self).map((node) => node(node)) as never,
+					type: 'group',
+				}),
+				{
+					1000: s(() => ({
+						// Connected without it: the token works until it needs refreshing.
+						desc: translate(
+							connected() && !settings.clientId
+								? 'clientIdNeeded'
+								: 'clientIdDescription',
+						),
+						name: translate('clientId'),
+						render: (setting) => {
+							setting.addText((text) => {
+								clientIdField = markValid(text);
+								const flag = (value: string) =>
+									text.inputEl.toggleClass(
+										INVALID,
+										Boolean(value) && !isClientId(value),
+									);
+								text.setValue(settings.clientId).onChange((value) => {
+									// The downloaded client_secret.json fills both fields at once.
+									const client = parseClientJson(value);
+									if (client) {
+										text.setValue(client.clientId);
+										clientSecretField?.setValue(client.clientSecret);
+										settings.clientId = client.clientId;
+										tokenManager.setClientSecret(client.clientSecret);
+										void saveSettings();
+										new Notice(translate('clientFromJson'));
+									}
+									flag(text.getValue().trim());
+								});
+								flag(settings.clientId);
+								if (connected() && !settings.clientId)
+									text.inputEl.addClass(INVALID);
+								text.inputEl.addEventListener('blur', () => {
+									const value = text.getValue().trim();
+									text.setValue(value);
+									if (value === settings.clientId) return;
+									settings.clientId = value;
+									void saveSettings();
+								});
+							});
+						},
+						visible: () => !ready(),
+					})),
+					1010: s(() => ({
+						desc: translate('clientSecretDescription'),
+						name: translate('clientSecret'),
+						render: (setting) => {
+							setting.addText((text) => {
+								clientSecretField = markValid(text);
+								text.inputEl.type = 'password';
+								text.setValue(tokenManager.getCredentials().clientSecret);
+								text.inputEl.addEventListener('blur', () => {
+									const value = text.getValue().trim();
+									text.setValue(value);
+									tokenManager.setClientSecret(value);
+								});
+							});
+						},
+						visible: () => !ready(),
+					})),
+					1020: s(() => ({
+						desc: translate('connectAccountDescription'),
+						name: translate('connectAccount'),
+						render: (setting) => {
+							let input = '';
+							// The token is long. This row gives the field and the button a line
+							// of their own under the description, instead of squeezing both
+							// into the control column.
+							setting.settingEl.addClass('drive-bridge-stacked-setting');
+							setting
+								.addText((text) => {
+									tokenField = markValid(text);
+									text.inputEl.type = 'password';
+									text.setPlaceholder(
+										translate('refreshTokenPlaceholder'),
+									).onChange((value) => (input = value));
+								})
+								.addButton((button) =>
+									button
+										.setButtonText(translate('connect'))
+										// As prominent as Sign in with Google: either way connects.
+										.setCta()
+										.onClick(() => connect(input)),
+								);
+						},
+						visible: () => !connected(),
+					})),
+					// Two ways to connect: a token above, or Sign in with Google below.
+					1022: s(() => ({
+						name: translate('or'),
+						render: (setting) => setting.settingEl.addClass('drive-bridge-or'),
+						search: false,
+						visible: () => !connected(),
+					})),
+					1025: s(() => ({
+						desc: translate('signInWithGoogleDescription'),
+						name: translate('signInWithGoogle'),
+						render: (setting) => {
+							setting.addButton((button) =>
+								button
+									.setButtonText(translate('signInWithGoogle'))
+									.setCta()
+									.onClick(() => void signIn()),
 							);
-						})
-						.addButton((button) =>
-							button
-								.setButtonText(translate('connect'))
-								.onClick(() => connect(input)),
-						);
+						},
+						visible: () => !connected(),
+					})),
+					1030: s(() => ({
+						desc: translate('accountConnectedDescription', settings.accountEmail),
+						name: translate('accountConnected'),
+						render: (setting) => {
+							setting.addButton((button) =>
+								button
+									.setButtonText(translate('disconnect'))
+									.setDestructive()
+									// Forgets the token on this device only.
+									// Other devices and the backup server may share it, so it is never revoked.
+									.onClick(() => {
+										settings.userId = '';
+										settings.accountEmail = '';
+										tokenManager.deleteRefreshToken();
+										tokenManager.invalidate();
+										void saveSettings();
+										refresh();
+									}),
+							);
+						},
+						visible: connected,
+					})),
+					1033: rows.connection,
+					1036: rows.exportForAnotherDevice,
 				},
-				visible: () => !connected(),
-			})),
-			1025: s(() => ({
-				desc: translate('signInWithGoogleDescription'),
-				name: translate('signInWithGoogle'),
-				render: (setting) => {
-					setting.addButton((button) =>
-						button
-							.setButtonText(translate('signInWithGoogle'))
-							.setCta()
-							.onClick(() => void signIn()),
-					);
+			),
+			// Where the client or the whole setup comes from.
+			200: s(
+				(self) => ({
+					items: Object.values(self).map((node) => node(node)) as never,
+					type: 'group',
+					visible: () => !ready(),
+				}),
+				{
+					// No client yet: the Google Cloud steps, on their own page.
+					1040: setupPage(
+						translate,
+						() => !ready(),
+						() => void signIn(),
+					),
+					// A device that is not set up can copy everything from one that is.
+					1050: s(() => ({
+						desc: translate('setUpFromDeviceDescription'),
+						name: translate('setUpFromDevice'),
+						render: (setting) => {
+							setting.addButton((button) =>
+								button
+									.setButtonText(translate('importSettings'))
+									.onClick(openImportSettings),
+							);
+						},
+						visible: () => !connected(),
+					})),
 				},
-				visible: () => !connected(),
-			})),
-			1030: s(() => ({
-				desc: translate('accountConnectedDescription', settings.accountEmail),
-				name: translate('accountConnected'),
-				render: (setting) => {
-					setting.addButton((button) =>
-						button
-							.setButtonText(translate('disconnect'))
-							.setDestructive()
-							// Forgets the token on this device only.
-							// Other devices and the backup server may share it, so it is never revoked.
-							.onClick(() => {
-								settings.userId = '';
-								settings.accountEmail = '';
-								tokenManager.deleteRefreshToken();
-								tokenManager.invalidate();
-								void saveSettings();
-								refresh();
-							}),
-					);
-				},
-				visible: connected,
-			})),
-			1033: rows.connection,
-			1036: rows.exportForAnotherDevice,
-			// No client yet: the Google Cloud steps, on their own page.
-			1040: setupPage(translate, () => !ready()),
-			// A device that is not set up can copy everything from one that is.
-			1050: s(() => ({
-				desc: translate('setUpFromDeviceDescription'),
-				name: translate('setUpFromDevice'),
-				render: (setting) => {
-					setting.addButton((button) =>
-						button
-							.setButtonText(translate('importSettings'))
-							.onClick(openImportSettings),
-					);
-				},
-				visible: () => !connected(),
-			})),
+			),
 		},
 	);
 
@@ -449,47 +484,15 @@ export default function gdriveSetting(
 			}),
 			{
 				1000: accountPage,
-				2000: s(() => ({
-					desc: translate('baseDirectoryDescription'),
-					labels: [matchLabel()],
-					name: translate('baseDirectory'),
-					render: (setting) => {
-						const save = (value: string) => {
-							const normalized = normalizeBaseDir(value.trim());
-							settings.baseDirectory = normalized;
-							void saveSettings();
-							return normalized;
-						};
-						let field: TextComponent;
-						setting
-							.addText((text) => {
-								field = text;
-								text.setPlaceholder(translate('baseDirectoryPlaceholder'))
-									.setValue(settings.baseDirectory)
-									.inputEl.addEventListener('blur', () => {
-										text.setValue(save(text.getValue()));
-									});
-							})
-							.addExtraButton((button) =>
-								button
-									.setIcon('folder-open')
-									.setTooltip(translate('pickFolder'))
-									.onClick(() => {
-										if (!tokenManager.getRefreshToken()) {
-											new Notice(translate('connectFirst'));
-											return;
-										}
-										new FolderPickerModal(app, {
-											onChoose: (path) => {
-												field.setValue(save(path));
-											},
-											request: getRequest(),
-											translate,
-										}).open();
-									}),
-							);
-					},
-				})),
+				2000: baseDirectorySetting({
+					app,
+					getRequest,
+					matchLabel,
+					saveSettings,
+					settings,
+					tokenManager,
+					translate,
+				}),
 			},
 		),
 	};
