@@ -1,4 +1,4 @@
-import type { GdriveTranslations } from './setting';
+import type { GdriveTranslations } from './translations';
 
 const SETUP_GUIDE_URL = 'https://github.com/mmayadag/drive-bridge/blob/main/TECHNICAL.md#setup';
 
@@ -58,6 +58,14 @@ const en: GdriveTranslations = {
 	enterClientId: 'Enter the OAuth client ID first.',
 	enterClientSecret: 'Enter the OAuth client secret first.',
 	enterRefreshToken: 'Paste a refresh token first.',
+	errorAccountRead: (status) => `Could not read the Google account: HTTP ${status}`,
+	errorAuthExpired:
+		'Google Drive authorization expired or was revoked, please reconnect your Google account in the settings.',
+	errorNoClient: 'Enter the OAuth client ID and client secret in the settings.',
+	errorNoRefreshToken: 'Google returned no refresh token.',
+	errorNotConnected: 'Connect a Google account in the settings first.',
+	errorTokenRefresh: (reason) => `Google Drive token refresh failed: ${reason}`,
+	folderCreateFailed: 'Could not create the Drive folder',
 	folderListFailed: 'Could not read Drive folders',
 	folderNameSlash: 'A folder name cannot contain a slash.',
 	gdrive: 'Google Drive',

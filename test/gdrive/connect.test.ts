@@ -1,6 +1,10 @@
 import ObsidianMock from '$/support/obsidian-mock';
+import translateWith from '$/support/translate';
 import { expect, mock, test } from 'bun:test';
 import type { RequestParam } from '@/modules/registrar';
+import gdriveEn from '@/gdrive/i18n';
+
+const translate = translateWith(gdriveEn);
 
 type HttpResponse = { json?: unknown; status?: number };
 let responses: Array<HttpResponse> = [];
@@ -32,7 +36,7 @@ function manager(entries: Array<[string, string]>, clientId = 'my-client') {
 		getSecret: (id: string) => secrets.get(id) ?? null,
 		setSecret: (id: string, value: string) => void secrets.set(id, value),
 	};
-	return { manager: new TokenManager(storage as never, () => clientId), secrets };
+	return { manager: new TokenManager(storage as never, () => clientId, translate), secrets };
 }
 
 function reset(...next: Array<HttpResponse>) {

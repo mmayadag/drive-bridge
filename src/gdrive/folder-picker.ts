@@ -16,6 +16,7 @@ export type FolderPickerTranslations = {
 	create: string;
 	cancel: string;
 	noSubfolders: string;
+	folderCreateFailed: string;
 	folderListFailed: string;
 	pickSubfolder: string;
 	folderNameSlash: string;
@@ -98,7 +99,7 @@ export default class FolderPickerModal extends Modal {
 			const folder = await createFolder(request, this.current.id, name);
 			this.enter(folder);
 		} catch (error) {
-			new Notice(`${translate('folderListFailed')}: ${getMessage(error)}`, 5000);
+			new Notice(`${translate('folderCreateFailed')}: ${getMessage(error)}`, 5000);
 		}
 	};
 

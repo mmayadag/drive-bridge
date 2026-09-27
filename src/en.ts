@@ -79,12 +79,18 @@ const en: Translations = {
 	done: 'Done',
 	download: 'Download',
 	edit: 'Edit',
+	errorAndroidWrite: 'Android kept writing the file empty. Sync will try again.',
 	errorForbidden: 'Google Drive refused the request, often because of a rate or storage limit.',
+	errorNoBackend: 'No sync backend is set. Choose one in the settings.',
 	errorOffline: "Can't reach Google. Check the internet connection.",
 	errorRateLimited: 'Too many requests. Sync will work again shortly.',
+	errorSecretHeader: (name) =>
+		`The secret for the custom header "${name}" is missing on this device.`,
 	errorServer: 'Google Drive had a problem. Try again later.',
 	errorSignIn: 'Google no longer accepts the sign-in. Connect the account again.',
 	errorTasksFailed: (count) => `${count} ${p(count, 'file', 'files')} could not be synced.`,
+	errorWindowsCharacter: (character) =>
+		`Windows does not allow "${character}" in file names. Rename the file to sync it.`,
 	excludeFromSync: 'Exclude from sync',
 	excludedFromSync: 'Excluded from sync:',
 	exclusionRules: 'Exclusion rules',

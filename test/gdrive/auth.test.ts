@@ -1,8 +1,12 @@
 import type { SecretStorage } from 'obsidian';
 import ObsidianMock from '$/support/obsidian-mock';
 import testKit from '$/support/test-kit';
+import translateWith from '$/support/translate';
 import { expect, mock, test } from 'bun:test';
 import type { RequestParam } from '@/modules/registrar';
+import gdriveEn from '@/gdrive/i18n';
+
+const translate = translateWith(gdriveEn);
 
 const { request } = testKit;
 
@@ -62,7 +66,10 @@ test('parses a bare refresh token and rclone output', () => {
 
 test('reads the account id and email from Drive', async () => {
 	reset({ json: { user: { emailAddress: 'me@test', permissionId: 'perm-1' } } });
-	expect(await fetchAccount('access')).toStrictEqual({ email: 'me@test', userId: 'perm-1' });
+	expect(await fetchAccount('access', translate)).toStrictEqual({
+		email: 'me@test',
+		userId: 'perm-1',
+	});
 	expect(requests[0]?.headers?.Authorization).toBe('Bearer access');
 	expect(String((requests[0] as { url?: string } | undefined)?.url)).toContain('/about');
 });
@@ -71,7 +78,7 @@ test('fails to read the account on an error response', async () => {
 	reset({ json: { error: 'nope' }, status: 401 });
 	let caught: unknown;
 	try {
-		await fetchAccount('access');
+		await fetchAccount('access', translate);
 	} catch (error) {
 		caught = error;
 	}
@@ -84,7 +91,7 @@ test('refresh sends the user client and records the granted scope', async () => 
 		['drive-bridge-gdrive-refresh-token', 'refresh'],
 		['drive-bridge-gdrive-client-secret', 'my-secret'],
 	]);
-	const manager = new TokenManager(storage, () => 'my-client');
+	const manager = new TokenManager(storage, () => 'my-client', translate);
 	expect(await manager.getToken()).toBe('a');
 	expect(String(requests[0]?.body)).toContain('client_id=my-client');
 	expect(String(requests[0]?.body)).toContain('client_secret=my-secret');
@@ -97,7 +104,7 @@ test('detects a token limited to drive.file', async () => {
 		['drive-bridge-gdrive-refresh-token', 'refresh'],
 		['drive-bridge-gdrive-client-secret', 'my-secret'],
 	]);
-	const manager = new TokenManager(storage, () => 'my-client');
+	const manager = new TokenManager(storage, () => 'my-client', translate);
 	await manager.getToken();
 	expect(manager.hasFullDriveScope()).toBe(false);
 });
@@ -116,7 +123,11 @@ test('caches tokens and retries bearer requests after a 401', async () => {
 		getSecret: (id: string) => secrets.get(id),
 		setSecret: (id: string, value: string) => void secrets.set(id, value),
 	};
-	const manager = new TokenManager(storage as unknown as SecretStorage, () => 'my-client');
+	const manager = new TokenManager(
+		storage as unknown as SecretStorage,
+		() => 'my-client',
+		translate,
+	);
 	const seen: Array<string | undefined> = [];
 	const req = request((url, params) => {
 		seen.push(params.headers?.Authorization);
@@ -141,7 +152,7 @@ test('refuses to refresh without a client configured', async () => {
 		getSecret: (id: string) => secrets.get(id),
 		setSecret: (id: string, value: string) => void secrets.set(id, value),
 	};
-	const manager = new TokenManager(storage as unknown as SecretStorage, () => '');
+	const manager = new TokenManager(storage as unknown as SecretStorage, () => '', translate);
 	let caught: unknown;
 	try {
 		await manager.getToken();
@@ -159,11 +170,35 @@ test('stores the client secret in secret storage and clears it when emptied', ()
 		getSecret: (id: string) => secrets.get(id),
 		setSecret: (id: string, value: string) => void secrets.set(id, value),
 	};
-	const manager = new TokenManager(storage as unknown as SecretStorage, () => 'my-client');
+	const manager = new TokenManager(
+		storage as unknown as SecretStorage,
+		() => 'my-client',
+		translate,
+	);
 	manager.setClientSecret('my-secret');
 	expect(manager.getCredentials()).toStrictEqual(credentials);
 	expect(manager.hasCredentials()).toBe(true);
 	manager.setClientSecret('');
 	expect(secrets.has('drive-bridge-gdrive-client-secret')).toBe(false);
 	expect(manager.hasCredentials()).toBe(false);
+});
+
+async function refreshError(json: object, refreshToken = 'refresh') {
+	reset({ json, status: 400 });
+	const entries: Array<[string, string]> = [['drive-bridge-gdrive-client-secret', 'my-secret']];
+	if (refreshToken) entries.push(['drive-bridge-gdrive-refresh-token', refreshToken]);
+	const { storage } = secretStorage(entries);
+	const manager = new TokenManager(storage, () => 'my-client', translate);
+	return manager.getToken().then(
+		() => '',
+		(error: unknown) => (error as Error).message,
+	);
+}
+
+test('refresh errors read in the plugin language', async () => {
+	expect(await refreshError({ error: 'invalid_grant' })).toBe(gdriveEn.errorAuthExpired);
+	expect(await refreshError({ error: 'invalid_client', error_description: 'Bad client' })).toBe(
+		'Google Drive token refresh failed: Bad client',
+	);
+	expect(await refreshError({}, '')).toBe(gdriveEn.errorNotConnected);
 });

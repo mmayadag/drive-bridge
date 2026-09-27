@@ -35,7 +35,7 @@ export async function connectWithToken(
 	try {
 		const accessToken = await manager.getToken(true);
 		if (!manager.hasFullDriveScope()) throw new LimitedScopeError();
-		const account = await fetchAccount(accessToken);
+		const account = await fetchAccount(accessToken, manager.translate);
 		return { account, status: 'connected' };
 	} catch (error) {
 		if (previous) manager.setRefreshToken(previous);

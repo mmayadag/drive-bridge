@@ -1,6 +1,10 @@
 import type { SettingDefinition, SettingDefinitionGroup, SettingDefinitionPage } from 'obsidian';
 import ObsidianMock from '$/support/obsidian-mock';
+import translateWith from '$/support/translate';
 import { expect, mock, test } from 'bun:test';
+import gdriveEn from '@/gdrive/i18n';
+
+const translate = translateWith(gdriveEn);
 
 void mock.module('obsidian', () => ObsidianMock);
 
@@ -37,7 +41,7 @@ function setup({
 			translate: (key: string) => key,
 		} as never,
 		{ accountEmail: email, clientId } as never,
-		new TokenManager(storage as never, () => clientId),
+		new TokenManager(storage as never, () => clientId, translate),
 	) as Record<number, (self: unknown) => SettingDefinitionGroup>;
 	const group = tree[551](tree[551]);
 	const prompt = tree[16](tree[16]) as unknown as SettingDefinitionPage;
