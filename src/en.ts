@@ -119,7 +119,7 @@ const en: Translations = {
 	guideTitle: 'Setup guide',
 	headerKeyPlaceholder: 'Header key',
 	headerValuePlaceholder: 'Header value',
-	help: 'Setup guide and every setting explained',
+	help: 'How to set up Drive Bridge, and every setting explained.',
 	helpAndSupport: 'Help and support',
 	helpAndSupportDescription: 'Setup guide, bug reports and feature requests.',
 	hide: 'Hide',
@@ -218,7 +218,8 @@ const en: Translations = {
 	previewSync: 'Preview sync',
 	previewSyncDescription: 'Lists what a sync would do now, without changing anything.',
 	previewTitle: 'Sync preview',
-	problemReport: 'Problem report (versions, settings without secrets, recent log)',
+	problemReport:
+		'Versions, settings without secrets and the recent log, to paste into a bug report.',
 	problemReportHint:
 		'Check it first; it includes your filter rules and recent log lines. Select all, copy it, and paste it into a Bug report.',
 	problemReportTitle: 'Problem report',
@@ -240,8 +241,9 @@ const en: Translations = {
 	replaceAccountConfirm:
 		'This device is already connected. Importing replaces its Google account with the one in the export.',
 	replacesOneVersion: 'Replaces one version',
-	reportBug: 'Report a bug. Nothing is sent until you submit it on GitHub.',
-	requestFeature: 'Request a feature. Nothing is sent until you submit it on GitHub.',
+	reportBug:
+		"Opens GitHub's form with your versions filled in. Nothing is sent until you submit it.",
+	requestFeature: "Opens GitHub's form. Nothing is sent until you submit it.",
 	reservedHeader:
 		'That header is set by the plugin itself; overriding it would break every request.',
 	resetToDefaults: 'Reset to defaults',

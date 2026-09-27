@@ -119,6 +119,7 @@ function helpRow() {
 			return setting;
 		},
 		infoEl: document.createElement('div'),
+		settingEl: document.createElement('div'),
 	};
 	return { buttons, setting };
 }
@@ -295,7 +296,7 @@ test('help page rows run their item and undo their decoration when the tab re-re
 			Record<number, () => { name: string; render: (setting: unknown) => () => void }>
 		>
 	>;
-	const page = tree[7000][4000];
+	const page = tree[7900][4000];
 	const row = page[1000]();
 	expect(row.name).toBe('guideTitle');
 	const settingEl = document.createElement('div');
@@ -314,5 +315,24 @@ test('help page rows run their item and undo their decoration when the tab re-re
 		expect(opened).toHaveLength(1);
 	} finally {
 		window.open = originalOpen;
+	}
+});
+
+test('with the help page entry on screen, the card title opens that page', () => {
+	const { setting } = helpRow();
+	helpItem().render(setting);
+	const group = document.createElement('div');
+	group.className = 'drive-bridge-help-link';
+	const entry = group.createDiv({ cls: 'setting-item' });
+	document.body.append(group);
+	let opened = 0;
+	entry.addEventListener('click', () => opened++);
+	windows.length = 0;
+	try {
+		setting.infoEl.click();
+		expect(opened).toBe(1);
+		expect(windows).toStrictEqual([]);
+	} finally {
+		group.remove();
 	}
 });

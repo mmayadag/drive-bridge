@@ -375,8 +375,8 @@ The main screen is grouped by purpose:
   (the entry shows how many are on) and Filter rules (the rule count).
 - **Deletions**: Never delete on Drive and Delete to trash.
 - **Google Drive**: Google account and Base directory.
-- **Advanced** and **Help and support**, then the help icons and
-  [Support](#support).
+- **Advanced**, then the Help and support card (its title opens the help
+  page) and [Support](#support).
 
 | Entry            | Holds                                                                                                                                              |
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -465,10 +465,10 @@ trust; the payload carries the vault name, not its contents.
 
 ### Support
 
-| Setting          | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Help and support | Tap the title for the same items as a labelled list; they are also a page of their own, **Help and support ›** under Advanced. Icons for the setup guide, a bug report, a feature request, and **Problem report**: versions, settings with secrets, addresses and file names removed, and the last 300 log lines, shown in a window to select and paste into a bug report. Both reports open GitHub's issue form with the plugin version, Obsidian version and platform filled in. Nothing leaves the device until you submit the form yourself. |
-| Buy me a coffee  | The yellow footer at the bottom of the settings; opens the donation page. The line above it follows the last sync: _It works! Coffee time?_ after a good sync, a setup hint before the first one, and a pointer to the bug report after a failure. The version below it is the installed plugin version.                                                                                                                                                                                                                                         |
+| Setting          | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Help and support | Tap the title for the Help and support page, which lists the same items with their labels. Icons for the setup guide, a bug report, a feature request, and **Problem report**: versions, settings with secrets, addresses and file names removed, and the last 300 log lines, shown in a window to select and paste into a bug report. Both reports open GitHub's issue form with the plugin version, Obsidian version and platform filled in. Nothing leaves the device until you submit the form yourself. |
+| Buy me a coffee  | The yellow footer at the bottom of the settings; opens the donation page. The line above it follows the last sync: _It works! Coffee time?_ after a good sync, a setup hint before the first one, and a pointer to the bug report after a failure. The version below it is the installed plugin version.                                                                                                                                                                                                     |
 
 ### Development
 
