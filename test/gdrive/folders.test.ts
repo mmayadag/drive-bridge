@@ -38,7 +38,7 @@ test('reports a failed listing', async () => {
 	} catch (error) {
 		caught = error;
 	}
-	expect(String(caught)).toContain('Listing Drive folders failed');
+	expect(String(caught)).toBe('Error: Google Drive 403: nope');
 });
 
 test('creates a folder under the current one', async () => {

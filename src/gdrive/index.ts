@@ -16,7 +16,7 @@ import { getMessage } from '@/shared/error';
 import type { RemoteScan, SnapshotDB } from './changes';
 import type { GdriveDB } from './fs';
 import type { Quota } from './quota';
-import type { GdriveTranslations } from './setting';
+import type { GdriveTranslations } from './translations';
 import { TokenManager, bearerMiddleware } from './auth';
 import checkConnection from './check-connection';
 import { connectWithToken } from './connect';
@@ -63,6 +63,7 @@ export default class Gdrive {
 		this.tokenManager = new TokenManager(
 			ctx.app.secretStorage,
 			() => this.moduleSettings.clientId,
+			ctx.translate,
 		);
 	}
 

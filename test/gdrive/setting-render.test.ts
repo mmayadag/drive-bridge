@@ -101,7 +101,11 @@ function setup({
 		setSecret: (id: string, value: string) => void secrets.set(id, value),
 	};
 	const moduleSettings = { accountEmail: email, baseDirectory, clientId, useTrash };
-	const tokenManager = new TokenManager(storage as never, () => moduleSettings.clientId);
+	const tokenManager = new TokenManager(
+		storage as never,
+		() => moduleSettings.clientId,
+		((key: string) => key) as never,
+	);
 	const saved: Array<true> = [];
 	const rerendered: Array<true> = [];
 	const refreshed: Array<true> = [];

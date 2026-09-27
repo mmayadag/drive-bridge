@@ -1,6 +1,10 @@
 import ObsidianMock from '$/support/obsidian-mock';
+import translateWith from '$/support/translate';
 import { expect, mock, test } from 'bun:test';
 import type { RequestParam } from '@/modules/registrar';
+import gdriveEn from '@/gdrive/i18n';
+
+const translate = translateWith(gdriveEn);
 
 let response: { json: unknown; status: number } = { json: {}, status: 200 };
 const requests: Array<RequestParam & { url: string }> = [];
@@ -60,6 +64,7 @@ test('trades the code for a refresh token with the verifier', async () => {
 		clientId: 'id',
 		clientSecret: 'secret',
 		code: 'the-code',
+		translate,
 		verifier: 'the-verifier',
 	});
 	expect(token).toBe('1//refresh');
@@ -81,6 +86,7 @@ test('reports Google errors', async () => {
 		clientId: 'id',
 		clientSecret: 's',
 		code: 'c',
+		translate,
 		verifier: 'v',
 	})
 		.then(() => {})
@@ -95,6 +101,7 @@ test('a 200 response with no refresh token and no error message says so', async 
 		clientId: 'id',
 		clientSecret: 's',
 		code: 'c',
+		translate,
 		verifier: 'v',
 	})
 		.then(() => {})
@@ -108,6 +115,7 @@ test('a failing response with no error message falls back to the HTTP status', a
 		clientId: 'id',
 		clientSecret: 's',
 		code: 'c',
+		translate,
 		verifier: 'v',
 	})
 		.then(() => {})

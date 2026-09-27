@@ -161,8 +161,7 @@ test('importing a refresh token that fails reports why', async () => {
 	const { gdrive, secrets } = setup([[SECRET_ID, 'secret']]);
 	gdrive.moduleSettings.clientId = 'client';
 	const line = await gdrive.secrets.import({ refreshToken: '1//imported' });
-	expect(line).toStartWith('authorizationFailed(');
-	expect(line).toContain('authorization expired');
+	expect(line).toBe('authorizationFailed(errorAuthExpired)');
 	expect(secrets.has(REFRESH_ID)).toBe(false);
 	expect(gdrive.moduleSettings.userId).toBe('');
 });

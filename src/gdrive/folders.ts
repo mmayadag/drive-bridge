@@ -13,10 +13,9 @@ export function isUsableFolderName(name: string): boolean {
 
 type FolderList = { files?: Array<DriveFolder>; nextPageToken?: string };
 
-function fail(response: { status: number } & Record<string, unknown>, action: string): never {
-	throw new Error(
-		`${action} failed: ${parseDriveError(response as never) ?? `HTTP ${response.status}`}`,
-	);
+// The caller shows what failed; the message is only Google's reason.
+function fail(response: { status: number } & Record<string, unknown>): never {
+	throw new Error(parseDriveError(response as never) ?? `HTTP ${response.status}`);
 }
 
 /** Subfolders of one folder, by name. `root` is the account's My Drive. */
@@ -34,7 +33,7 @@ export async function listFolders(request: Request, parentId: string): Promise<A
 			}),
 			{ method: 'GET', throw: false },
 		);
-		if (response.status >= 300) fail(response, 'Listing Drive folders');
+		if (response.status >= 300) fail(response);
 		const page = response.json<FolderList>();
 		folders.push(...(page.files ?? []));
 		pageToken = page.nextPageToken;
@@ -53,6 +52,6 @@ export async function createFolder(
 		method: 'POST',
 		throw: false,
 	});
-	if (response.status >= 300) fail(response, 'Creating a Drive folder');
+	if (response.status >= 300) fail(response);
 	return response.json<DriveFolder>();
 }

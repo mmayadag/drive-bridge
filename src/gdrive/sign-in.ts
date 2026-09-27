@@ -1,4 +1,6 @@
 import { requestUrl } from 'obsidian';
+import type { Translate } from '@/modules/i18n';
+import type { AuthTranslations } from './auth';
 import { OAUTH_TOKEN_URL } from './api';
 
 // Google's authorization code flow for installed apps, with PKCE. Nothing listens on the
@@ -77,6 +79,7 @@ export async function exchangeCode(input: {
 	clientSecret: string;
 	code: string;
 	verifier: string;
+	translate: Translate<Pick<AuthTranslations, 'errorNoRefreshToken'>>;
 }): Promise<string> {
 	const response = await requestUrl({
 		body: new URLSearchParams({
@@ -98,7 +101,7 @@ export async function exchangeCode(input: {
 		data.error_description ??
 			data.error ??
 			(response.status === 200
-				? 'Google returned no refresh token.'
+				? input.translate('errorNoRefreshToken')
 				: `HTTP ${response.status}`),
 	);
 }

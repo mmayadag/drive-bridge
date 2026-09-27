@@ -5,6 +5,7 @@ import constructTaskIcon from './construct-task-icon';
 function renderFailedTaskRow(
 	itemEl: HTMLDivElement,
 	{ name, key, error, prettyName, isDir }: FailedTaskInfo,
+	describe: (error: string) => string,
 ) {
 	const row = itemEl.createDiv();
 	const main = row.createDiv('drive-bridge-failed-task');
@@ -14,15 +15,16 @@ function renderFailedTaskRow(
 
 	main.createSpan({ cls: 'drive-bridge-failed-task-type', text: prettyName });
 	main.createSpan({ cls: 'drive-bridge-failed-task-path', text: key });
-	row.createDiv({ cls: 'drive-bridge-failed-task-error', text: error });
+	row.createDiv({ cls: 'drive-bridge-failed-task-error', text: describe(error) });
 }
 
 export default function renderFailedTasks(
 	detailContainer: HTMLDivElement,
 	failedTasks: Array<FailedTaskInfo>,
+	describe: (error: string) => string = (error) => error,
 ): void {
 	detailContainer.empty();
 	const tasksContainer = detailContainer.createDiv('drive-bridge-failed-tasks');
 	detailContainer.show();
-	failedTasks.forEach((task) => renderFailedTaskRow(tasksContainer, task));
+	failedTasks.forEach((task) => renderFailedTaskRow(tasksContainer, task, describe));
 }

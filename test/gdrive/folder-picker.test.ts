@@ -348,3 +348,25 @@ test('onClose empties the content element', () => {
 	(modal as unknown as { onClose: () => void }).onClose();
 	expect(modal.contentEl.children).toHaveLength(0);
 });
+
+test('a failed folder creation says so, not that listing failed', async () => {
+	const { request } = fakeRequest((url, params) =>
+		params.method === 'POST'
+			? Promise.resolve({ json: { error: { message: 'nope' } }, status: 403 })
+			: Promise.resolve(listResponse([])),
+	);
+	const modal = new FolderPickerModal({} as never, {
+		onChoose: () => {},
+		request,
+		translate: ((key: string) => key) as never,
+	}) as unknown as ModalSpy & { onOpen: () => void };
+	modal.onOpen();
+	await flush();
+
+	notices.length = 0;
+	const setting = settingOf(modal);
+	setting.texts[0]?.setValue('New folder');
+	setting.texts[0]?.keydown('Enter');
+	await flush();
+	expect(notices[0]?.message).toStartWith('folderCreateFailed: ');
+});

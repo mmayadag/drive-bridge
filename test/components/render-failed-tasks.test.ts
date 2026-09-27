@@ -36,6 +36,16 @@ test('lists each failed task with its type, path and error, replacing what was t
 	expect(icon?.querySelectorAll('svg')).toHaveLength(2);
 });
 
+test('each error is shown as the describe function words it', () => {
+	const container = document.createElement('div');
+	renderFailedTasks(container, [...failed], (error) => `said: ${error}`);
+	expect(
+		[...container.querySelectorAll('.drive-bridge-failed-task-error')].map(
+			(el) => el.textContent,
+		),
+	).toStrictEqual(['said: Quota exceeded', 'said: Not found']);
+});
+
 test('with nothing failed, the list is empty', () => {
 	const container = document.createElement('div');
 	renderFailedTasks(container, []);

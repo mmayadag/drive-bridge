@@ -7,20 +7,41 @@ export type ErrorTranslations = {
 	errorForbidden: string;
 	errorServer: string;
 	errorTasksFailed: Snippet<number>;
+	errorAndroidWrite: string;
+	errorWindowsCharacter: Snippet<string>;
+	errorNoBackend: string;
+	errorSecretHeader: Snippet<string>;
 };
 
+type WithCount = 'errorTasksFailed';
+type WithName = 'errorWindowsCharacter' | 'errorSecretHeader';
+
 type Known =
-	| { key: Exclude<keyof ErrorTranslations, 'errorTasksFailed'> }
-	| { key: 'errorTasksFailed'; count: number };
+	| { key: Exclude<keyof ErrorTranslations, WithCount | WithName> }
+	| { key: WithCount; count: number }
+	| { key: WithName; name: string };
 
 const OFFLINE =
 	/net::ERR_(?:NAME_NOT_RESOLVED|INTERNET_DISCONNECTED|NETWORK_CHANGED|ADDRESS_UNREACHABLE|TIMED_OUT|CONNECTION_\w+)|Failed to fetch|Device is offline|ENOTFOUND|ECONNRESET|ETIMEDOUT/u;
+
+// Errors thrown in the plugin core stay in English, so logs read the same on every
+// device; these patterns match them and they are translated only where they are shown.
+const ANDROID_WRITE = /known Android bug/u;
+const WINDOWS_CHARACTER = /Windows forbids character "(?<name>.)"/u;
+const NO_BACKEND = /Please (?:set|install) a backend!|Backend ".*" is not installed!/u;
+const SECRET_HEADER = /Custom secret header not found: "(?<name>.*)"/u;
 
 /** Recognises common sync errors; undefined for anything to show as it is. */
 export function classifyError(raw: string): Known | undefined {
 	if (OFFLINE.test(raw)) return { key: 'errorOffline' };
 	const tasks = /Execution of (?<count>\d+) sync task/u.exec(raw)?.groups?.count;
 	if (tasks) return { count: Number(tasks), key: 'errorTasksFailed' };
+	if (ANDROID_WRITE.test(raw)) return { key: 'errorAndroidWrite' };
+	if (NO_BACKEND.test(raw)) return { key: 'errorNoBackend' };
+	const character = WINDOWS_CHARACTER.exec(raw)?.groups?.name;
+	if (character) return { key: 'errorWindowsCharacter', name: character };
+	const header = SECRET_HEADER.exec(raw)?.groups?.name;
+	if (header !== undefined) return { key: 'errorSecretHeader', name: header };
 	const status = Number(/status (?<status>\d{3})\b/u.exec(raw)?.groups?.status);
 	if (status === 401) return { key: 'errorSignIn' };
 	if (status === 429) return { key: 'errorRateLimited' };
@@ -32,7 +53,7 @@ export function classifyError(raw: string): Known | undefined {
 export function describeError(raw: string, translate: Translate<ErrorTranslations>) {
 	const known = classifyError(raw);
 	if (!known) return raw;
-	return known.key === 'errorTasksFailed'
-		? translate('errorTasksFailed', known.count)
-		: translate(known.key);
+	if ('count' in known) return translate(known.key, known.count);
+	if ('name' in known) return translate(known.key, known.name);
+	return translate(known.key);
 }

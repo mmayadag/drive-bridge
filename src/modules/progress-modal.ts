@@ -11,6 +11,7 @@ import renderFailedTasks from '@/components/render-failed-tasks';
 import renderProgress from '@/components/render-progress';
 import { computed, hook } from '@/shared/reactive';
 import { reverseTasks } from '@/sync/reverse';
+import { describeError } from '@/utils/describe-error';
 import type { Dispatch, On } from './event-bus';
 import type { Snippet, Translate } from './i18n';
 import type { SyncStage } from './observability';
@@ -63,7 +64,9 @@ export default class ProgressModal extends Modal {
 					this.renderDone();
 				}
 				this.description?.setText(this.t('failedTasksDescription', failedTasks.length));
-				renderFailedTasks(this.detailContainer as HTMLDivElement, failedTasks);
+				renderFailedTasks(this.detailContainer as HTMLDivElement, failedTasks, (error) =>
+					describeError(error, this.t),
+				);
 				this.showDetails();
 				failedTasks.length = 0;
 			}),

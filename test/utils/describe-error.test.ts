@@ -3,8 +3,8 @@ import type { Translate } from '@/modules/i18n';
 import type { ErrorTranslations } from '@/utils/describe-error';
 import { classifyError, describeError } from '@/utils/describe-error';
 
-const translate = ((key: string, count?: number) =>
-	count === undefined ? key : `${key}:${count}`) as Translate<ErrorTranslations>;
+const translate = ((key: string, arg?: number | string) =>
+	arg === undefined ? key : `${key}:${arg}`) as Translate<ErrorTranslations>;
 
 test('network failures read as offline', () => {
 	for (const raw of [
@@ -38,4 +38,19 @@ test('a recognized but count-less error translates to its plain key', () => {
 test('unknown errors are shown as they are', () => {
 	const raw = 'Google Drive authorization expired or was revoked, please reconnect.';
 	expect(describeError(raw, translate)).toBe(raw);
+});
+
+test('errors thrown in English by the plugin core are worded for the reader', () => {
+	expect(
+		describeError('File write fails repeatedly, this is a known Android bug.', translate),
+	).toBe('errorAndroidWrite');
+	expect(describeError('Please set a backend!', translate)).toBe('errorNoBackend');
+	expect(describeError('Please install a backend!', translate)).toBe('errorNoBackend');
+	expect(describeError('Backend "s3" is not installed!', translate)).toBe('errorNoBackend');
+	expect(describeError('Windows forbids character ":" in file names!', translate)).toBe(
+		'errorWindowsCharacter::',
+	);
+	expect(describeError('Custom secret header not found: "X-Key".', translate)).toBe(
+		'errorSecretHeader:X-Key',
+	);
 });

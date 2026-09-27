@@ -1,5 +1,6 @@
 import type { SecretStorage } from 'obsidian';
 import { requestUrl } from 'obsidian';
+import type { Snippet, Translate } from '@/modules/i18n';
 import type { Request } from '@/modules/registrar';
 import { getStatus } from '@/shared/error';
 import { buildUrl, DRIVE_API, OAUTH_TOKEN_URL } from './api';
@@ -7,6 +8,15 @@ import { buildUrl, DRIVE_API, OAUTH_TOKEN_URL } from './api';
 // Secret storage ids. Secret storage is per device and never synced.
 const REFRESH_TOKEN_ID = 'drive-bridge-gdrive-refresh-token';
 const CLIENT_SECRET_ID = 'drive-bridge-gdrive-client-secret';
+
+export type AuthTranslations = {
+	errorAccountRead: Snippet<number>;
+	errorAuthExpired: string;
+	errorNoClient: string;
+	errorNoRefreshToken: string;
+	errorNotConnected: string;
+	errorTokenRefresh: Snippet<string>;
+};
 
 /** The user's own Google Cloud OAuth client. Nothing is compiled into the plugin. */
 export type ClientCredentials = { clientId: string; clientSecret: string };
@@ -84,7 +94,10 @@ export function parseRefreshToken(input: string): string | undefined {
 export type Account = { userId: string; email: string };
 
 /** Reads the signed-in Google user. `userId` is stable and keeps sync records per account. */
-export async function fetchAccount(accessToken: string): Promise<Account> {
+export async function fetchAccount(
+	accessToken: string,
+	translate: Translate<AuthTranslations>,
+): Promise<Account> {
 	const response = await requestUrl({
 		headers: { Authorization: `Bearer ${accessToken}` },
 		method: 'GET',
@@ -94,7 +107,7 @@ export async function fetchAccount(accessToken: string): Promise<Account> {
 	const user = (response.json as { user?: { permissionId?: string; emailAddress?: string } })
 		?.user;
 	if (response.status >= 300 || !user?.permissionId)
-		throw new Error(`Could not read the Google account: HTTP ${response.status}`);
+		throw new Error(translate('errorAccountRead', response.status));
 	return { email: user.emailAddress ?? '', userId: user.permissionId };
 }
 
@@ -112,6 +125,7 @@ export class TokenManager {
 	constructor(
 		private readonly secretStorage: SecretStorage,
 		private readonly getClientId: () => string,
+		readonly translate: Translate<AuthTranslations>,
 	) {}
 
 	readonly getCredentials = (): ClientCredentials => ({
@@ -155,10 +169,9 @@ export class TokenManager {
 
 	private async refresh(): Promise<string> {
 		const refresh_token = this.getRefreshToken();
-		if (!refresh_token) throw new Error('Please authorize Google Account!');
+		if (!refresh_token) throw new Error(this.translate('errorNotConnected'));
 		const { clientId, clientSecret } = this.getCredentials();
-		if (!clientId || !clientSecret)
-			throw new Error('Enter the OAuth client ID and client secret in the settings.');
+		if (!clientId || !clientSecret) throw new Error(this.translate('errorNoClient'));
 		const response = await requestUrl({
 			body: formEncode({
 				client_id: clientId,
@@ -179,12 +192,9 @@ export class TokenManager {
 			return data.access_token;
 		}
 		this.invalidate();
-		if (data.error === 'invalid_grant')
-			throw new Error(
-				'Google Drive authorization expired or was revoked, please reconnect your Google account in the settings.',
-			);
+		if (data.error === 'invalid_grant') throw new Error(this.translate('errorAuthExpired'));
 		throw new Error(
-			`Google Drive token refresh failed: ${describeAuthError(data, response.status)}`,
+			this.translate('errorTokenRefresh', describeAuthError(data, response.status)),
 		);
 	}
 }

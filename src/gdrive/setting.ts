@@ -2,10 +2,10 @@ import type { Events, Settings } from '@';
 import type { App, SettingGroupItem, TextComponent } from 'obsidian';
 import { Notice, Platform } from 'obsidian';
 import type { Dispatch } from '@/modules/event-bus';
-import type { Fragment, Snippet, Translate } from '@/modules/i18n';
+import type { Translate } from '@/modules/i18n';
 import type { CheckConnectionResult, Request } from '@/modules/registrar';
 import type { CallableOrObjectTree, SettingTree } from '@/modules/setting';
-import type { CheckConnectionDB, CheckConnectionTranslations } from '@/settings/check-connection';
+import type { CheckConnectionDB } from '@/settings/check-connection';
 import type { LabelDefinition } from '@/settings/utils';
 import type { MaybePromise } from '@/types';
 import { ADVANCED, DELETIONS, MORE, PAGE } from '@/settings/layout';
@@ -13,12 +13,10 @@ import { s } from '@/settings/utils';
 import { getMessage } from '@/shared/error';
 import type { GdriveSettings } from '.';
 import type { TokenManager } from './auth';
-import type { BaseDirectoryTranslations } from './base-directory-setting';
 import type { ConnectedRowsTranslations } from './connected-rows';
 import type { Quota } from './quota';
-import type { RemoteScanTranslations } from './remote-scan-setting';
-import type { SetupPageTranslations } from './setup-page';
 import type { PendingSignIn } from './sign-in';
+import type { GdriveTranslations } from './translations';
 import baseDirectorySetting from './base-directory-setting';
 import { isClientId, parseClientJson } from './client-setup';
 import { connectWithToken, findMissingInput } from './connect';
@@ -26,54 +24,6 @@ import connectedRows from './connected-rows';
 import remoteScanSetting from './remote-scan-setting';
 import setupPage, { labelSetupEntryLater } from './setup-page';
 import { exchangeCode, parseRedirect, startSignIn } from './sign-in';
-
-export type GdriveTranslations = BaseDirectoryTranslations &
-	RemoteScanTranslations &
-	SetupPageTranslations &
-	Omit<ConnectedRowsTranslations, keyof CheckConnectionTranslations | 'exportSettings'> & {
-		gdrive: string;
-		connectAccount: string;
-		accountConnected: string;
-		accountConnectedDescription: Snippet<string>;
-		connectAccountDescription: Fragment;
-		connect: string;
-		connected: string;
-		googleAccount: string;
-		clientIdMissing: string;
-		clientSecretMissing: string;
-		clickToConnect: string;
-		tapToConnect: string;
-		disconnect: string;
-		configureFirst: string;
-		connectSuccess: string;
-		useTrash: string;
-		useTrashDescription: string;
-		authorizationFailed: Snippet<string>;
-		clientId: string;
-		clientIdDescription: string;
-		clientIdNeeded: string;
-		clientSecret: string;
-		clientSecretDescription: string;
-		connectFirst: string;
-		or: string;
-		driveAlmostFull: Snippet<{ used: string; limit: string }>;
-		connectPrompt: string;
-		connectPromptDescription: string;
-		enterClientId: string;
-		enterClientSecret: string;
-		enterRefreshToken: string;
-		invalidRefreshToken: string;
-		limitedScope: string;
-		refreshTokenPlaceholder: string;
-		signInWithGoogle: string;
-		setUpFromDevice: string;
-		setUpFromDeviceDescription: string;
-		clientFromJson: string;
-		signInWithGoogleDescription: string;
-		signInOpened: string;
-		signInStartAgain: string;
-		signInDenied: string;
-	};
 
 type AccountHintKey =
 	| 'clickToConnect'
@@ -217,6 +167,7 @@ export default function gdriveSetting(
 				token = await exchangeCode({
 					...tokenManager.getCredentials(),
 					code: redirect.code,
+					translate,
 					verifier: pending.verifier,
 				});
 			} catch (error) {
