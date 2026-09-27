@@ -57,6 +57,7 @@ export function countAutomaticSyncs(settings: Settings) {
 		settings.startupSync.enabled,
 		settings.scheduledSync.enabled,
 		settings.syncOnLeave,
+		settings.syncOnFileOpen,
 	];
 	return { on: flags.filter(Boolean).length, total: flags.length };
 }

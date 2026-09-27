@@ -184,7 +184,8 @@ export default class Observability {
 				this.overdue(false);
 				window.clearInterval(updateInterval);
 				sinceLastSyncText('');
-				if (settings.noticeStatusOnMobile && Platform.isMobile) {
+				// Opening a note syncs it quietly; a notice for each would be noise.
+				if (settings.noticeStatusOnMobile && Platform.isMobile && trigger !== 'fileOpen') {
 					window.clearTimeout(noticeTimeout);
 					mobileSyncNotice ??= new Notice(progressText(), 0);
 				}
@@ -217,8 +218,12 @@ export default class Observability {
 						mobileSyncNotice?.hide();
 						mobileSyncNotice = undefined;
 					}, MOBILE_SYNC_NOTICE_HIDE_DELAY);
-				// A preview only showed a plan: it is not a sync for Last sync or the history.
-				if (currentTrigger !== 'preview') {
+				// Not syncs for Last sync or the history: a preview only showed a plan, and an
+				// opened note that was already in sync changed nothing.
+				const quiet =
+					currentTrigger === 'preview' ||
+					(currentTrigger === 'fileOpen' && result === 'noop');
+				if (!quiet) {
 					this.lastSyncTime = Date.now();
 					this.settings.lastSync = {
 						at: this.lastSyncTime,

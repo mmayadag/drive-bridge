@@ -19,6 +19,8 @@ export type FeaturesSettingTranslations = {
 	scheduledSyncPlaceholder: string;
 	syncOnLeave: string;
 	syncOnLeaveDescription: string;
+	syncOnFileOpen: string;
+	syncOnFileOpenDescription: string;
 	pauseAutomaticSync: string;
 	pauseAutomaticSyncDescription: string;
 };
@@ -87,6 +89,11 @@ export default function featuresSettings(ctx: {
 					control: { key: 'syncOnLeave', type: 'toggle' },
 					desc: translate('syncOnLeaveDescription'),
 					name: translate('syncOnLeave'),
+				})),
+				3600: s(() => ({
+					control: { key: 'syncOnFileOpen', type: 'toggle' },
+					desc: translate('syncOnFileOpenDescription'),
+					name: translate('syncOnFileOpen'),
 				})),
 				4000: s(() => ({
 					control: {

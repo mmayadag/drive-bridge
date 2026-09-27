@@ -502,3 +502,23 @@ test('a preview is not a sync: Last sync and the history stay as they were', () 
 	expect(settings.lastSync).toBeUndefined();
 	expect(settings.syncHistory).toStrictEqual([]);
 });
+
+test('opening a note that was in sync leaves no trace; one that synced is recorded', () => {
+	const { emit, settings } = setup();
+	emit('syncStarted', { trigger: 'fileOpen' });
+	emit('syncTerminated', { result: 'noop' });
+	expect(settings.lastSync).toBeUndefined();
+	expect(settings.syncHistory).toStrictEqual([]);
+	emit('syncStarted', { trigger: 'fileOpen' });
+	emit('syncTerminated', { result: 'completed' });
+	expect(settings.lastSync).toMatchObject({ result: 'completed' });
+	expect(settings.syncHistory).toHaveLength(1);
+});
+
+test('on a phone, syncing an opened note shows no notice', () => {
+	Object.assign(ObsidianMock.Platform, { isMobile: true });
+	const { emit } = setup({ noticeStatusOnMobile: true });
+	emit('syncStarted', { trigger: 'fileOpen' });
+	expect(notices).toStrictEqual([]);
+	emit('syncTerminated', { result: 'noop' });
+});
