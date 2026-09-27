@@ -64,7 +64,7 @@ export function defaultSettings(configDir: string): Settings {
 export function resetSettings(settings: Settings, configDir: string) {
 	// Kept-on-Drive marks are state, not a preference: dropping them would download every
 	// kept file again.
-	const { modules, remoteFs, lastSync, keptOnRemote, syncHistory } = settings;
+	const { modules, remoteFs, lastSync, keptOnRemote, syncHistory, lastExport } = settings;
 	Object.assign(settings, defaultSettings(configDir), {
 		keptOnRemote,
 		modules,
@@ -72,4 +72,5 @@ export function resetSettings(settings: Settings, configDir: string) {
 		syncHistory,
 	});
 	if (lastSync) settings.lastSync = lastSync;
+	if (lastExport) settings.lastExport = lastExport;
 }

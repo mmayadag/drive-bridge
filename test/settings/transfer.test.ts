@@ -11,6 +11,7 @@ const current = () => ({
 	decider: 'bidirectional',
 	exclusionRules: [{ caseSensitive: false, expr: '.git' }],
 	keptOnRemote: { 'a.md': 'r1' },
+	lastExport: { at: 2, path: 'x.json' },
 	lastSync: { at: 1, result: 'completed' },
 	modules: { gdrive: { baseDirectory: 'vault/', clientId: 'id', useTrash: true } },
 	skipState: { failures: {}, skipped: ['bad.md'] },

@@ -1,6 +1,6 @@
 import type { Settings } from '@';
 import type { App } from 'obsidian';
-import { Notice } from 'obsidian';
+import { Notice, TFile } from 'obsidian';
 import type { ImportPreview } from '@/components/transfer-modal';
 import type { Snippet, Translate } from '@/modules/i18n';
 import type { CallableOrObjectTree } from '@/modules/setting';
@@ -23,6 +23,8 @@ export type TransferTranslations = {
 	cancel: string;
 	exportSettings: string;
 	exportSettingsDescription: string;
+	lastExport: (last: { path: string; time: string }) => string;
+	openLastExport: (path: string) => string;
 	importSettings: string;
 	importSettingsDescription: string;
 	includeAccount: string;
@@ -94,6 +96,9 @@ export function createTransfer(ctx: TransferContext) {
 				const stamp = formatDateTime(Date.now()).replaceAll(':', '-');
 				const path = `Drive Bridge settings ${stamp}.json`;
 				await app.vault.create(path, text);
+				settings.lastExport = { at: Date.now(), path };
+				void ctx.saveSettings();
+				ctx.rerenderSettingTab();
 				return path;
 			},
 			texts: {
@@ -168,6 +173,27 @@ export function createTransfer(ctx: TransferContext) {
 			},
 		}).open();
 
+	const lastExportFile = () => {
+		const path = settings.lastExport?.path;
+		const file = path ? app.vault.getAbstractFileByPath(path) : undefined;
+		return file instanceof TFile ? file : undefined;
+	};
+	// Save to vault leaves a file that syncs like any note: say where, and when.
+	const describeExport = () => {
+		const file = lastExportFile();
+		if (!file || !settings.lastExport) return t('exportSettingsDescription');
+		return createFragment((frag) => {
+			frag.appendText(t('exportSettingsDescription'));
+			frag.createDiv({
+				cls: 'drive-bridge-last-export',
+				text: t('lastExport', {
+					path: file.path,
+					time: formatDateTime(settings.lastExport?.at ?? 0),
+				}),
+			});
+		});
+	};
+
 	const tree: CallableOrObjectTree = {
 		[MORE]: {
 			[PAGE.advanced]: {
@@ -178,9 +204,25 @@ export function createTransfer(ctx: TransferContext) {
 					}),
 					{
 						1000: s(() => ({
-							desc: t('exportSettingsDescription'),
+							desc: describeExport(),
 							name: t('exportSettings'),
 							render: (setting) => {
+								const file = lastExportFile();
+								// The last export, one tap away, while it is still in the vault.
+								if (file)
+									setting.addExtraButton((button) =>
+										button
+											.setIcon('file-json')
+											.setTooltip(t('openLastExport', file.path))
+											.onClick(
+												() =>
+													void app.workspace.openLinkText(
+														file.path,
+														'',
+														true,
+													),
+											),
+									);
 								setting.addButton((button) =>
 									button.setButtonText(t('exportSettings')).onClick(openExport),
 								);

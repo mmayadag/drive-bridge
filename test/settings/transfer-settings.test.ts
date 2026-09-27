@@ -372,3 +372,64 @@ test('the modal texts that take a value pass it to the translation', () => {
 	const summary = importModals[0]?.texts.summary as (counts: unknown) => string;
 	expect(summary({ changes: 2 })).toBe('importSummary:{"changes":2}');
 });
+
+test('Save to vault remembers the file, and the Export row points at it while it exists', async () => {
+	const { TFile } = await import('obsidian');
+	exportModals.length = 0;
+	const files = new Map<string, unknown>();
+	const opened: Array<string> = [];
+	const ctx = baseCtx();
+	Object.assign((ctx.app as { vault: object }).vault, {
+		getAbstractFileByPath: (path: string) => files.get(path),
+	});
+	Object.assign(ctx.app, {
+		workspace: { openLinkText: (path: string) => void opened.push(path) },
+	});
+	const { openExport, tree } = createTransfer(ctx as never);
+	openExport();
+	const path = await exportModals[0]?.save('{}');
+	const { lastExport } = ctx.settings as { lastExport?: { path: string; at: number } };
+	expect(lastExport?.path).toBe(path);
+	expect(ctx.saved.length).toBeGreaterThan(0);
+	expect(ctx.rerendered.length).toBeGreaterThan(0);
+
+	type Row = () => { desc: unknown; render: (setting: unknown) => void };
+	const row = (
+		tree as never as Record<number, Record<number, Record<number, Record<number, Row>>>>
+	)[MORE][PAGE.advanced][ADVANCED.transfer][1000];
+	const extras: Array<{ icon?: string; click?: () => void }> = [];
+	const fakeRow = {
+		addButton: () => fakeRow,
+		addExtraButton: (cb: (b: unknown) => void) => {
+			const extra: { icon?: string; click?: () => void } = {};
+			const button = {
+				onClick: (fn: () => void) => {
+					extra.click = fn;
+					return button;
+				},
+				setIcon: (icon: string) => {
+					extra.icon = icon;
+					return button;
+				},
+				setTooltip: () => button,
+			};
+			cb(button);
+			extras.push(extra);
+			return fakeRow;
+		},
+	};
+
+	// The file is gone: the plain description, no button.
+	expect(row().desc).toBe('exportSettingsDescription');
+	row().render(fakeRow);
+	expect(extras).toHaveLength(0);
+
+	files.set(path, Object.assign(new TFile(), { path }));
+	const desc = row().desc as DocumentFragment;
+	expect(desc.textContent).toContain('lastExport');
+	expect(desc.textContent).toContain(path);
+	row().render(fakeRow);
+	expect(extras[0]?.icon).toBe('file-json');
+	extras[0]?.click?.();
+	expect(opened).toStrictEqual([path]);
+});
