@@ -1,5 +1,5 @@
 import type { Fragment, Translate } from '@/modules/i18n';
-import { s } from '@/settings/utils';
+import { addLabel, s } from '@/settings/utils';
 import type { SetupStepKey } from './client-setup';
 import { SETUP_STEPS } from './client-setup';
 
@@ -74,4 +74,24 @@ export default function setupPage(
 			})),
 		},
 	);
+}
+
+/**
+ * Draws the Guide label on the Set up a Google client entry. Labels on page entries are
+ * drawn for the main screen only, and this entry sits on the Google account page, so that
+ * page draws it once it has rendered.
+ */
+export function labelSetupEntry(doc: Document, translate: Translate<SetupPageTranslations>) {
+	const name = translate('setupPage');
+	for (const entry of doc.querySelectorAll('.setting-item-name'))
+		if (entry.firstChild?.textContent === name)
+			addLabel(entry, {
+				text: translate('guide'),
+				tooltip: translate('guideLabelDescription'),
+			});
+}
+
+/** labelSetupEntry once the page around `el` has rendered. */
+export function labelSetupEntryLater(el: HTMLElement, translate: Translate<SetupPageTranslations>) {
+	queueMicrotask(() => labelSetupEntry(el.ownerDocument, translate));
 }
