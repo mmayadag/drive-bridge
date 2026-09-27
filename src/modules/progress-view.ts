@@ -1,4 +1,5 @@
 import type { Translations } from '@';
+import type { BaseTask } from '@/sync';
 import type { Progress } from '@/types';
 import roundPercent from '@/utils/round-percent';
 import type { Translate } from './i18n';
@@ -51,4 +52,26 @@ export function describeProgress(
 			total: 0,
 		};
 	return { current: t('failed') };
+}
+
+export type TaskCounts = {
+	total: number;
+	deleteLocal: number;
+	deleteRemote: number;
+	conflict: number;
+};
+
+/** How many tasks there are, and how many delete or resolve a conflict. */
+export function countTasks(tasks: Array<BaseTask>): TaskCounts {
+	const counts: TaskCounts = {
+		conflict: 0,
+		deleteLocal: 0,
+		deleteRemote: 0,
+		total: tasks.length,
+	};
+	for (const { name } of tasks)
+		if (name === 'removeLocal') counts.deleteLocal++;
+		else if (name === 'removeRemote') counts.deleteRemote++;
+		else if (name === 'resolveConflict') counts.conflict++;
+	return counts;
 }

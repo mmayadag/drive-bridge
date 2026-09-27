@@ -6,6 +6,7 @@ import type { BaseTask, RemoveLocal, TaskNames } from '@/sync';
 import type { Progress } from '@/types';
 import ConfirmModal from '@/components/confirm-modal';
 import mountFileTree from '@/components/file-tree';
+import PreviewModal from '@/components/preview-modal';
 import renderFailedTasks from '@/components/render-failed-tasks';
 import renderProgress from '@/components/render-progress';
 import { computed, hook } from '@/shared/reactive';
@@ -13,19 +14,13 @@ import { reverseTasks } from '@/sync/reverse';
 import type { Dispatch, On } from './event-bus';
 import type { Snippet, Translate } from './i18n';
 import type { SyncStage } from './observability';
+import type { TaskCounts } from './progress-view';
 import type { FailedTaskInfo, TaskInfo } from './sync';
-import { describeProgress } from './progress-view';
+import { countTasks, describeProgress } from './progress-view';
 
 export type DeleteConfirmReturn = {
 	delete: Array<RemoveLocal>;
 	reupload: Array<RemoveLocal>;
-};
-
-type TaskCounts = {
-	total: number;
-	deleteLocal: number;
-	deleteRemote: number;
-	conflict: number;
 };
 
 export default class ProgressModal extends Modal {
@@ -120,6 +115,17 @@ export default class ProgressModal extends Modal {
 					title: this.t('massChangeTitle'),
 				}).open();
 			}),
+			ctx.on('requestPreview', (tasks) =>
+				new PreviewModal(ctx.app, {
+					description: tasks.length
+						? `${this.t('previewIntro')} ${this.t('confirmTasksDescription', countTasks(tasks))}`
+						: this.t('previewNothing'),
+					done: this.t('done'),
+					tasks,
+					title: this.t('previewTitle'),
+					translate: this.t,
+				}).open(),
+			),
 			ctx.on('requestConfirmTasks', (tasks) => {
 				if (!this.opening) this.open();
 				const { unmount, getState } = mountFileTree(
@@ -129,16 +135,7 @@ export default class ProgressModal extends Modal {
 					{ undo: true },
 				);
 				const cleanupUnmount = this.modalCleanupCallbacks.subscribe(unmount);
-				const taskCounts: TaskCounts = {
-					conflict: 0,
-					deleteLocal: 0,
-					deleteRemote: 0,
-					total: tasks.length,
-				};
-				for (const { name } of tasks)
-					if (name === 'removeLocal') taskCounts.deleteLocal++;
-					else if (name === 'removeRemote') taskCounts.deleteRemote++;
-					else if (name === 'resolveConflict') taskCounts.conflict++;
+				const taskCounts = countTasks(tasks);
 				this.description?.setText(this.t('confirmTasksDescription', taskCounts));
 				this.showDetails();
 				this.renderConfirmCancel(() => {
@@ -160,6 +157,9 @@ export default class ProgressModal extends Modal {
 	};
 
 	declare readonly i18n: {
+		previewIntro: string;
+		previewNothing: string;
+		previewTitle: string;
 		syncProgress: string;
 		completed: string;
 		failedTasksDescription: Snippet<number>;

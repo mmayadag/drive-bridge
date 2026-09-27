@@ -43,6 +43,7 @@ import { prepareGlobMatch } from '@/utils/glob-match';
 import type { Dispatch, On } from './event-bus';
 import type { Snippet, Translate } from './i18n';
 import type { Infras } from './registrar';
+import { registerPreviewSync } from './preview-sync';
 import { registerSyncThisFile } from './sync-this-file';
 
 export type SyncTerminateReason =
@@ -65,6 +66,8 @@ export type SyncOptions = {
 	inclusionRules?: Array<GlobMatchRule>;
 	/** Sync only this vault path (and the folders above it); other records stay as they are. */
 	only?: string;
+	/** Plan only: show what would run, change nothing, record nothing. */
+	preview?: boolean;
 };
 
 export default class Sync {
@@ -92,6 +95,7 @@ export default class Sync {
 			name: this.ctx.translate('retrySkippedFiles'),
 		});
 		registerSyncThisFile({ ...this.ctx, executeSync: this.executeSync });
+		registerPreviewSync({ ...this.ctx, executeSync: this.executeSync });
 	};
 
 	private readonly retrySkipped = () => {
@@ -109,6 +113,8 @@ export default class Sync {
 		requestConfirmMassDelete: { local: number; remote: number };
 		requestConfirmMassChange: { changes: number; percent: number };
 		requestConfirmTasks: Array<BaseTask>;
+		/** The plan of a preview, to show read-only; empty when everything is in sync. */
+		requestPreview: Array<BaseTask>;
 		syncCanceled: undefined;
 		taskCompleted: TaskInfo;
 		taskFailed: FailedTaskInfo;
@@ -216,7 +222,10 @@ export default class Sync {
 			needConfirmTasks = false,
 			inclusionRules = settings.inclusionRules,
 			exclusionRules = settings.exclusionRules,
+			preview = false,
 		} = options;
+		// A preview works on a copy of the kept-on-Drive marks, so it changes nothing.
+		const kept = preview ? { ...settings.keptOnRemote } : settings.keptOnRemote;
 
 		const isCancelled = ref(false);
 		let failedCount = 0;
@@ -249,7 +258,7 @@ export default class Sync {
 			const records = new Map(await record.entries());
 			const localStats = postProcess(localList, localPruner);
 			const remoteStats = postProcess(remoteList, remotePruner);
-			if (hideKeptOnRemote(settings.keptOnRemote, localStats, remoteStats))
+			if (hideKeptOnRemote(kept, localStats, remoteStats) && !preview)
 				void ctx.saveSettings();
 			if (options.only) narrowTo(options.only, { localStats, records, remoteStats });
 			dispatch(
@@ -271,16 +280,17 @@ export default class Sync {
 				taskFactory,
 			});
 			if (tasks.length === 0) {
+				if (preview) dispatch('requestPreview', []);
 				terminateReason = { result: 'noop' };
 				return terminateReason;
 			}
 
 			if (settings.neverDeleteRemote) {
-				const before = Object.keys(settings.keptOnRemote).length;
-				tasks = keepOnRemote(tasks, settings.keptOnRemote, taskFactory);
-				const kept = Object.keys(settings.keptOnRemote).length - before;
-				if (kept) {
-					dispatch('logSync', `Kept ${kept} file(s) on Drive instead of deleting them.`);
+				const before = Object.keys(kept).length;
+				tasks = keepOnRemote(tasks, kept, taskFactory);
+				const added = Object.keys(kept).length - before;
+				if (added && !preview) {
+					dispatch('logSync', `Kept ${added} file(s) on Drive instead of deleting them.`);
 					void ctx.saveSettings();
 				}
 			}
@@ -299,6 +309,12 @@ export default class Sync {
 				tasks,
 				(task) => task instanceof AddRecord || task instanceof RemoveRecord,
 			);
+			if (preview) {
+				// Stops before any question or task: the plan is all a preview shows.
+				dispatch('requestPreview', displayableTasks);
+				terminateReason = { result: 'noop' };
+				return terminateReason;
+			}
 			const reviewed = needConfirmTasks && displayableTasks.length !== 0;
 			if (reviewed) {
 				const confirmResult = await confirmTasks(displayableTasks);

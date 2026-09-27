@@ -420,12 +420,13 @@ The main screen is grouped by purpose:
 
 ### Controls
 
-| Setting                 | Default    | Recommended | What it does                                                              |
-| ----------------------- | ---------- | ----------- | ------------------------------------------------------------------------- |
-| Max file size           | off, 30 MB | off         | Skips files above the limit.                                              |
-| Max request concurrency | on, 50     | on, 50      | Parallel requests. Lower it (e.g. 10) if you see Drive rate-limit errors. |
-| Min request interval    | off        | off         | Minimum pause between requests.                                           |
-| Max memory consumption  | on, 100 MB | on, 100 MB  | Caps memory used for file contents during a sync; lower on old phones.    |
+| Setting                 | Default    | Recommended | What it does                                                                                                                                         |
+| ----------------------- | ---------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Preview sync            | —          | —           | Lists what a sync would do now (the same list as the confirm dialog, read-only) and changes nothing: no files, records or Last sync. Also a command. |
+| Max file size           | off, 30 MB | off         | Skips files above the limit.                                                                                                                         |
+| Max request concurrency | on, 50     | on, 50      | Parallel requests. Lower it (e.g. 10) if you see Drive rate-limit errors.                                                                            |
+| Min request interval    | off        | off         | Minimum pause between requests.                                                                                                                      |
+| Max memory consumption  | on, 100 MB | on, 100 MB  | Caps memory used for file contents during a sync; lower on old phones.                                                                               |
 
 ### Filter rules
 

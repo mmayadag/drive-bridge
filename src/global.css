@@ -199,6 +199,10 @@ input[type='password'].drive-bridge-invalid-input {
 	color: var(--text-normal);
 }
 
+.drive-bridge-file-tree.is-read-only .drive-bridge-file-tree-row {
+	cursor: default;
+}
+
 .drive-bridge-file-tree-label.is-deselected,
 .drive-bridge-file-tree-count {
 	color: var(--text-muted);

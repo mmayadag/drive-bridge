@@ -34,3 +34,17 @@ test('the end states say how it ended', () => {
 	expect(view('none')).toStrictEqual({});
 	expect(view('failed')).toStrictEqual({ current: 'failed' });
 });
+
+test('countTasks counts deletions on each side and conflicts', async () => {
+	const { countTasks } = await import('@/modules/progress-view');
+	const task = (name: string) => ({ name }) as never;
+	expect(
+		countTasks([
+			task('upload'),
+			task('removeLocal'),
+			task('removeRemote'),
+			task('removeRemote'),
+			task('resolveConflict'),
+		]),
+	).toStrictEqual({ conflict: 1, deleteLocal: 1, deleteRemote: 2, total: 5 });
+});

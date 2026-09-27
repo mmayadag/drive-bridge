@@ -212,6 +212,12 @@ const en: Translations = {
 	pauseAutomaticSyncDescription:
 		'Skip every automatic sync on this device until turned off. Manual syncs still run.',
 	pluginVersion: (version) => `Drive Bridge ${version}`,
+	preview: 'Preview',
+	previewIntro: 'Nothing has been changed. If you sync now:',
+	previewNothing: 'Everything is in sync: a sync now would change nothing.',
+	previewSync: 'Preview sync',
+	previewSyncDescription: 'Lists what a sync would do now, without changing anything.',
+	previewTitle: 'Sync preview',
 	problemReport: 'Problem report (versions, settings without secrets, recent log)',
 	problemReportHint:
 		'Check it first; it includes your filter rules and recent log lines. Select all, copy it, and paste it into a Bug report.',

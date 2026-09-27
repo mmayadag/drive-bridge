@@ -34,12 +34,13 @@ const isDirTask = (task: BaseTask) => task.local?.isDir ?? task.remote?.isDir ??
 
 // Renders a checkbox tree of sync tasks. Selection rules live in ./selection; this file only
 // keeps the DOM in step with them. With `undo`, rows that can be reversed get a button that
-// runs the opposite task instead (see reverseTask).
+// runs the opposite task instead (see reverseTask). With `readOnly`, the tree only shows the
+// tasks: no boxes to tick, nothing to click.
 export default function mount(
 	el: HTMLElement,
 	tasks: Array<BaseTask>,
 	translate: Translate<FileTreeTranslations>,
-	{ undo = false }: { undo?: boolean } = {},
+	{ undo = false, readOnly = false }: { undo?: boolean; readOnly?: boolean } = {},
 ) {
 	const data = createFileTreeData(tasks);
 	const selection = createFileTreeSelection(
@@ -47,6 +48,7 @@ export default function mount(
 		(task) => undo && reverseTask(task) !== undefined,
 	);
 	const root = el.createDiv({ cls: 'drive-bridge-file-tree' });
+	root.toggleClass('is-read-only', readOnly);
 	const rows = new Map<string, Row>();
 	let selectAll: { checkbox: HTMLInputElement; count: HTMLElement } | undefined;
 
@@ -83,7 +85,7 @@ export default function mount(
 	const toggle = (nodeId: string, nextSelected: boolean) =>
 		refresh(selection.toggle(nodeId, nextSelected));
 
-	if (data.taskNodeIds.length > 1) {
+	if (data.taskNodeIds.length > 1 && !readOnly) {
 		const header = root.createDiv({ cls: 'drive-bridge-file-tree-row' });
 		const checkbox = header.createEl('input', { type: 'checkbox' });
 		setIcon(header.createDiv({ cls: 'drive-bridge-file-tree-small-icon' }), 'folders');
@@ -108,8 +110,10 @@ export default function mount(
 		row.style.paddingLeft = `${node.depth * 24}px`;
 
 		let checkbox: HTMLInputElement | undefined;
-		if (task) checkbox = row.createEl('input', { type: 'checkbox' });
-		else row.createDiv({ cls: 'drive-bridge-file-tree-dot' });
+		if (task) {
+			checkbox = row.createEl('input', { type: 'checkbox' });
+			if (readOnly) checkbox.hide();
+		} else row.createDiv({ cls: 'drive-bridge-file-tree-dot' });
 		const icon = row.createDiv({ cls: 'drive-bridge-file-tree-icon' });
 		const label = row.createDiv({
 			cls: 'drive-bridge-file-tree-label',
@@ -131,7 +135,8 @@ export default function mount(
 				entry.undo = button;
 			}
 			rows.set(nodeId, entry);
-			row.addEventListener('click', () => toggle(nodeId, !selection.isSelected(nodeId)));
+			if (!readOnly)
+				row.addEventListener('click', () => toggle(nodeId, !selection.isSelected(nodeId)));
 			refreshRow(nodeId);
 		} else setIcon(icon, 'folder-open');
 	}
