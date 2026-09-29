@@ -11,7 +11,6 @@ All notable changes to this project will be documented in this file.
   steps, GitHub, Buy me a coffee), and the three uses of base64; the README
   points to them (#216).
 
-
 ## v0.5.1 - 2026-09-29
 
 - Read large vault files through Obsidian's file adapter instead of `fetch`,
