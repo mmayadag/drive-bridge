@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.4.8 - 2026-09-29
+
+- Drive Bridge is in the Community directory: install it from
+  **Settings → Community plugins → Browse**; BRAT is for pre-releases (#204).
+
+Fixes:
+
+- The plugin description no longer includes the word "Obsidian", which the
+  Community directory review rejects; 0.4.6 and 0.4.7 did not reach the
+  directory because of it (#206).
+
 ## v0.4.7 - 2026-09-29
 
 Fixes:
