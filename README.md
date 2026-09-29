@@ -10,14 +10,16 @@
 <a href="https://buymeacoffee.com/muratmayadag"><img alt="Buy me a coffee" src="https://img.shields.io/badge/Buy%20me%20a%20coffee-FFDD00?logo=buymeacoffee&logoColor=black"></a>
 </p>
 
-Two-way sync between Obsidian and Google Drive, on desktop, iPhone and iPad.
-Built for shared folders that other apps can read from and write to, including
-AI assistants and backup tools.
+Two-way sync between your Obsidian vault and a Google Drive folder, on desktop
+and mobile. Unlike plugins that only see the files they created, Drive Bridge
+picks up every file in the folder, so notes from other apps, AI assistants,
+scripts or teammates show up like any other note.
 
-- No telemetry or tracking.
-- Direct Google Drive sync.
-  - Files move only between your device and your Google Drive, using your own
-    Google client credentials.
+- Nothing silently lost: conflicting edits are merged or kept side by side, and
+  large deletions stop and ask.
+- Your own Google OAuth client: files move only between your device and your
+  Google Drive, with no server in between.
+- No telemetry, no analytics and no code downloaded at runtime.
 
 > [!WARNING]
 > **Back up your vault first.** Two-way sync can overwrite or delete files on
@@ -28,11 +30,9 @@ AI assistants and backup tools.
 <p align="center"><img src="docs/how-it-works.svg" alt="Your vault and Google Drive, kept in step by Drive Bridge" width="760"></p>
 
 Drive Bridge keeps your vault and one Google Drive folder in step, on every
-device you install it on. Unlike plugins that only see the files they created,
-it sees everything in the folder, so notes other tools write (an AI assistant,
-a script, a teammate) show up like any other note. How they get into the folder
-is up to them and Drive's sharing settings. Seeing more also means more can go
-wrong, so safety comes first.
+device you install it on. How other tools get notes into the folder is up to
+them and Drive's sharing settings. Seeing more also means more can go wrong, so
+safety comes first.
 
 ## Features
 
