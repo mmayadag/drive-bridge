@@ -29,8 +29,12 @@ afterAll(() => {
 function fakeApp() {
 	const secrets = new Map<string, string>();
 	const noop = () => {};
+	const local = new Map<string, unknown>();
 	return {
+		// oxlint-disable-next-line unicorn/no-null -- Obsidian returns null for a missing key
+		loadLocalStorage: (key: string) => local.get(key) ?? null,
 		metadataCache: { on: () => ({}) },
+		saveLocalStorage: (key: string, value: unknown) => void local.set(key, value),
 		secretStorage: {
 			deleteSecret: (key: string) => void secrets.delete(key),
 			// oxlint-disable-next-line unicorn/no-null -- Obsidian returns null for a missing secret
