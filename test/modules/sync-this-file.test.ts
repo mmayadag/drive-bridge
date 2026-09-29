@@ -14,7 +14,7 @@ const { ref } = await import('@/shared/reactive');
 
 type Handler = (...args: Array<unknown>) => void;
 
-function setup(result = 'completed') {
+function setup(result = 'completed', { notices: showNotices = true } = {}) {
 	notices.length = 0;
 	const note = Object.assign(new TFile(), { path: 'notes/a.md' });
 	const handlers = new Map<string, Handler>();
@@ -50,6 +50,7 @@ function setup(result = 'completed') {
 		},
 		isIdle,
 		registerEvent: () => {},
+		showSyncNotices: () => showNotices,
 		translate: ((key: string) => key) as never,
 	});
 	return {
@@ -144,4 +145,12 @@ test('each note view gets one header button, which syncs the open note', async (
 	actions[0]?.();
 	await flush();
 	expect(runs).toHaveLength(1);
+});
+
+test('with sync notices off, the note still syncs without a notice', async () => {
+	const { command, runs } = setup('completed', { notices: false });
+	command.checkCallback(false);
+	await flush();
+	expect(runs).toHaveLength(1);
+	expect(notices).toStrictEqual([]);
 });

@@ -203,9 +203,9 @@ const en: Translations = {
 	none: 'None',
 	notAnExport: 'This is not a Drive Bridge settings export.',
 	nothingLost: 'Nothing lost',
-	noticeStatusOnMobile: 'Notice sync status on mobile',
+	noticeStatusOnMobile: 'Sync notices',
 	noticeStatusOnMobileDescription:
-		'Show sync progress as a notice on mobile, where there is no status bar.',
+		'Show sync progress as a notice on phones, where there is no status bar, and a notice when Sync this file ends. Failures, skipped files and a nearly full Drive always show.',
 	open: 'Open',
 	openLastExport: (path) => `Open ${path}`,
 	or: 'or',
