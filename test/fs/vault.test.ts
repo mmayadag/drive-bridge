@@ -1,14 +1,16 @@
 import type { ListedFiles } from 'obsidian';
 import testKit from '$/support/test-kit';
 import { expect, test } from 'bun:test';
-import { App, TFile, TFolder } from 'obsidian';
+import { App, Platform, TFile, TFolder } from 'obsidian';
 import type { RootFs, VaultRequest } from '@/fs';
 import type { Binary, MaybePromise } from '@/types';
 import { createVaultRequest, VaultFs } from '@/fs';
+import { MOBILE_READ_LIMIT } from '@/fs/vault/request';
 import { OS } from '@/modules/event-bus';
 
 const { stream, bytes, file } = testKit;
 const textDecoder = new TextDecoder();
+const textEncoder = new TextEncoder();
 
 /** What a promise rejected with, or undefined when it resolved. */
 const failure = (promise: Promise<unknown>) =>
@@ -397,79 +399,51 @@ async function withOS<T>(flags: Partial<typeof OS>, run: () => Promise<T>) {
 	}
 }
 
-test('GET_STREAM streams the file behind its resource path', async () => {
+test('GET_STREAM reads the file once and hands it on in chunks, without fetch', async () => {
 	const realFetch = globalThis.fetch;
-	const urls: Array<string> = [];
-	globalThis.fetch = ((url: string) => {
-		urls.push(url);
-		return Promise.resolve(new Response('hello'));
-	}) as never;
+	globalThis.fetch = (() => Promise.reject(new Error('fetch must not be used'))) as never;
+	const reads: Array<string> = [];
 	try {
-		const { request } = bareRequest({});
-		await withOS({ iOS: false, iPadOS: false }, async () => {
-			const body = await request('note.md', { method: 'GET_STREAM', size: 5 });
-			expect(textDecoder.decode(await new Response(body).bytes())).toBe('hello');
+		const { request } = bareRequest({
+			readBinary: (path: string) => {
+				reads.push(path);
+				return Promise.resolve(textEncoder.encode('hello').buffer);
+			},
 		});
-		expect(urls).toStrictEqual(['app://local/note.md']);
+		const body = await request('note.md', { method: 'GET_STREAM', size: 5 });
+		expect(textDecoder.decode(await new Response(body).bytes())).toBe('hello');
+		expect(reads).toStrictEqual(['note.md']);
 	} finally {
 		globalThis.fetch = realFetch;
 	}
 });
 
 test('readStream delegates through the vault request with GET_STREAM', async () => {
-	const realFetch = globalThis.fetch;
-	globalThis.fetch = (() => Promise.resolve(new Response('hello'))) as never;
-	try {
-		const { request } = bareRequest({});
-		const vaultFs = new VaultFs(request, 'Vault Name');
-		await withOS({ iOS: false, iPadOS: false }, async () => {
-			const body = await vaultFs.readStream('note.md', file('note.md', { size: 5 }));
-			expect(textDecoder.decode(await new Response(body).bytes())).toBe('hello');
-		});
-	} finally {
-		globalThis.fetch = realFetch;
-	}
+	const { request } = bareRequest({
+		readBinary: () => Promise.resolve(textEncoder.encode('hello').buffer),
+	});
+	const vaultFs = new VaultFs(request, 'Vault Name');
+	const body = await vaultFs.readStream('note.md', file('note.md', { size: 5 }));
+	expect(textDecoder.decode(await new Response(body).bytes())).toBe('hello');
 });
 
-test('on iOS, GET_STREAM reads ranges through a temporary media copy', async () => {
-	const realFetch = globalThis.fetch;
-	const fetched: Array<[string, string | undefined]> = [];
-	globalThis.fetch = ((url: string, init?: { headers?: Record<string, string> }) => {
-		fetched.push([url, init?.headers?.Range]);
-		return Promise.resolve(new Response('abc'));
-	}) as never;
-	const copies: Array<[string, string]> = [];
-	const removed: Array<string> = [];
-	const made: Array<string> = [];
+test('on a phone, GET_STREAM refuses a file above the limit before reading it', async () => {
+	const reads: Array<string> = [];
+	const { request } = bareRequest({
+		readBinary: (path: string) => {
+			reads.push(path);
+			return Promise.resolve(new ArrayBuffer(0));
+		},
+	});
+	Platform.isMobileApp = true;
 	try {
-		const { request } = bareRequest({
-			copy: (from: string, to: string) => void copies.push([from, to]),
-			exists: () => false,
-			mkdir: (path: string) => void made.push(path),
-			// Removing the temporary copy failing does not fail the read.
-			remove: (path: string) => {
-				removed.push(path);
-				return Promise.reject(new Error('busy'));
-			},
-		});
-		await withOS({ iOS: true }, async () => {
-			const body = await request('note.md', { method: 'GET_STREAM', size: 3 });
-			expect(textDecoder.decode(await new Response(body).bytes())).toBe('abc');
-			// Media files stream as they are, without a copy.
-			await new Response(
-				await request('clip.mp4', { method: 'GET_STREAM', size: 3 }),
-			).bytes();
-		});
-		expect(made).toStrictEqual(['.trash']);
-		expect(copies).toHaveLength(1);
-		expect(copies[0]?.[1]).toMatch(/^\.trash\/.+\.mov$/u);
-		expect(removed).toStrictEqual([copies[0]?.[1]]);
-		expect(fetched).toStrictEqual([
-			[`app://local/${copies[0]?.[1]}`, 'bytes=0-2'],
-			['app://local/clip.mp4', 'bytes=0-2'],
-		]);
+		expect(
+			request('movie.bin', { method: 'GET_STREAM', size: MOBILE_READ_LIMIT + 1 }),
+		).rejects.toThrow('too large to sync on this device');
+		await request('small.bin', { method: 'GET_STREAM', size: MOBILE_READ_LIMIT });
+		expect(reads).toStrictEqual(['small.bin']);
 	} finally {
-		globalThis.fetch = realFetch;
+		Platform.isMobileApp = false;
 	}
 });
 

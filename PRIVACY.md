@@ -18,8 +18,8 @@ file names, folder names or Google account.
   with your passphrase, or left out.
 - The plugin never touches the clipboard. The sync log, the problem report and
   an export are shown in a window with **Select all**; copying is up to you.
-- The two uses of `fetch` read large files of this vault from disk, in pieces;
-  they never reach the network.
+- Files of this vault are read with Obsidian's own file API; the plugin makes
+  no `fetch` call.
 - **Sign in with Google** opens Google's own sign-in page in your browser.
   The address you paste back goes only to Google's token endpoint
   (`oauth2.googleapis.com`), with your client; no other server sees it.

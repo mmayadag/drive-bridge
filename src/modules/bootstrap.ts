@@ -229,6 +229,8 @@ export default class Bootstrap {
 				memoryControlWrapper(
 					fs,
 					Object.assign(this.memoryStates, { maxMemory: getMaxMemory() }),
+					// The vault reads a large file whole before handing it on (see MOBILE_READ_LIMIT).
+					{ wholeFileStreams: true },
 				),
 			priority: 1000,
 		});

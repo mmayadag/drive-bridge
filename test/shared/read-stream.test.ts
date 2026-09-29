@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 import type { Binary } from '@/shared/binary';
-import createRangeReadStream from '@/shared/read-stream';
+import createRangeReadStream, { createBufferReadStream } from '@/shared/read-stream';
 
 function deferred<T>() {
 	let resolve!: (value: T) => void;
@@ -169,4 +169,15 @@ test('a finalize that rejects or throws is swallowed', async () => {
 	});
 	expect(await collectStream(throwing)).toStrictEqual(new Uint8Array());
 	await flush();
+});
+
+test('buffer read stream hands out chunk-sized views in order', async () => {
+	const bytes = new Uint8Array([1, 2, 3, 4, 5]);
+	const chunks: Array<Array<number>> = [];
+	for await (const chunk of createBufferReadStream(bytes, 2)) chunks.push([...chunk]);
+	expect(chunks).toStrictEqual([[1, 2], [3, 4], [5]]);
+});
+
+test('buffer read stream of an empty file closes at once', async () => {
+	expect((await collectStream(createBufferReadStream(new Uint8Array(0), 2))).byteLength).toBe(0);
 });

@@ -2,7 +2,7 @@ import type { Binary, FileStat, MaybePromise } from '@/types';
 import type { Fs, ListReporter, WrappedFs } from '../interface';
 
 type HangingOperation = {
-	/** Memory reservation, capped at `STREAM_RESERVATION_SIZE`. */
+	/** Memory reservation, usually capped at `STREAM_RESERVATION_SIZE`. */
 	size: number;
 	/** Transfer size, larger operations resume first. */
 	priority: number;
@@ -48,8 +48,16 @@ function resumeHangingOperations(state: MemoryControlSharedState) {
 	}
 }
 
-function reserveMemory(state: MemoryControlSharedState, stat: FileStat) {
-	const size = Math.min(stat.size, STREAM_RESERVATION_SIZE);
+/** What a transfer holds in memory at once: streams read and write in pieces. */
+function reservationOf(stat: FileStat) {
+	return Math.min(stat.size, STREAM_RESERVATION_SIZE);
+}
+
+function reserveMemory(
+	state: MemoryControlSharedState,
+	stat: FileStat,
+	size = reservationOf(stat),
+) {
 	if (canReserve(state, size)) {
 		state.memoryConsumption += size;
 		return Promise.resolve();
@@ -64,24 +72,71 @@ function reserveMemory(state: MemoryControlSharedState, stat: FileStat) {
 	});
 }
 
-function releaseMemory(state: MemoryControlSharedState, stat: FileStat) {
-	const size = Math.min(stat.size, STREAM_RESERVATION_SIZE);
+function releaseMemory(state: MemoryControlSharedState, size: number) {
 	state.memoryConsumption = Math.max(0, state.memoryConsumption - size);
 	resumeHangingOperations(state);
 }
+
+/**
+ * Passes `stream` on and calls `release` once, when it is read to the end, fails or is
+ * cancelled.
+ */
+function releaseAfter(stream: ReadableStream<Binary>, release: () => void) {
+	const reader = stream.getReader();
+	let released = false;
+	const releaseOnce = () => {
+		if (released) return;
+		released = true;
+		release();
+	};
+	return new ReadableStream<Binary>(
+		{
+			cancel(reason) {
+				releaseOnce();
+				return reader.cancel(reason);
+			},
+			async pull(controller) {
+				try {
+					const { done, value } = await reader.read();
+					if (done) {
+						releaseOnce();
+						controller.close();
+					} else controller.enqueue(value);
+				} catch (error) {
+					releaseOnce();
+					controller.error(error);
+				}
+			},
+		},
+		{ highWaterMark: 0 },
+	);
+}
+
+export type MemoryControlOptions = {
+	/**
+	 * The file system reads a whole file before streaming it, so a stream holds the whole
+	 * file, not a few pieces, until it is read.
+	 */
+	wholeFileStreams?: boolean;
+};
 
 class MemoryControlRemoteFs implements WrappedFs {
 	constructor(
 		readonly original: Fs,
 		private readonly state: MemoryControlSharedState,
+		private readonly options: MemoryControlOptions,
 	) {}
 
-	private async readThroughMemory<T>(read: () => MaybePromise<T>, stat: FileStat) {
-		await reserveMemory(this.state, stat);
+	private async readThroughMemory<T>(
+		read: () => MaybePromise<T>,
+		stat: FileStat,
+		size = reservationOf(stat),
+	) {
+		await reserveMemory(this.state, stat, size);
 		try {
 			return await read();
 		} catch (error) {
-			releaseMemory(this.state, stat);
+			releaseMemory(this.state, size);
 			throw error;
 		}
 	}
@@ -90,7 +145,7 @@ class MemoryControlRemoteFs implements WrappedFs {
 		try {
 			return await write();
 		} finally {
-			releaseMemory(this.state, stat);
+			releaseMemory(this.state, reservationOf(stat));
 		}
 	}
 
@@ -102,8 +157,14 @@ class MemoryControlRemoteFs implements WrappedFs {
 		return this.readThroughMemory(() => this.original.read(key, stat), stat);
 	}
 
-	readStream(key: string, stat: FileStat) {
-		return this.readThroughMemory(() => this.original.readStream(key, stat), stat);
+	async readStream(key: string, stat: FileStat) {
+		const read = () => this.original.readStream(key, stat);
+		if (!this.options.wholeFileStreams) return this.readThroughMemory(read, stat);
+		// Hold the whole file until it is read; the write side then releases the usual part.
+		const extra = stat.size - reservationOf(stat);
+		const stream = await this.readThroughMemory(read, stat, stat.size);
+		if (extra <= 0) return stream;
+		return releaseAfter(stream, () => releaseMemory(this.state, extra));
 	}
 
 	write(key: string, value: Binary, stat: FileStat) {
@@ -142,6 +203,7 @@ class MemoryControlRemoteFs implements WrappedFs {
 export default function memoryControlWrapper(
 	original: Fs,
 	state: MemoryControlSharedState,
+	options: MemoryControlOptions = {},
 ): WrappedFs {
-	return new MemoryControlRemoteFs(original, state);
+	return new MemoryControlRemoteFs(original, state, options);
 }
