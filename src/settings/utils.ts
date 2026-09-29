@@ -50,7 +50,9 @@ export function addLabel(
 ) {
 	for (const existing of element.querySelectorAll(`.${LABEL}`))
 		if (existing.textContent === text) return;
-	const tag = element.createSpan({ cls: ['flair', LABEL], text });
+	// Obsidian capitalises labels by the interface language's rules; the text is English, so
+	// a Turkish interface would otherwise show GUİDE with a dotted capital I.
+	const tag = element.createSpan({ attr: { lang: 'en' }, cls: ['flair', LABEL], text });
 	setTooltip(tag, tooltip);
 	tag.style.setProperty('--flair-color', textColor);
 	tag.style.setProperty('--flair-background', color);
