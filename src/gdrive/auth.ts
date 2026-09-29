@@ -3,11 +3,14 @@ import { requestUrl } from 'obsidian';
 import type { Snippet, Translate } from '@/modules/i18n';
 import type { Request } from '@/modules/registrar';
 import { getStatus } from '@/shared/error';
+import type { SecretIds } from './secret-scope';
 import { buildUrl, DRIVE_API, OAUTH_TOKEN_URL } from './api';
+import { LEGACY_CLIENT_SECRET_ID, LEGACY_REFRESH_TOKEN_ID } from './secret-scope';
 
-// Secret storage ids. Secret storage is per device and never synced.
-const REFRESH_TOKEN_ID = 'drive-bridge-gdrive-refresh-token';
-const CLIENT_SECRET_ID = 'drive-bridge-gdrive-client-secret';
+const UNSCOPED: SecretIds = {
+	clientSecret: LEGACY_CLIENT_SECRET_ID,
+	refreshToken: LEGACY_REFRESH_TOKEN_ID,
+};
 
 export type AuthTranslations = {
 	errorAccountRead: Snippet<number>;
@@ -15,6 +18,7 @@ export type AuthTranslations = {
 	errorNoClient: string;
 	errorNoRefreshToken: string;
 	errorNotConnected: string;
+	errorOtherAccount: Snippet<string>;
 	errorTokenRefresh: Snippet<string>;
 };
 
@@ -121,16 +125,28 @@ export class TokenManager {
 	private expiresAt = 0;
 	private grantedScopes: Array<string> = [];
 	private pending?: Promise<string>;
+	/** Whether the stored refresh token is known to belong to this vault's account. */
+	private verified = false;
 
 	constructor(
 		private readonly secretStorage: SecretStorage,
 		private readonly getClientId: () => string,
 		readonly translate: Translate<AuthTranslations>,
+		private readonly options: {
+			/** Where this vault keeps its secrets. */
+			ids?: SecretIds;
+			/** The Google account this vault syncs with, empty before it first connects. */
+			getUserId?: () => string;
+		} = {},
 	) {}
+
+	private get ids() {
+		return this.options.ids ?? UNSCOPED;
+	}
 
 	readonly getCredentials = (): ClientCredentials => ({
 		clientId: this.getClientId(),
-		clientSecret: this.secretStorage.getSecret(CLIENT_SECRET_ID) ?? '',
+		clientSecret: this.secretStorage.getSecret(this.ids.clientSecret) ?? '',
 	});
 
 	readonly hasCredentials = () => {
@@ -140,8 +156,8 @@ export class TokenManager {
 
 	readonly setClientSecret = (secret: string) =>
 		secret
-			? this.secretStorage.setSecret(CLIENT_SECRET_ID, secret)
-			: this.secretStorage.deleteSecret(CLIENT_SECRET_ID);
+			? this.secretStorage.setSecret(this.ids.clientSecret, secret)
+			: this.secretStorage.deleteSecret(this.ids.clientSecret);
 
 	readonly getToken = (force = false): Promise<string> => {
 		if (!force && this.accessToken && Date.now() < this.expiresAt - 60_000)
@@ -150,14 +166,20 @@ export class TokenManager {
 		return this.pending;
 	};
 
-	readonly getRefreshToken = () => this.secretStorage.getSecret(REFRESH_TOKEN_ID);
+	readonly getRefreshToken = () => this.secretStorage.getSecret(this.ids.refreshToken);
 
-	readonly setRefreshToken = (token: string) =>
-		this.secretStorage.setSecret(REFRESH_TOKEN_ID, token);
+	/** A token the user just connected with is theirs; only a stored one is checked. */
+	readonly setRefreshToken = (token: string) => {
+		this.verified = true;
+		this.secretStorage.setSecret(this.ids.refreshToken, token);
+	};
 
 	// `deleteSecret` works but is missing from Obsidian's public typings; the bundled
 	// type augmentation declares it.
-	readonly deleteRefreshToken = () => this.secretStorage.deleteSecret(REFRESH_TOKEN_ID);
+	readonly deleteRefreshToken = () => {
+		this.verified = false;
+		this.secretStorage.deleteSecret(this.ids.refreshToken);
+	};
 
 	/** Whether the last refresh granted full Drive access rather than just drive.file. */
 	readonly hasFullDriveScope = () => this.grantedScopes.includes(FULL_DRIVE_SCOPE);
@@ -186,6 +208,7 @@ export class TokenManager {
 		});
 		const data = response.json as TokenResponse | TokenError;
 		if ('access_token' in data) {
+			await this.verifyAccount(data.access_token);
 			this.accessToken = data.access_token;
 			this.expiresAt = Date.now() + data.expires_in * 1000;
 			this.grantedScopes = data.scope?.split(' ') ?? [];
@@ -196,6 +219,19 @@ export class TokenManager {
 		throw new Error(
 			this.translate('errorTokenRefresh', describeAuthError(data, response.status)),
 		);
+	}
+
+	/**
+	 * Once per stored token: the sign-in must be for the account this vault syncs with, so
+	 * a token another vault left behind never syncs this vault into someone else's Drive.
+	 */
+	private async verifyAccount(accessToken: string) {
+		const expected = this.options.getUserId?.();
+		if (this.verified || !expected) return;
+		const account = await fetchAccount(accessToken, this.translate);
+		if (account.userId !== expected)
+			throw new Error(this.translate('errorOtherAccount', account.email));
+		this.verified = true;
 	}
 }
 

@@ -23,6 +23,7 @@ import { connectWithToken } from './connect';
 import GdriveFs from './fs';
 import en from './i18n';
 import { QUOTA_CHECK_INTERVAL, fetchQuota, formatBytes, isNearlyFull } from './quota';
+import { adoptLegacySecrets, secretIds, secretScope } from './secret-scope';
 import gdriveSetting from './setting';
 
 const QUOTA_CHECKED_KEY = 'drive-bridge-quota-checked';
@@ -66,10 +67,13 @@ export default class Gdrive {
 		if (!this.moduleSettings.baseDirectory)
 			this.moduleSettings.baseDirectory = `${ctx.app.vault.getName()}/`;
 		ctx.registerTranslations(en);
+		const ids = secretIds(secretScope(ctx.app));
+		adoptLegacySecrets(ctx.app.secretStorage, ids, Boolean(this.moduleSettings.userId));
 		this.tokenManager = new TokenManager(
 			ctx.app.secretStorage,
 			() => this.moduleSettings.clientId,
 			ctx.translate,
+			{ getUserId: () => this.moduleSettings.userId, ids },
 		);
 	}
 

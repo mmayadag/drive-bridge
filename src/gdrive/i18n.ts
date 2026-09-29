@@ -64,6 +64,8 @@ const en: GdriveTranslations = {
 	errorNoClient: 'Enter the OAuth client ID and client secret in the settings.',
 	errorNoRefreshToken: 'Google returned no refresh token.',
 	errorNotConnected: 'Connect a Google account in the settings first.',
+	errorOtherAccount: (email) =>
+		`This device is signed in to Google as ${email || 'another account'}, not the account this vault syncs with. Connect the account again in the settings.`,
 	errorTokenRefresh: (reason) => `Google Drive token refresh failed: ${reason}`,
 	folderCreateFailed: 'Could not create the Drive folder',
 	folderListFailed: 'Could not read Drive folders',
