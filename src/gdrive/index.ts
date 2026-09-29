@@ -95,14 +95,14 @@ export default class Gdrive {
 	// The account, client and folder are kept: they are what ties this device to its Drive.
 	readonly resetSettings = () => {
 		this.moduleSettings.useTrash = true;
-		this.moduleSettings.remoteScan = 'full';
+		this.moduleSettings.remoteScan = 'changes';
 	};
 
 	readonly moduleSettings: GdriveSettings = {
 		accountEmail: '',
 		baseDirectory: '',
 		clientId: '',
-		remoteScan: 'full',
+		remoteScan: 'changes',
 		useTrash: true,
 		userId: '',
 	};

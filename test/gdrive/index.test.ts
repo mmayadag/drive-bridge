@@ -174,13 +174,18 @@ test('importing a refresh token without a client reports an invalid token', asyn
 	expect(requests).toHaveLength(0);
 });
 
-test('resetSettings restores trash and full scans but keeps the account and folder', () => {
+test('a fresh install asks Drive only for changes; its first sync is a full scan (fs.test)', () => {
+	const { gdrive } = setup();
+	expect(gdrive.moduleSettings.remoteScan).toBe('changes');
+});
+
+test('resetSettings restores trash and changes-only scans but keeps the account and folder', () => {
 	const { gdrive } = setup();
 	Object.assign(gdrive.moduleSettings, {
 		accountEmail: 'me@test',
 		baseDirectory: 'Notes/',
 		clientId: 'client',
-		remoteScan: 'changes',
+		remoteScan: 'full',
 		useTrash: false,
 		userId: 'perm-1',
 	});
@@ -189,7 +194,7 @@ test('resetSettings restores trash and full scans but keeps the account and fold
 		accountEmail: 'me@test',
 		baseDirectory: 'Notes/',
 		clientId: 'client',
-		remoteScan: 'full',
+		remoteScan: 'changes',
 		useTrash: true,
 		userId: 'perm-1',
 	});

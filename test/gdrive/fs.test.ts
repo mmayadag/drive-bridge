@@ -374,6 +374,7 @@ test('changes only lists everything once, then asks only what changed', async ()
 	const paths = () =>
 		harness.calls.splice(0).map((call) => new URL(call.url).pathname.split('/v3')[1]);
 
+	// Changes only (the default): the first sync has no snapshot, so it lists everything.
 	expect(await keys()).toStrictEqual(['a.md']);
 	expect(paths()).toStrictEqual(['/changes/startPageToken', '/files']);
 
