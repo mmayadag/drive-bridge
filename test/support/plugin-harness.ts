@@ -16,6 +16,7 @@ export type FakeApp = ReturnType<typeof fakeApp>;
 /** An app with the vault, workspace and secret storage the plugin touches, all in memory. */
 export function fakeApp(options: { vaultName?: string } = {}) {
 	const secrets = new Map<string, string>();
+	const local = new Map<string, unknown>();
 	const folders = new Set<string>();
 	const files = new Map<string, string>();
 	const opened: Array<unknown> = [];
@@ -26,7 +27,9 @@ export function fakeApp(options: { vaultName?: string } = {}) {
 		return { name } as unknown as EventRef;
 	};
 	const app = {
+		loadLocalStorage: (key: string) => local.get(key),
 		metadataCache: { on: () => ({}) },
+		saveLocalStorage: (key: string, value: unknown) => void local.set(key, value),
 		secretStorage: {
 			deleteSecret: (key: string) => void secrets.delete(key),
 			getSecret: (key: string) => secrets.get(key),

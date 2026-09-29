@@ -16,6 +16,7 @@ import { getMessage } from '@/shared/error';
 import type { RemoteScan, SnapshotDB } from './changes';
 import type { GdriveDB } from './fs';
 import type { Quota } from './quota';
+import type { SecretIds } from './secret-scope';
 import type { GdriveTranslations } from './translations';
 import { TokenManager, bearerMiddleware } from './auth';
 import checkConnection from './check-connection';
@@ -23,6 +24,7 @@ import { connectWithToken } from './connect';
 import GdriveFs from './fs';
 import en from './i18n';
 import { QUOTA_CHECK_INTERVAL, fetchQuota, formatBytes, isNearlyFull } from './quota';
+import { adoptLegacySecrets, secretIds, secretScope } from './secret-scope';
 import gdriveSetting from './setting';
 
 const QUOTA_CHECKED_KEY = 'drive-bridge-quota-checked';
@@ -45,6 +47,7 @@ const PREFERENCES: Pick<GdriveSettings, 'remoteScan' | 'useTrash'> = {
 export default class Gdrive {
 	private readonly cleanup: Array<() => void> = [];
 	private readonly tokenManager: TokenManager;
+	private readonly secretIds: SecretIds;
 	/** The last storage quota Drive reported, for the Connection row. */
 	private quota?: Quota;
 
@@ -66,10 +69,12 @@ export default class Gdrive {
 		if (!this.moduleSettings.baseDirectory)
 			this.moduleSettings.baseDirectory = `${ctx.app.vault.getName()}/`;
 		ctx.registerTranslations(en);
+		this.secretIds = secretIds(secretScope(ctx.app));
 		this.tokenManager = new TokenManager(
 			ctx.app.secretStorage,
 			() => this.moduleSettings.clientId,
 			ctx.translate,
+			{ getUserId: () => this.moduleSettings.userId, ids: this.secretIds },
 		);
 	}
 
@@ -127,6 +132,13 @@ export default class Gdrive {
 			registerRemoteRequestMiddleware,
 			registerSetting,
 		} = this.ctx;
+		// Saved settings are applied after the constructor, so whether this vault was
+		// connected is only known here.
+		adoptLegacySecrets(
+			this.ctx.app.secretStorage,
+			this.secretIds,
+			Boolean(this.moduleSettings.userId),
+		);
 		this.cleanup.push(
 			registerRemoteFs('gdrive', {
 				checkConnection,
