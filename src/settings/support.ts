@@ -4,6 +4,7 @@ import type { Translate } from '@/modules/i18n';
 import type { CallableOrObjectTree } from '@/modules/setting';
 import { TextModal } from '@/components/selectable-text';
 import { VERSION } from '@/modules/event-bus';
+import { releaseNotesUrl } from '@/modules/whats-new';
 import type { HelpItem } from './help-list';
 import { asHelpRow, HelpListModal } from './help-list';
 import { COFFEE, HELP, HELP_LINK, HELP_LINK_CLASS, PAGE } from './layout';
@@ -29,6 +30,7 @@ export type SupportSettingTranslations = {
 	starOnGithubDescription: string;
 	or: string;
 	pluginVersion: (version: string) => string;
+	whatsNew: string;
 	problemReport: string;
 	problemReportTitle: string;
 	guideTitle: string;
@@ -224,9 +226,13 @@ export default function supportSettings({
 						});
 						drawCup(link);
 						link.createSpan({ text: translate('buyMeACoffee') });
-						el.createDiv({
+						const version = el.createDiv({
 							cls: 'drive-bridge-coffee-version',
-							text: translate('pluginVersion', VERSION),
+							text: `${translate('pluginVersion', VERSION)} · `,
+						});
+						version.createEl('a', {
+							attr: { href: releaseNotesUrl(), rel: 'noopener' },
+							text: translate('whatsNew'),
 						});
 					},
 					search: false,
