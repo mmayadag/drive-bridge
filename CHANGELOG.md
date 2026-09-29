@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.4.10-beta.1 - 2026-09-29
+
+Pre-release for testing on devices.
+
+- Large vault files are read with Obsidian's own file API instead of `fetch`,
+  then uploaded in pieces as before. The iPhone and iPad workaround that copied
+  a file to a temporary `.mov` is gone (#208).
+- A large file now waits until the memory limit has room for all of it. On a
+  phone or tablet, files above 200 MB are skipped with a message to sync them
+  from a computer; the limit is provisional (#208).
+
 ## v0.4.9 - 2026-09-29
 
 - New defaults for a fresh install and for Reset to defaults: **Smart merge**
