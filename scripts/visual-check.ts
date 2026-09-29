@@ -54,7 +54,7 @@ const STAR = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" vie
 
 /** Each fixture is one card of settings rows, as the plugin renders them. */
 const FIXTURES: Record<string, string> = {
-	'coffee footer': `<div class="setting-item drive-bridge-coffee"><div class="setting-item-info">Buy me a coffee</div><div class="setting-item-control"><div class="drive-bridge-coffee-question">It works! Enjoying Drive Bridge?</div><a class="drive-bridge-star-button" href="#"><span class="drive-bridge-star-icon">${STAR}</span><span>Star on GitHub</span></a><div class="drive-bridge-coffee-or">or</div><a class="drive-bridge-coffee-button" href="#">${CUP}<span>Buy me a coffee</span></a><div class="drive-bridge-coffee-version">Drive Bridge 0.0.0</div></div></div>`,
+	'coffee footer': `<div class="setting-item drive-bridge-coffee"><div class="setting-item-info">Buy me a coffee</div><div class="setting-item-control"><a class="drive-bridge-star-button" href="#"><span class="drive-bridge-star-icon">${STAR}</span><span>Star on GitHub</span></a><div class="drive-bridge-coffee-or">or</div><a class="drive-bridge-coffee-button" href="#">${CUP}<span>Buy me a coffee</span></a><div class="drive-bridge-coffee-version">Drive Bridge 0.0.0</div></div></div>`,
 	conflicts: choice(
 		true,
 		'Rename and keep both',

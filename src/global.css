@@ -424,7 +424,6 @@ input[type='password'].drive-bridge-invalid-input {
 .setting-item.drive-bridge-coffee {
 	--drive-bridge-coffee-yellow: #ffdd00;
 	--drive-bridge-coffee-ink: #0d0c22;
-	--drive-bridge-coffee-question: var(--drive-bridge-coffee-yellow);
 	flex-direction: column;
 	align-items: stretch;
 	border-top: none;
@@ -440,18 +439,6 @@ input[type='password'].drive-bridge-invalid-input {
 		width: 100%;
 		gap: var(--size-4-3);
 	}
-}
-
-.theme-light .setting-item.drive-bridge-coffee {
-	--drive-bridge-coffee-question: var(--drive-bridge-coffee-ink);
-}
-
-.drive-bridge-coffee-question {
-	font-family: 'Drive Bridge Script', cursive;
-	font-size: 1.7em;
-	line-height: 1.1;
-	color: var(--drive-bridge-coffee-question);
-	text-align: center;
 }
 
 a.drive-bridge-coffee-button {

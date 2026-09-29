@@ -30,7 +30,6 @@ void mock.module('obsidian', () => ({
 }));
 
 const {
-	coffeeQuestion,
 	showProblemReport,
 	default: supportSettings,
 	reportUrl,
@@ -59,14 +58,6 @@ test('the form field names in the link exist in both issue forms', async () => {
 		const yaml = await Bun.file(`.github/ISSUE_TEMPLATE/${form}.yml`).text();
 		for (const field of fields) expect(yaml).toContain(`id: ${field}\n`);
 	}
-});
-
-test('the coffee line follows the last sync', () => {
-	expect(coffeeQuestion()).toBe('coffeeSetUp');
-	expect(coffeeQuestion({ at: 1, result: 'completed' })).toBe('coffeeWorks');
-	expect(coffeeQuestion({ at: 1, result: 'noop' })).toBe('coffeeWorks');
-	expect(coffeeQuestion({ at: 1, error: 'offline', result: 'failed' })).toBe('coffeeFailed');
-	expect(coffeeQuestion({ at: 1, result: 'cancelled' })).toBe('coffeeQuestion');
 });
 
 test('reportUrl names every platform branch', () => {
@@ -128,7 +119,6 @@ function helpItem() {
 	const tree = supportSettings({
 		app: {} as never,
 		getLogs: () => '',
-		on: () => () => {},
 		settings: {},
 		translate: ((key: string) => key) as never,
 	});
@@ -195,18 +185,11 @@ test('the help row wires up the guide, bug, feature and problem report buttons',
 	expect(windows).toHaveLength(1);
 });
 
-let onSyncTerminated: (() => void) | undefined;
-
-test('the coffee row draws the question, the star link, or, the button and the version', () => {
-	const settings: { lastSync?: { at: number; result: string } } = { lastSync: undefined };
+test('the coffee row starts with the star link, then or, the button and the version', () => {
 	const tree = supportSettings({
 		app: {} as never,
 		getLogs: () => '',
-		on: ((_event: string, fn: () => void) => {
-			onSyncTerminated = fn;
-			return () => {};
-		}) as never,
-		settings: settings as never,
+		settings: {},
 		translate: ((key: string, arg?: string) =>
 			arg === undefined ? key : `${key}:${arg}`) as never,
 	});
@@ -215,13 +198,11 @@ test('the coffee row draws the question, the star link, or, the button and the v
 
 	const settingEl = document.createElement('div');
 	const controlEl = document.createElement('div');
-	const cleanup = item.render({ controlEl, settingEl });
+	item.render({ controlEl, settingEl });
 
 	expect(settingEl.classList.contains('drive-bridge-coffee')).toBe(true);
-	const question = controlEl.querySelector('.drive-bridge-coffee-question');
-	expect(question?.textContent).toBe('coffeeSetUp');
-
 	const star = controlEl.querySelector('a.drive-bridge-star-button');
+	expect(controlEl.firstElementChild).toBe(star);
 	expect(star?.getAttribute('href')).toBe('https://github.com/mmayadag/drive-bridge');
 	expect(star?.getAttribute('rel')).toBe('noopener');
 	expect(star?.getAttribute('aria-label')).toBe('starOnGithubDescription');
@@ -240,15 +221,6 @@ test('the coffee row draws the question, the star link, or, the button and the v
 
 	const version = controlEl.querySelector('.drive-bridge-coffee-version');
 	expect(version?.textContent).toContain('pluginVersion:');
-
-	// A sync redraws only the question, following the outcome.
-	settings.lastSync = { at: 1, result: 'completed' };
-	onSyncTerminated?.();
-	expect(controlEl.querySelector('.drive-bridge-coffee-question')?.textContent).toBe(
-		'coffeeWorks',
-	);
-
-	expect(typeof cleanup).toBe('function');
 });
 
 test('the help title opens the same items as a labelled list, each doing what its icon does', () => {
@@ -297,7 +269,6 @@ test('help page rows run their item and undo their decoration when the tab re-re
 	const tree = supportSettings({
 		app: {} as never,
 		getLogs: () => '',
-		on: () => () => {},
 		settings: {},
 		translate: ((key: string) => key) as never,
 	}) as unknown as Record<

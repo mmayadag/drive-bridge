@@ -36,10 +36,6 @@ const en: Translations = {
 	clearRecordsConfirm:
 		'Drive Bridge forgets what it knew about the last sync. The next sync compares everything again and may upload, download or flag conflicts it would otherwise skip. Your files are not changed now.',
 	clearRecordsDescription: 'Forget the stored sync state. The next sync may decide differently.',
-	coffeeFailed: 'Need help?',
-	coffeeQuestion: 'Enjoying Drive Bridge?',
-	coffeeSetUp: "Let's get you connected first.",
-	coffeeWorks: 'It works! Enjoying Drive Bridge?',
 	completed: 'Completed',
 	completedNoop: 'Already synced',
 	confirm: 'Confirm',
