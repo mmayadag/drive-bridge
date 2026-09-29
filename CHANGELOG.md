@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.5.2 - 2026-09-29
+
+- The contributing guide is now `CONTRIBUTING.md`, the name the community
+  directory and GitHub look for (#214).
+- PRIVACY.md lists every address the plugin calls and why, the pages that
+  buttons open in the browser (Google sign-in, the Google Cloud Console setup
+  steps, GitHub, Buy me a coffee), and the three uses of base64; the README
+  points to them (#216).
+
+
 ## v0.5.1 - 2026-09-29
 
 - Read large vault files through Obsidian's file adapter instead of `fetch`,
