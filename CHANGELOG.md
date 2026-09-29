@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.4.7 - 2026-09-29
+
+Fixes:
+
+- Labels such as **Guide** read correctly with Obsidian in Turkish (GUIDE, not
+  GUİDE) (#202).
+
 ## v0.4.6 - 2026-09-29
 
 - The plugin description shown in Obsidian and the README introduction match
