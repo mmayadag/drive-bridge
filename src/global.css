@@ -503,6 +503,50 @@ a.drive-bridge-coffee-button:hover .drive-bridge-coffee-cup {
 	fill: #fff;
 }
 
+a.drive-bridge-star-button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--size-4-2);
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 22rem;
+	min-height: 3rem;
+	padding: 0 var(--size-4-4);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 14px;
+	color: var(--text-normal);
+	font-family: 'Drive Bridge Script', cursive;
+	font-size: 1.8em;
+	text-decoration: none;
+}
+
+a.drive-bridge-star-button:hover {
+	border-color: var(--drive-bridge-coffee-yellow);
+	color: var(--text-normal);
+}
+
+.drive-bridge-star-icon {
+	display: flex;
+	color: var(--drive-bridge-coffee-yellow);
+
+	svg {
+		width: 1.4rem;
+		height: 1.4rem;
+		fill: currentColor;
+	}
+}
+
+.theme-light .drive-bridge-star-icon {
+	color: #e3a008;
+}
+
+.drive-bridge-coffee-or {
+	margin-block: calc(-1 * var(--size-4-1));
+	color: var(--text-muted);
+	font-size: var(--font-ui-small);
+}
+
 .drive-bridge-coffee-version {
 	color: var(--text-faint);
 	font-size: var(--font-ui-smaller);

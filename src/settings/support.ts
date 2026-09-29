@@ -1,6 +1,6 @@
 import type { Events } from '@';
 import type { App } from 'obsidian';
-import { apiVersion, Platform } from 'obsidian';
+import { apiVersion, Platform, setIcon } from 'obsidian';
 import type { On } from '@/modules/event-bus';
 import type { Translate } from '@/modules/i18n';
 import type { LastSync } from '@/modules/observability';
@@ -16,6 +16,7 @@ import { s } from './utils';
 const GUIDE_URL = 'https://github.com/mmayadag/drive-bridge#readme';
 const ISSUES_URL = 'https://github.com/mmayadag/drive-bridge/issues/new';
 const COFFEE_URL = 'https://buymeacoffee.com/muratmayadag';
+const REPO_URL = 'https://github.com/mmayadag/drive-bridge';
 
 export type SupportSettingTranslations = {
 	helpAndSupport: string;
@@ -28,6 +29,9 @@ export type SupportSettingTranslations = {
 	coffeeSetUp: string;
 	coffeeFailed: string;
 	buyMeACoffee: string;
+	starOnGithub: string;
+	starOnGithubDescription: string;
+	or: string;
 	pluginVersion: (version: string) => string;
 	problemReport: string;
 	problemReportTitle: string;
@@ -213,6 +217,18 @@ export default function supportSettings({
 						const ask = () =>
 							question.setText(translate(coffeeQuestion(settings.lastSync)));
 						ask();
+						// Only a link: nothing is asked of GitHub, so no star count either.
+						const star = el.createEl('a', {
+							attr: {
+								'aria-label': translate('starOnGithubDescription'),
+								href: REPO_URL,
+								rel: 'noopener',
+							},
+							cls: 'drive-bridge-star-button',
+						});
+						setIcon(star.createSpan('drive-bridge-star-icon'), 'star');
+						star.createSpan({ text: translate('starOnGithub') });
+						el.createDiv({ cls: 'drive-bridge-coffee-or', text: translate('or') });
 						const link = el.createEl('a', {
 							attr: { href: COFFEE_URL, rel: 'noopener' },
 							cls: 'drive-bridge-coffee-button',
