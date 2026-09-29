@@ -7,6 +7,8 @@ export type ModuleInstance = {
 	moduleSettings: object;
 	/** Resets the module's settings that Reset to defaults may change. */
 	resetSettings?: () => void;
+	/** Defaults a settings export may leave out; any other module setting always travels. */
+	transferDefaults?: Record<string, unknown>;
 	/** Secrets a settings export may carry, sealed with a passphrase. */
 	secrets?: {
 		export: () => Record<string, string>;
@@ -70,6 +72,13 @@ export default class BundledModules {
 			([id, ctor]) => [id, this.ctx.__getModule__(ctor as never) as ModuleInstance] as const,
 		);
 
+	private readonly moduleTransferDefaults = () => {
+		const defaults: Record<string, Record<string, unknown>> = {};
+		for (const [id, instance] of this.instances())
+			if (instance.transferDefaults) defaults[id] = instance.transferDefaults;
+		return defaults;
+	};
+
 	private readonly exportModuleSecrets = () => {
 		const secrets: Record<string, Record<string, string>> = {};
 		for (const [id, instance] of this.instances())
@@ -97,6 +106,7 @@ export default class BundledModules {
 		importModuleSecrets: this.importModuleSecrets,
 		loadAllModules: this.loadAllModules,
 		loadedModules: this.loadedModules,
+		moduleTransferDefaults: this.moduleTransferDefaults,
 		resetModuleSettings: this.resetModuleSettings,
 	};
 }
