@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.4.9 - 2026-09-29
+
+- New defaults for a fresh install and for Reset to defaults: **Smart merge**
+  for conflicts, **Never delete on Drive** on, and **Changes only** for the
+  Drive scan (the first sync still lists everything). Existing settings are
+  kept (#209).
+- **Export settings** carries only what differs from the defaults, so the
+  file shows what you changed; the Drive folder, client and account always
+  travel. **Import settings** sets what the file leaves out back to its
+  default, so both devices end up the same. Older exports import as before
+  (#210).
+
 ## v0.4.8 - 2026-09-29
 
 - Drive Bridge is in the Community directory: install it from
