@@ -1,9 +1,6 @@
-import type { Events } from '@';
 import type { App } from 'obsidian';
 import { apiVersion, Platform, setIcon } from 'obsidian';
-import type { On } from '@/modules/event-bus';
 import type { Translate } from '@/modules/i18n';
-import type { LastSync } from '@/modules/observability';
 import type { CallableOrObjectTree } from '@/modules/setting';
 import { TextModal } from '@/components/selectable-text';
 import { VERSION } from '@/modules/event-bus';
@@ -27,10 +24,6 @@ export type SupportSettingTranslations = {
 	help: string;
 	reportBug: string;
 	requestFeature: string;
-	coffeeQuestion: string;
-	coffeeWorks: string;
-	coffeeSetUp: string;
-	coffeeFailed: string;
 	buyMeACoffee: string;
 	starOnGithub: string;
 	starOnGithubDescription: string;
@@ -92,27 +85,15 @@ export function reportUrl(kind: ReportKind = 'bug'): string {
 	return `${ISSUES_URL}?${params.toString()}`;
 }
 
-export type CoffeeQuestion = 'coffeeWorks' | 'coffeeSetUp' | 'coffeeFailed' | 'coffeeQuestion';
-
-/** The line above the coffee button, following how the last sync on this device ended. */
-export function coffeeQuestion(lastSync?: LastSync): CoffeeQuestion {
-	if (!lastSync) return 'coffeeSetUp';
-	if (lastSync.result === 'failed') return 'coffeeFailed';
-	if (lastSync.result === 'cancelled') return 'coffeeQuestion';
-	return 'coffeeWorks';
-}
-
 export default function supportSettings({
 	app,
 	translate,
 	settings,
-	on,
 	getLogs,
 }: {
 	app: App;
 	translate: Translate<SupportSettingTranslations>;
-	settings: { lastSync?: LastSync };
-	on: On<Events>;
+	settings: object;
 	getLogs: () => string;
 }): CallableOrObjectTree {
 	const helpItems = (): Array<HelpItem> => [
@@ -216,10 +197,6 @@ export default function supportSettings({
 					render: (setting) => {
 						setting.settingEl.addClass('drive-bridge-coffee');
 						const el = setting.controlEl;
-						const question = el.createDiv({ cls: 'drive-bridge-coffee-question' });
-						const ask = () =>
-							question.setText(translate(coffeeQuestion(settings.lastSync)));
-						ask();
 						// Only a link: nothing is asked of GitHub, so no star count either.
 						const star = el.createEl('a', {
 							attr: {
@@ -251,7 +228,6 @@ export default function supportSettings({
 							cls: 'drive-bridge-coffee-version',
 							text: translate('pluginVersion', VERSION),
 						});
-						return on('syncTerminated', ask);
 					},
 					search: false,
 				})),
