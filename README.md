@@ -71,8 +71,9 @@ Details in [PRIVACY.md](PRIVACY.md).
 
 ## Support
 
-If the plugin saves you a headache, you can buy me a coffee. Contributions of
-code and bug reports are welcome too, see
+If the plugin saves you a headache, you can star it on GitHub or buy me a
+coffee. The settings link to both at the bottom; they open in the browser and the
+plugin sends nothing. Contributions of code and bug reports are welcome too, see
 [CONTRIBUTORS.md](CONTRIBUTORS.md).
 
 <p align="right">

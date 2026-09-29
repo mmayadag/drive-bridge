@@ -49,9 +49,12 @@ const choice = (checked: boolean, name: string, desc: string, extra: string) =>
 
 const CUP = `<svg aria-hidden="true" viewBox="0 0 40 54" class="drive-bridge-coffee-cup"><path class="drive-bridge-coffee-milk" d="M10.5 26.5c3-2 6-2 9.5 0s7 2 10-.5L28.2 47.5c-.2 1.6-1.4 2.5-3 2.5H14.8c-1.6 0-2.8-.9-3-2.5z"/><path class="drive-bridge-coffee-line" d="M8 17l3.5 31c.2 1.6 1.4 2.5 3 2.5h11c1.6 0 2.8-.9 3-2.5L32 17"/><path class="drive-bridge-coffee-line" d="M8 10.5h24a3.5 3.5 0 0 1 0 7H8a3.5 3.5 0 0 1 0-7z"/><path class="drive-bridge-coffee-line" d="M9 10.5c0-5 22-6.5 22-1"/><path class="drive-bridge-coffee-line" d="M13 8c3-2 12-2 14 0"/></svg>`;
 
+// Lucide's star, as Obsidian's setIcon draws it.
+const STAR = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-star"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg>`;
+
 /** Each fixture is one card of settings rows, as the plugin renders them. */
 const FIXTURES: Record<string, string> = {
-	'coffee footer': `<div class="setting-item drive-bridge-coffee"><div class="setting-item-info">Buy me a coffee</div><div class="setting-item-control"><div class="drive-bridge-coffee-question">It works! Coffee time?</div><a class="drive-bridge-coffee-button" href="#">${CUP}<span>Buy me a coffee</span></a><div class="drive-bridge-coffee-version">Drive Bridge 0.0.0</div></div></div>`,
+	'coffee footer': `<div class="setting-item drive-bridge-coffee"><div class="setting-item-info">Buy me a coffee</div><div class="setting-item-control"><div class="drive-bridge-coffee-question">It works! Enjoying Drive Bridge?</div><a class="drive-bridge-star-button" href="#"><span class="drive-bridge-star-icon">${STAR}</span><span>Star on GitHub</span></a><div class="drive-bridge-coffee-or">or</div><a class="drive-bridge-coffee-button" href="#">${CUP}<span>Buy me a coffee</span></a><div class="drive-bridge-coffee-version">Drive Bridge 0.0.0</div></div></div>`,
 	conflicts: choice(
 		true,
 		'Rename and keep both',

@@ -197,7 +197,7 @@ test('the help row wires up the guide, bug, feature and problem report buttons',
 
 let onSyncTerminated: (() => void) | undefined;
 
-test('the coffee row draws the question, the button and the plugin version', () => {
+test('the coffee row draws the question, the star link, or, the button and the version', () => {
 	const settings: { lastSync?: { at: number; result: string } } = { lastSync: undefined };
 	const tree = supportSettings({
 		app: {} as never,
@@ -220,6 +220,14 @@ test('the coffee row draws the question, the button and the plugin version', () 
 	expect(settingEl.classList.contains('drive-bridge-coffee')).toBe(true);
 	const question = controlEl.querySelector('.drive-bridge-coffee-question');
 	expect(question?.textContent).toBe('coffeeSetUp');
+
+	const star = controlEl.querySelector('a.drive-bridge-star-button');
+	expect(star?.getAttribute('href')).toBe('https://github.com/mmayadag/drive-bridge');
+	expect(star?.getAttribute('rel')).toBe('noopener');
+	expect(star?.getAttribute('aria-label')).toBe('starOnGithubDescription');
+	expect(star?.querySelector('.drive-bridge-star-icon')).not.toBeNull();
+	expect(star?.textContent).toBe('starOnGithub');
+	expect(star?.nextElementSibling?.textContent).toBe('or');
 
 	const link = controlEl.querySelector('a.drive-bridge-coffee-button');
 	expect(link?.getAttribute('href')).toBe('https://buymeacoffee.com/muratmayadag');
