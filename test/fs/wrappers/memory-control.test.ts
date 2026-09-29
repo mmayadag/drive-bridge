@@ -77,6 +77,64 @@ test('memory wrapper caps stream reservation at 16 MiB', async () => {
 	expect(state.memoryConsumption).toBe(SIXTEEN_MIB + 1);
 });
 
+test('whole-file streams hold the whole file until read, then the usual part', async () => {
+	const state = createSharedState(SIXTEEN_MIB * 4);
+	const remote = fs({ control: { readStream: () => stream(['ab', 'cd']) } });
+	const wrapper = memoryControlWrapper(remote.fs, state, { wholeFileStreams: true });
+
+	const largeStat = file('large.bin', { size: SIXTEEN_MIB * 3 });
+	const body = await wrapper.readStream('large.bin', largeStat);
+	expect(state.memoryConsumption).toBe(SIXTEEN_MIB * 3);
+
+	expect(new TextDecoder().decode(await new Response(body).bytes())).toBe('abcd');
+	expect(state.memoryConsumption).toBe(SIXTEEN_MIB);
+
+	await wrapper.writeStream('large.bin', stream(['abcd']), largeStat);
+	expect(state.memoryConsumption).toBe(0);
+});
+
+test('whole-file streams release the extra once when cancelled', async () => {
+	const state = createSharedState(Infinity);
+	const remote = fs({ control: { readStream: () => stream(['ab']) } });
+	const wrapper = memoryControlWrapper(remote.fs, state, { wholeFileStreams: true });
+
+	const body = await wrapper.readStream(
+		'large.bin',
+		file('large.bin', { size: SIXTEEN_MIB * 2 }),
+	);
+	await body.cancel();
+	await body.cancel();
+	expect(state.memoryConsumption).toBe(SIXTEEN_MIB);
+});
+
+test('whole-file streams of a small file reserve as usual', async () => {
+	const state = createSharedState(Infinity);
+	const remote = fs({ control: { readStream: () => stream(['ab']) } });
+	const wrapper = memoryControlWrapper(remote.fs, state, { wholeFileStreams: true });
+
+	const smallStat = file('small.bin', { size: 2 });
+	await wrapper.readStream('small.bin', smallStat);
+	expect(state.memoryConsumption).toBe(2);
+});
+
+test('a larger whole-file stream waits until the budget is free', async () => {
+	const state = createSharedState(SIXTEEN_MIB * 2);
+	const remote = fs({ control: { readStream: () => stream(['ab']) } });
+	const wrapper = memoryControlWrapper(remote.fs, state, { wholeFileStreams: true });
+
+	const heldStat = file('held.md', { size: 1 });
+	await wrapper.read('held.md', heldStat);
+	const bigStat = file('big.bin', { size: SIXTEEN_MIB * 3 });
+	const bigRead = wrapper.readStream('big.bin', bigStat);
+	await flush();
+	expect(remote.calls.readStream).toStrictEqual([]);
+
+	await wrapper.write('held.md', bytes('1'), heldStat);
+	await flush();
+	expect(remote.calls.readStream).toStrictEqual([['big.bin', bigStat]]);
+	await bigRead;
+});
+
 test('memory wrapper releases budget only after writeStream fully drains', async () => {
 	const state = createSharedState(8);
 	const local = fs();

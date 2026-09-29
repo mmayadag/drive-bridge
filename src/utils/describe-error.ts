@@ -8,6 +8,7 @@ export type ErrorTranslations = {
 	errorServer: string;
 	errorTasksFailed: Snippet<number>;
 	errorAndroidWrite: string;
+	errorTooLargeOnDevice: string;
 	errorWindowsCharacter: Snippet<string>;
 	errorNoBackend: string;
 	errorSecretHeader: Snippet<string>;
@@ -27,6 +28,7 @@ const OFFLINE =
 // Errors thrown in the plugin core stay in English, so logs read the same on every
 // device; these patterns match them and they are translated only where they are shown.
 const ANDROID_WRITE = /known Android bug/u;
+const TOO_LARGE_ON_DEVICE = /too large to sync on this device/u;
 const WINDOWS_CHARACTER = /Windows forbids character "(?<name>.)"/u;
 const NO_BACKEND = /Please (?:set|install) a backend!|Backend ".*" is not installed!/u;
 const SECRET_HEADER = /Custom secret header not found: "(?<name>.*)"/u;
@@ -37,6 +39,7 @@ export function classifyError(raw: string): Known | undefined {
 	const tasks = /Execution of (?<count>\d+) sync task/u.exec(raw)?.groups?.count;
 	if (tasks) return { count: Number(tasks), key: 'errorTasksFailed' };
 	if (ANDROID_WRITE.test(raw)) return { key: 'errorAndroidWrite' };
+	if (TOO_LARGE_ON_DEVICE.test(raw)) return { key: 'errorTooLargeOnDevice' };
 	if (NO_BACKEND.test(raw)) return { key: 'errorNoBackend' };
 	const character = WINDOWS_CHARACTER.exec(raw)?.groups?.name;
 	if (character) return { key: 'errorWindowsCharacter', name: character };

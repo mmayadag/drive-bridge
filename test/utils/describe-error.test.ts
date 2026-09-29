@@ -44,6 +44,12 @@ test('errors thrown in English by the plugin core are worded for the reader', ()
 	expect(
 		describeError('File write fails repeatedly, this is a known Android bug.', translate),
 	).toBe('errorAndroidWrite');
+	expect(
+		describeError(
+			'File is too large to sync on this device (limit 200 MB), sync it from a computer.',
+			translate,
+		),
+	).toBe('errorTooLargeOnDevice');
 	expect(describeError('Please set a backend!', translate)).toBe('errorNoBackend');
 	expect(describeError('Please install a backend!', translate)).toBe('errorNoBackend');
 	expect(describeError('Backend "s3" is not installed!', translate)).toBe('errorNoBackend');

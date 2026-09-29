@@ -85,6 +85,7 @@ const en: Translations = {
 	errorServer: 'Google Drive had a problem. Try again later.',
 	errorSignIn: 'Google no longer accepts the sign-in. Connect the account again.',
 	errorTasksFailed: (count) => `${count} ${p(count, 'file', 'files')} could not be synced.`,
+	errorTooLargeOnDevice: 'A file is too large to sync on this device. Sync it from a computer.',
 	errorWindowsCharacter: (character) =>
 		`Windows does not allow "${character}" in file names. Rename the file to sync it.`,
 	excludeFromSync: 'Exclude from sync',

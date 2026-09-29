@@ -126,3 +126,21 @@ export default function createRangeReadStream({
 		{ highWaterMark: 0 },
 	);
 }
+
+/** Hands out bytes already in memory as a stream of `chunkSize` views, one per pull. */
+export function createBufferReadStream(bytes: Binary, chunkSize: number): ReadableStream<Binary> {
+	let offset = 0;
+	return new ReadableStream<Binary>(
+		{
+			pull(controller) {
+				if (offset >= bytes.byteLength) {
+					controller.close();
+					return;
+				}
+				controller.enqueue(bytes.subarray(offset, offset + chunkSize));
+				offset += chunkSize;
+			},
+		},
+		{ highWaterMark: 0 },
+	);
+}

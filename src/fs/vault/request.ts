@@ -1,11 +1,11 @@
 import type { Vault, Stat, ListedFiles, App } from 'obsidian';
-import { TFile, TFolder } from 'obsidian';
+import { Platform, TFile, TFolder } from 'obsidian';
 import type { Binary, MaybePromise } from '@/types';
 import { OS } from '@/modules/event-bus';
 import { toArrayBuffer, toUint8Array } from '@/shared/binary';
 import { basename, isFolder, stripEndSlash } from '@/shared/path';
-import createRangeReadStream from '@/shared/read-stream';
-import { chunkSize, concurrency } from '@/utils/pipe';
+import { createBufferReadStream } from '@/shared/read-stream';
+import { chunkSize } from '@/utils/pipe';
 
 export const TEMP_FOLDER = '.trash';
 
@@ -40,26 +40,11 @@ export type VaultRequest = <T extends VaultRequestParam = { method: 'GET' }>(
 	params?: T,
 ) => Promise<VaultRequestResponseMap[T['method']]>;
 
-// Capacitor ranged local file request only supports those extensions
-// Fixed in Capacitor 7: https://github.com/ionic-team/capacitor/pull/7868
-// but Obsidian is still using 5
-// oxlint-disable-next-line eslint/no-warning-comments -- time-bounded, revisit 2027-01-01
-// TODO(2027-01-01): remove once Obsidian adopts Capacitor 7
-const CAPACITOR_MEDIA_EXTENSIONS = [
-	'm4v',
-	'mov',
-	'mp4',
-	'aac',
-	'ac3',
-	'aiff',
-	'au',
-	'flac',
-	'm4a',
-	'mp3',
-	'wav',
-];
-const isMediaExtension = (key: string) =>
-	CAPACITOR_MEDIA_EXTENSIONS.some((ext) => key.endsWith(`.${ext}`));
+// Obsidian can only read a vault file whole: the adapter has no ranged read, and requestUrl
+// cannot address the app:// resource path ("ClientRequest only supports http: and https:
+// protocols", Obsidian 1.13.7). A large file is therefore read once and handed on in chunks,
+// so the whole file stays in memory until its upload ends. Above this size, phones skip it.
+export const MOBILE_READ_LIMIT = 200 * 1024 ** 2;
 
 function toVaultPath(key: string) {
 	if (key === '/') return key;
@@ -99,45 +84,14 @@ export default function createVaultRequest(app: App): VaultRequest {
 
 		if (method === 'GET') return get();
 		if (method === 'GET_STREAM') {
-			let url = adapter.getResourcePath(path);
-			// Local file fetch streaming isn't supported in iOS
-			if (OS.iOS || OS.iPadOS) {
-				let newPath: string | undefined;
-				// Workaround by masquerading to be a media file
-				if (!isMediaExtension(key)) {
-					newPath = `${TEMP_FOLDER}/${crypto.randomUUID()}.mov`;
-					if (!(await adapter.exists(TEMP_FOLDER))) await adapter.mkdir(TEMP_FOLDER);
-					await adapter.copy(path, newPath);
-					url = adapter.getResourcePath(newPath);
-				}
-				return createRangeReadStream({
-					chunkSize,
-					concurrency,
-					finalize: () => {
-						if (newPath) return adapter.remove(newPath).catch(() => {});
-					},
-					// Reads part of this vault's own file behind its app:// resource path.
-					// No network is involved.
-					// Obsidian has no adapter call for reading a byte range.
-					// Nor can requestUrl address an app:// path at all.
-					requestRange: async (start, end) => {
-						const response = await fetch(url, {
-							headers: { Range: `bytes=${start}-${end}` },
-							method: 'GET',
-						});
-						return response.bytes();
-					},
-					size: params.size,
-				}) as never;
-			}
-			// Same here: a local vault file behind its app:// resource path.
-			// Streaming is the point.
-			// Only fetch hands back a stream.
-			// Using requestUrl would pull in the whole file at once.
-			// That is exactly what streaming exists to avoid on a large attachment.
-			const response = await fetch(url);
-			if (!response.body) throw new Error('Streaming vault file is not supported!');
-			return response.body as never;
+			if (Platform.isMobileApp && params.size > MOBILE_READ_LIMIT)
+				throw new Error(
+					`File is too large to sync on this device (limit ${MOBILE_READ_LIMIT / 1024 ** 2} MB), sync it from a computer.`,
+				);
+			return createBufferReadStream(
+				toUint8Array(await adapter.readBinary(path)),
+				chunkSize,
+			) as never;
 		}
 		if (method === 'PUT')
 			return withCheckChars(key, () =>

@@ -11,6 +11,7 @@ export const Platform = {
 	isAndroidApp: false,
 	isDesktop: true,
 	isMobile: false,
+	isMobileApp: false,
 };
 
 export function normalizePath(path: string) {
