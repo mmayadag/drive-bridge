@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.4.6 - 2026-09-29
+
+- The plugin description shown in Obsidian and the README introduction match
+  the Community directory listing (#200).
+
 ## v0.4.5 - 2026-09-29
 
 - The coffee card at the bottom of the settings starts with **Star on GitHub**,
