@@ -30,8 +30,12 @@ const { default: GdriveFs } = await import('@/gdrive/fs');
 const { openMemoryDB } = await import('@/shared/key-value-store');
 
 const FULL_DRIVE = 'https://www.googleapis.com/auth/drive';
-const REFRESH_ID = 'drive-bridge-gdrive-refresh-token';
-const SECRET_ID = 'drive-bridge-gdrive-client-secret';
+const LEGACY_REFRESH_ID = 'drive-bridge-gdrive-refresh-token';
+const LEGACY_SECRET_ID = 'drive-bridge-gdrive-client-secret';
+// Every setup runs as the same vault on this device.
+const SCOPE = 'testvault1';
+const REFRESH_ID = `${LEGACY_REFRESH_ID}-${SCOPE}`;
+const SECRET_ID = `${LEGACY_SECRET_ID}-${SCOPE}`;
 
 function reset(...next: Array<HttpResponse>) {
 	requests.length = 0;
@@ -48,7 +52,7 @@ function setup(entries: Array<[string, string]> = []) {
 	const removed: Array<string> = [];
 	const logs: Array<unknown> = [];
 	const layoutReady: Array<() => void> = [];
-	const local = new Map<string, unknown>();
+	const local = new Map<string, unknown>([['drive-bridge-secret-scope', SCOPE]]);
 	const driveRequests: Array<string> = [];
 	let driveAnswer: () => Promise<unknown> = () =>
 		Promise.resolve({ json: () => ({}), status: 200 });
@@ -198,6 +202,27 @@ test('resetSettings restores trash and changes-only scans but keeps the account 
 		useTrash: true,
 		userId: 'perm-1',
 	});
+});
+
+test('on start, a vault connected before the update keeps its sign-in', () => {
+	const { gdrive, secrets } = setup([
+		[LEGACY_REFRESH_ID, '1//shared'],
+		[LEGACY_SECRET_ID, 'shared-secret'],
+	]);
+	// Saved settings arrive after the constructor, as the module loader applies them.
+	gdrive.moduleSettings.userId = 'perm-1';
+	gdrive.start();
+	expect(secrets.get(REFRESH_ID)).toBe('1//shared');
+	expect(secrets.get(SECRET_ID)).toBe('shared-secret');
+	gdrive.dispose();
+});
+
+test("on start, a vault never connected does not take another vault's sign-in", () => {
+	const { gdrive, secrets } = setup([[LEGACY_REFRESH_ID, '1//shared']]);
+	gdrive.start();
+	expect(secrets.get(REFRESH_ID)).toBeUndefined();
+	expect(gdrive.secrets.export()).toStrictEqual({});
+	gdrive.dispose();
 });
 
 test('start registers the Drive backend, its folder wrapper, the bearer token and the settings', () => {

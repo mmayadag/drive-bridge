@@ -202,3 +202,75 @@ test('refresh errors read in the plugin language', async () => {
 	);
 	expect(await refreshError({}, '')).toBe(gdriveEn.errorNotConnected);
 });
+
+const SCOPED = {
+	clientSecret: 'drive-bridge-gdrive-client-secret-vault1',
+	refreshToken: 'drive-bridge-gdrive-refresh-token-vault1',
+};
+const TOKEN = { json: { access_token: 'a', expires_in: 3600, scope: FULL_DRIVE } };
+const account = (permissionId: string) => ({
+	json: { user: { emailAddress: `${permissionId}@test`, permissionId } },
+});
+
+test('a vault keeps its secrets under its own ids', () => {
+	const { secrets, storage } = secretStorage([['drive-bridge-gdrive-refresh-token', 'other']]);
+	const manager = new TokenManager(storage, () => 'my-client', translate, { ids: SCOPED });
+	expect(manager.getRefreshToken()).toBeUndefined();
+	manager.setRefreshToken('mine');
+	manager.setClientSecret('my-secret');
+	expect(secrets.get(SCOPED.refreshToken)).toBe('mine');
+	expect(secrets.get(SCOPED.clientSecret)).toBe('my-secret');
+	expect(secrets.get('drive-bridge-gdrive-refresh-token')).toBe('other');
+});
+
+test("a stored token is checked once against the vault's account", async () => {
+	reset(TOKEN, account('perm-1'), TOKEN);
+	const { storage } = secretStorage([
+		[SCOPED.refreshToken, 'refresh'],
+		[SCOPED.clientSecret, 'my-secret'],
+	]);
+	const manager = new TokenManager(storage, () => 'my-client', translate, {
+		getUserId: () => 'perm-1',
+		ids: SCOPED,
+	});
+	expect(await manager.getToken()).toBe('a');
+	expect(await manager.getToken(true)).toBe('a');
+	// Token, account, token: the account is read only once.
+	expect(requests).toHaveLength(3);
+});
+
+test('a stored token of another account stops the sync and says whose it is', async () => {
+	reset(TOKEN, account('perm-2'));
+	const { storage } = secretStorage([
+		[SCOPED.refreshToken, 'refresh'],
+		[SCOPED.clientSecret, 'my-secret'],
+	]);
+	const manager = new TokenManager(storage, () => 'my-client', translate, {
+		getUserId: () => 'perm-1',
+		ids: SCOPED,
+	});
+	let caught: unknown;
+	try {
+		await manager.getToken();
+	} catch (error) {
+		caught = error;
+	}
+	expect(String(caught)).toContain('perm-2@test');
+});
+
+test('a token just connected with, or a vault not yet connected, needs no account check', async () => {
+	reset(TOKEN, TOKEN);
+	const { storage } = secretStorage([[SCOPED.clientSecret, 'my-secret']]);
+	let userId = '';
+	const manager = new TokenManager(storage, () => 'my-client', translate, {
+		getUserId: () => userId,
+		ids: SCOPED,
+	});
+	manager.setRefreshToken('refresh');
+	await manager.getToken();
+	userId = 'perm-1';
+	await manager.getToken(true);
+	expect(requests).toHaveLength(2);
+	manager.deleteRefreshToken();
+	expect(manager.getRefreshToken()).toBeUndefined();
+});
