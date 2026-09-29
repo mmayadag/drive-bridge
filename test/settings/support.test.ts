@@ -226,7 +226,10 @@ test('the coffee row draws the question, the star link, or, the button and the v
 	expect(star?.getAttribute('rel')).toBe('noopener');
 	expect(star?.getAttribute('aria-label')).toBe('starOnGithubDescription');
 	expect(star?.querySelector('.drive-bridge-star-icon')).not.toBeNull();
-	expect(star?.textContent).toBe('starOnGithub');
+	const burst = star?.querySelector('.drive-bridge-star-burst');
+	expect(burst?.getAttribute('aria-hidden')).toBe('true');
+	expect(burst?.children).toHaveLength(6);
+	expect(star?.lastElementChild?.textContent).toBe('starOnGithub');
 	expect(star?.nextElementSibling?.textContent).toBe('or');
 
 	const link = controlEl.querySelector('a.drive-bridge-coffee-button');

@@ -17,6 +17,9 @@ const GUIDE_URL = 'https://github.com/mmayadag/drive-bridge#readme';
 const ISSUES_URL = 'https://github.com/mmayadag/drive-bridge/issues/new';
 const COFFEE_URL = 'https://buymeacoffee.com/muratmayadag';
 const REPO_URL = 'https://github.com/mmayadag/drive-bridge';
+// Little stars that fly out of the star link; global.css places each one.
+const BURST_STARS = 6;
+const SPARKLE = 'M12 0l2.6 9.4L24 12l-9.4 2.6L12 24l-2.6-9.4L0 12l9.4-2.6z';
 
 export type SupportSettingTranslations = {
 	helpAndSupport: string;
@@ -226,7 +229,16 @@ export default function supportSettings({
 							},
 							cls: 'drive-bridge-star-button',
 						});
-						setIcon(star.createSpan('drive-bridge-star-icon'), 'star');
+						const starIcon = star.createSpan('drive-bridge-star-icon');
+						setIcon(starIcon, 'star');
+						const burst = starIcon.createSpan({
+							attr: { 'aria-hidden': 'true' },
+							cls: 'drive-bridge-star-burst',
+						});
+						for (let i = 0; i < BURST_STARS; i++)
+							burst
+								.createSvg('svg', { attr: { viewBox: '0 0 24 24' } })
+								.createSvg('path', { attr: { d: SPARKLE } });
 						star.createSpan({ text: translate('starOnGithub') });
 						el.createDiv({ cls: 'drive-bridge-coffee-or', text: translate('or') });
 						const link = el.createEl('a', {

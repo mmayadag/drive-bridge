@@ -484,7 +484,8 @@ a.drive-bridge-coffee-button:hover {
 	width: 1.75rem;
 	height: 2.35rem;
 	transform-origin: 50% 90%;
-	animation: drive-bridge-cup-wiggle 0.9s ease-in-out 0.4s 2;
+	/* After the star link's burst, so the two never move at once. */
+	animation: drive-bridge-cup-wiggle 0.9s ease-in-out 1.2s 2;
 }
 
 a.drive-bridge-coffee-button:hover .drive-bridge-coffee-cup {
@@ -527,18 +528,82 @@ a.drive-bridge-star-button:hover {
 }
 
 .drive-bridge-star-icon {
+	--drive-bridge-star: var(--drive-bridge-coffee-yellow);
+	position: relative;
 	display: flex;
-	color: var(--drive-bridge-coffee-yellow);
+	color: var(--drive-bridge-star);
 
-	svg {
+	> svg {
 		width: 1.4rem;
 		height: 1.4rem;
 		fill: currentColor;
+		animation: drive-bridge-star-pop 0.6s ease-out 0.3s;
 	}
 }
 
 .theme-light .drive-bridge-star-icon {
-	color: #e3a008;
+	--drive-bridge-star: #e3a008;
+}
+
+a.drive-bridge-star-button:hover .drive-bridge-star-icon > svg {
+	animation: drive-bridge-star-pop-again 0.6s ease-out;
+}
+
+/* Little stars fly out of the big one: once when the card appears, again on hover. */
+.drive-bridge-star-burst {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	pointer-events: none;
+
+	svg {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: var(--drive-bridge-burst-size, 0.8rem);
+		height: var(--drive-bridge-burst-size, 0.8rem);
+		fill: var(--drive-bridge-star);
+		opacity: 0;
+		transform: translate(-50%, -50%);
+		animation: drive-bridge-star-burst 0.9s ease-out 0.3s;
+	}
+
+	svg:nth-child(1) {
+		--drive-bridge-burst-x: -2.2rem;
+		--drive-bridge-burst-y: -1.6rem;
+	}
+
+	svg:nth-child(2) {
+		--drive-bridge-burst-x: 0.2rem;
+		--drive-bridge-burst-y: -2.4rem;
+		--drive-bridge-burst-size: 0.6rem;
+	}
+
+	svg:nth-child(3) {
+		--drive-bridge-burst-x: 2.3rem;
+		--drive-bridge-burst-y: -1.4rem;
+	}
+
+	svg:nth-child(4) {
+		--drive-bridge-burst-x: 2.6rem;
+		--drive-bridge-burst-y: 1.2rem;
+		--drive-bridge-burst-size: 0.6rem;
+	}
+
+	svg:nth-child(5) {
+		--drive-bridge-burst-x: -0.4rem;
+		--drive-bridge-burst-y: 2.2rem;
+	}
+
+	svg:nth-child(6) {
+		--drive-bridge-burst-x: -2.5rem;
+		--drive-bridge-burst-y: 1rem;
+		--drive-bridge-burst-size: 0.6rem;
+	}
+}
+
+a.drive-bridge-star-button:hover .drive-bridge-star-burst svg {
+	animation: drive-bridge-star-burst-again 0.9s ease-out;
 }
 
 .drive-bridge-coffee-or {
@@ -578,9 +643,71 @@ a.drive-bridge-star-button:hover {
 	}
 }
 
+@keyframes drive-bridge-star-pop {
+	0%,
+	100% {
+		transform: scale(1) rotate(0);
+	}
+	40% {
+		transform: scale(1.3) rotate(15deg);
+	}
+}
+
+@keyframes drive-bridge-star-pop-again {
+	0%,
+	100% {
+		transform: scale(1) rotate(0);
+	}
+	40% {
+		transform: scale(1.3) rotate(15deg);
+	}
+}
+
+@keyframes drive-bridge-star-burst {
+	0% {
+		opacity: 0;
+		transform: translate(-50%, -50%) scale(0.3);
+	}
+	25%,
+	60% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+		transform: translate(
+				calc(-50% + var(--drive-bridge-burst-x)),
+				calc(-50% + var(--drive-bridge-burst-y))
+			)
+			scale(1) rotate(90deg);
+	}
+}
+
+@keyframes drive-bridge-star-burst-again {
+	0% {
+		opacity: 0;
+		transform: translate(-50%, -50%) scale(0.3);
+	}
+	25%,
+	60% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+		transform: translate(
+				calc(-50% + var(--drive-bridge-burst-x)),
+				calc(-50% + var(--drive-bridge-burst-y))
+			)
+			scale(1) rotate(90deg);
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.drive-bridge-coffee-cup,
-	a.drive-bridge-coffee-button:hover .drive-bridge-coffee-cup {
+	a.drive-bridge-coffee-button:hover .drive-bridge-coffee-cup,
+	.drive-bridge-star-icon > svg,
+	a.drive-bridge-star-button:hover .drive-bridge-star-icon > svg,
+	.drive-bridge-star-burst svg,
+	a.drive-bridge-star-button:hover .drive-bridge-star-burst svg {
 		animation: none;
 	}
 }
