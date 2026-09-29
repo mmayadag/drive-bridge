@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.5.1 - 2026-09-29
+
+- Read large vault files through Obsidian's file adapter instead of `fetch`,
+  removing the temporary media-file workaround on iOS (#208).
+- Reserve memory for the whole local file while uploading it in chunks.
+  On mobile, files larger than 200 MiB are skipped with a message to sync
+  them from a computer.
+
 ## v0.5.0 - 2026-09-29
 
 - Stable release of the improvements shipped in 0.4.9: Smart merge,
