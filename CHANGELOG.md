@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.5.0 - 2026-09-29
+
+- Stable release of the improvements shipped in 0.4.9: Smart merge,
+  **Never delete on Drive** and **Changes only** scans are the defaults for
+  fresh installs; existing settings are kept (#209).
+- Settings exports include only values that differ from the defaults,
+  together with the Drive folder, client and account. Imports restore omitted
+  settings to their defaults; older exports remain supported (#210).
+- Align the manifest, package version and compatibility map with the 0.5.0
+  release tag so the release build and plugin updates use the correct version.
+
 ## v0.4.9 - 2026-09-29
 
 - New defaults for a fresh install and for Reset to defaults: **Smart merge**
