@@ -6,9 +6,10 @@ import type { Snippet, Translate } from '@/modules/i18n';
 import type { CallableOrObjectTree } from '@/modules/setting';
 import ConfirmModal from '@/components/confirm-modal';
 import { ExportModal, ImportModal } from '@/components/transfer-modal';
+import { defaultSettings } from '@/defaults';
 import { WrongPassphraseError } from '@/shared/secret-box';
 import formatDateTime from '@/utils/format-date';
-import type { ModuleSecrets } from './transfer';
+import type { ModuleSecrets, TransferDefaults } from './transfer';
 import { ADVANCED, MORE, PAGE } from './layout';
 import {
 	applySettings,
@@ -56,6 +57,7 @@ type TransferContext = {
 	saveSettings: () => Promise<void>;
 	rerenderSettingTab: () => void;
 	exportModuleSecrets: () => ModuleSecrets;
+	moduleTransferDefaults: () => TransferDefaults['modules'];
 	importModuleSecrets: (secrets: ModuleSecrets) => Promise<Array<string>>;
 	startScheduledSync: () => void;
 	stopScheduledSync: () => void;
@@ -79,6 +81,10 @@ const confirmed = (
 
 export function createTransfer(ctx: TransferContext) {
 	const { app, translate: t, settings } = ctx;
+	const defaults = (): TransferDefaults => ({
+		modules: ctx.moduleTransferDefaults(),
+		settings: defaultSettings(app.vault.configDir),
+	});
 
 	const openExport = () =>
 		new ExportModal(app, {
@@ -88,6 +94,7 @@ export function createTransfer(ctx: TransferContext) {
 						settings,
 						passphrase ? ctx.exportModuleSecrets() : {},
 						passphrase,
+						{ defaults: defaults() },
 					),
 					undefined,
 					2,
@@ -122,7 +129,7 @@ export function createTransfer(ctx: TransferContext) {
 		const transfer = parseTransfer(text);
 		if (!transfer) return { valid: false };
 		return {
-			changes: changedSettings(settings, transfer.settings).length,
+			changes: changedSettings(settings, transfer.settings, defaults()).length,
 			hasSecrets: Boolean(transfer.secrets),
 			valid: true,
 		};
@@ -147,7 +154,7 @@ export function createTransfer(ctx: TransferContext) {
 			}))
 		)
 			return;
-		applySettings(settings, transfer.settings);
+		applySettings(settings, transfer.settings, defaults());
 		// Editable lists keep a working copy; drop it so they show the imported values.
 		ctx.memoryDB.getStore('ephemeralEditableLists').clear();
 		ctx.stopScheduledSync();

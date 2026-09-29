@@ -52,6 +52,8 @@ export default class SmartMerge {
 
 	readonly resetSettings = () => Object.assign(this.moduleSettings, DEFAULT_MARKERS);
 
+	readonly transferDefaults = DEFAULT_MARKERS;
+
 	readonly start = () => {
 		const {
 			indexedDB,

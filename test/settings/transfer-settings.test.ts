@@ -117,6 +117,7 @@ function baseCtx(overrides: Record<string, unknown> = {}) {
 	return {
 		app: {
 			vault: {
+				configDir: '.obsidian',
 				create: (path: string, text: string) => {
 					created.push([path, text]);
 					return Promise.resolve();
@@ -127,6 +128,7 @@ function baseCtx(overrides: Record<string, unknown> = {}) {
 		exportModuleSecrets: () => ({}),
 		importModuleSecrets: () => Promise.resolve([]),
 		memoryDB: { getStore: () => ({ clear: () => {} }) },
+		moduleTransferDefaults: () => ({}),
 		rerenderSettingTab: () => void rerendered.push(true),
 		rerendered,
 		saveSettings: () => {
@@ -152,7 +154,10 @@ test('openExport builds an unsealed JSON transfer by default', async () => {
 	const text = await exportModals[0]?.build();
 	const parsed = parseJson(text ?? '{}');
 	expect(parsed.format).toBe('drive-bridge-settings');
-	expect(parsed.settings.decider).toBe('bidirectional');
+	// Bidirectional is the default, so it is left out; what differs travels.
+	expect(parsed.settings.decider).toBeUndefined();
+	expect(parsed.settings.scheduledSync).toStrictEqual({ enabled: false });
+	expect(parsed.settings.modules).toStrictEqual({ gdrive: { clientId: 'existing-client' } });
 	expect(parsed.secrets).toBeUndefined();
 });
 

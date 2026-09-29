@@ -24,6 +24,7 @@ function setup(modules: Record<string, object> = {}) {
 					import: (values) =>
 						Promise.resolve(`gdrive got ${Object.keys(values).join(',')}`),
 				},
+				transferDefaults: { useTrash: true },
 			},
 		],
 		// No secrets and nothing to reset.
@@ -91,6 +92,12 @@ test('exportModuleSecrets collects the secrets of modules that have some', () =>
 	expect(bundled.root.exportModuleSecrets()).toStrictEqual({
 		gdrive: { refreshToken: '1//token' },
 	});
+});
+
+test('moduleTransferDefaults collects the defaults of modules that declare some', () => {
+	const { bundled } = setup();
+	bundled.root.loadAllModules();
+	expect(bundled.root.moduleTransferDefaults()).toStrictEqual({ gdrive: { useTrash: true } });
 });
 
 test('importModuleSecrets hands each module its own secrets and returns their lines', async () => {

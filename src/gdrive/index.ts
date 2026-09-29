@@ -36,6 +36,12 @@ export type GdriveSettings = {
 	userId: string;
 };
 
+/** What Reset to defaults puts back; everything else ties the device to its Drive. */
+const PREFERENCES: Pick<GdriveSettings, 'remoteScan' | 'useTrash'> = {
+	remoteScan: 'changes',
+	useTrash: true,
+};
+
 export default class Gdrive {
 	private readonly cleanup: Array<() => void> = [];
 	private readonly tokenManager: TokenManager;
@@ -93,18 +99,19 @@ export default class Gdrive {
 	};
 
 	// The account, client and folder are kept: they are what ties this device to its Drive.
-	readonly resetSettings = () => {
-		this.moduleSettings.useTrash = true;
-		this.moduleSettings.remoteScan = 'changes';
-	};
+	readonly resetSettings = () => Object.assign(this.moduleSettings, PREFERENCES);
+
+	// Only the preferences can be left out of an export: the account, client and folder
+	// always travel, and the folder's default comes from the vault name, which differs
+	// between devices.
+	readonly transferDefaults = PREFERENCES;
 
 	readonly moduleSettings: GdriveSettings = {
 		accountEmail: '',
 		baseDirectory: '',
 		clientId: '',
-		remoteScan: 'changes',
-		useTrash: true,
 		userId: '',
+		...PREFERENCES,
 	};
 
 	declare settings: Settings;
