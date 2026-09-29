@@ -70,8 +70,10 @@ Step-by-step instructions and the reasoning behind each choice are in
 
 The only requests Drive Bridge makes are to Google, and to a webhook URL if you
 set one yourself. It collects no usage statistics, has no analytics or crash
-reporting, and never touches the clipboard.
-Details in [PRIVACY.md](PRIVACY.md).
+reporting, and never touches the clipboard. Setup links to the Google Cloud
+Console, GitHub and the coffee page open in your browser; the plugin sends
+nothing to them. Details, including every address the plugin calls, in
+[PRIVACY.md](PRIVACY.md).
 
 ## Support
 
