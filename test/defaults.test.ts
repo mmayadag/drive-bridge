@@ -22,7 +22,7 @@ test('reset puts settings back but keeps the backend, modules and last sync', ()
 	resetSettings(settings, '.obsidian');
 
 	expect(settings.decider).toBe('bidirectional');
-	expect(settings.conflictResolver).toBe('renameAndKeepBoth');
+	expect(settings.conflictResolver).toBe('smartMerge');
 	expect(settings.webhookOnStart).toBe('');
 	expect(settings.scheduledSync.enabled).toBe(true);
 	expect(settings.exclusionRules).toStrictEqual(defaultSettings('.obsidian').exclusionRules);
@@ -31,6 +31,13 @@ test('reset puts settings back but keeps the backend, modules and last sync', ()
 	expect(settings.lastSync).toBe(lastSync);
 	expect(settings.keptOnRemote).toStrictEqual({ 'a.md': 'r1' });
 	expect(settings.syncHistory).toHaveLength(1);
+});
+
+test('a fresh install merges conflicts and never deletes on Drive', () => {
+	const settings = defaultSettings('.obsidian');
+	expect(settings.conflictResolver).toBe('smartMerge');
+	expect(settings.neverDeleteRemote).toBe(true);
+	expect(settings.realtimeSyncFastMode).toBe(true);
 });
 
 test('reset does not share objects with the defaults', () => {

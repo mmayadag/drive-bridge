@@ -13,7 +13,7 @@ test('onload merges saved data over the defaults and saves it back', async () =>
 	await flush();
 	const { settings } = harness.plugin;
 	expect(settings.decider).toBe('mirrorLocal');
-	expect(settings.conflictResolver).toBe('renameAndKeepBoth');
+	expect(settings.conflictResolver).toBe('smartMerge');
 	expect(settings.exclusionRules.map((rule) => rule.expr)).toContain('.obsidian');
 	expect(harness.saved.length).toBeGreaterThan(0);
 	expect(harness.saved.at(-1)).toMatchObject({ decider: 'mirrorLocal' });

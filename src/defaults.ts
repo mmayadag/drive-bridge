@@ -7,7 +7,7 @@ export function defaultSettings(configDir: string): Settings {
 		avoidAutoSyncWhenOffline: true,
 		confirmDeleteInAutoSync: true,
 		confirmTasksInSync: true,
-		conflictResolver: 'renameAndKeepBoth',
+		conflictResolver: 'smartMerge',
 		customHeaders: [],
 		decider: 'bidirectional',
 		exclusionRules: [
@@ -38,7 +38,7 @@ export function defaultSettings(configDir: string): Settings {
 		maxRequestConcurrency: { enabled: true, value: 50 },
 		minRequestInterval: { enabled: false, value: 0 },
 		modules: {},
-		neverDeleteRemote: false,
+		neverDeleteRemote: true,
 		noticeStatusOnMobile: true,
 		realtimeSync: { enabled: false, value: 5000 },
 		realtimeSyncFastMode: true,
