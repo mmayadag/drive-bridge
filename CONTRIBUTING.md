@@ -1,10 +1,4 @@
-# Contributors
-
-## Maintainer
-
-- **Murat Mayadağ** ([@mmayadag](https://github.com/mmayadag)), author and maintainer
-
-## Contributing
+# Contributing
 
 Bug reports, ideas and pull requests are welcome. Before opening a pull
 request:
@@ -18,6 +12,10 @@ request:
    (`src/gdrive/auth.ts` → `test/gdrive/auth.test.ts`).
 4. Describe what changes for the person using the plugin, not only what
    changed in the code.
+
+## Contributors
+
+- **Murat Mayadağ** ([@mmayadag](https://github.com/mmayadag)), author and maintainer
 
 Everyone who lands a change is listed here.
 
