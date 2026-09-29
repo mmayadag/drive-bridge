@@ -2,15 +2,22 @@
 
 ## Install
 
-Drive Bridge is not in Community plugins yet. Install it with
-[BRAT](https://github.com/TfTHacker/obsidian42-brat):
+Install Drive Bridge from the
+[Obsidian Community directory](https://community.obsidian.md/plugins/drive-bridge),
+or in Obsidian: **Settings → Community plugins → Browse**, search for
+**Drive Bridge**, then **Install** and **Enable**. Obsidian keeps it updated.
+
+### Pre-releases with BRAT
+
+Pre-releases (versions such as `0.5.0-beta.1`) are published on GitHub only.
+To try one, use [BRAT](https://github.com/TfTHacker/obsidian42-brat):
 
 1. Install and enable BRAT from Community plugins.
 2. BRAT → **Add beta plugin** → `https://github.com/mmayadag/drive-bridge`.
 3. Enable **Drive Bridge** in Community plugins.
 
-BRAT installs the files attached to the latest GitHub release and can keep
-them updated.
+BRAT installs the files attached to the latest GitHub release, pre-releases
+included, and can keep them updated.
 
 ## Setup
 
