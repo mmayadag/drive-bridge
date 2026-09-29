@@ -1,7 +1,7 @@
 # Privacy
 
 Short version: nothing about you or your notes is collected. Your files move
-between this device and your own Google Drive, and nowhere else.
+between your own device and your own Google Drive, and nowhere else.
 
 ## Your notes
 
