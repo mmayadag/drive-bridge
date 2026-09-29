@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.4.5 - 2026-09-29
+
+- The coffee card at the bottom of the settings starts with **Star on GitHub**,
+  _or_ **Buy me a coffee**. The star is only a link to the repository; when the
+  card appears, and on hover, it pops and a few little stars burst out of it
+  (#193, #195, #197).
+- Error messages shown in Last sync, the sync history, the failed files list
+  and the Google account page come from the translation files, ready for other
+  languages (#191).
+
 ## v0.4.4 - 2026-09-27
 
 - After **Save to vault**, the Export settings row says where the file is and
