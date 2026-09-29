@@ -17,6 +17,8 @@ test('the Guide label is drawn on the Set up a Google client entry, once', async
 			(label) => label.textContent,
 		);
 		expect(labels).toStrictEqual(['guide']);
+		// English capitals whatever the interface language: GUIDE, not GUİDE.
+		expect(name.querySelector('.drive-bridge-label')?.getAttribute('lang')).toBe('en');
 		expect(other.querySelector('.drive-bridge-label')).toBeNull();
 	} finally {
 		page.remove();
