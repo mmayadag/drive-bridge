@@ -221,6 +221,9 @@ test('the coffee row starts with the star link, then or, the button and the vers
 
 	const version = controlEl.querySelector('.drive-bridge-coffee-version');
 	expect(version?.textContent).toContain('pluginVersion:');
+	const notes = version?.querySelector('a');
+	expect(notes?.textContent).toBe('whatsNew');
+	expect(notes?.getAttribute('href')).toContain('/releases/tag/');
 });
 
 test('the help title opens the same items as a labelled list, each doing what its icon does', () => {

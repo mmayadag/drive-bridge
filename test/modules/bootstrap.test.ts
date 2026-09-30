@@ -12,6 +12,7 @@ import type {
 } from '@/modules/registrar';
 import type { Stat } from '@/types';
 import Bootstrap from '@/modules/bootstrap';
+import { VERSION } from '@/modules/event-bus';
 import { openMemoryDB } from '@/shared/key-value-store';
 import { ref } from '@/shared/reactive';
 
@@ -46,7 +47,11 @@ function setup(settingsOverrides: Partial<ReturnType<typeof baseSettings>> = {})
 	const unsubscribed: Array<string> = [];
 	const memoryDB = openMemoryDB('bootstrap-test');
 	const ctx = {
-		app: { secretStorage: { getSecret: (key: string) => secrets.get(key) } },
+		app: {
+			loadLocalStorage: () => VERSION,
+			saveLocalStorage: () => {},
+			secretStorage: { getSecret: (key: string) => secrets.get(key) },
+		},
 		dispatch: () => {},
 		memoryDB,
 		on: (name: string, handler: Handler) => {

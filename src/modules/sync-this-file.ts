@@ -14,13 +14,15 @@ export function registerSyncThisFile(ctx: {
 	isIdle: Ref<boolean>;
 	translate: Translate<SyncThisFileTranslations>;
 	executeSync: (trigger: string, options?: SyncOptions) => Promise<SyncTerminateReason>;
+	/** Whether informational notices are on; the result still shows in the status bar. */
+	showSyncNotices: () => boolean;
 }) {
 	const { app, translate: t, isIdle } = ctx;
 	const sync = async (file: TFile) => {
 		if (!isIdle()) return;
 		const result = await ctx.executeSync('file', { only: file.path });
-		if (result.result === 'completed' || result.result === 'noop')
-			new Notice(`${t('fileSynced')} ${file.path}`);
+		const synced = result.result === 'completed' || result.result === 'noop';
+		if (synced && ctx.showSyncNotices()) new Notice(`${t('fileSynced')} ${file.path}`);
 	};
 
 	ctx.addCommand({

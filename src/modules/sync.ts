@@ -94,7 +94,11 @@ export default class Sync {
 			id: 'retry-skipped-files',
 			name: this.ctx.translate('retrySkippedFiles'),
 		});
-		registerSyncThisFile({ ...this.ctx, executeSync: this.executeSync });
+		registerSyncThisFile({
+			...this.ctx,
+			executeSync: this.executeSync,
+			showSyncNotices: () => this.settings.noticeStatusOnMobile,
+		});
 		registerPreviewSync({ ...this.ctx, executeSync: this.executeSync });
 	};
 
@@ -135,6 +139,7 @@ export default class Sync {
 		skipState: SkipState;
 		exclusionRules: Array<GlobMatchRule>;
 		inclusionRules: Array<GlobMatchRule>;
+		noticeStatusOnMobile: boolean;
 	};
 
 	private readonly postProcess = (

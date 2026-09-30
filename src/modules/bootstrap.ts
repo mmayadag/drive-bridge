@@ -51,6 +51,8 @@ import type {
 	LocalRequestMiddlewareEntry,
 	TriggerEntry,
 } from './registrar';
+import type { WhatsNewTranslations } from './whats-new';
+import { noteUpdate } from './whats-new';
 
 export type CustomHeaders = Array<{ type: 'plaintext' | 'secret'; value: string; key: string }>;
 export type ExistingMemoryDB = DatabaseSync<
@@ -113,6 +115,7 @@ export default class Bootstrap {
 		WebhooksSettingTranslations &
 		SupportSettingTranslations &
 		TransferTranslations &
+		WhatsNewTranslations &
 		ExcludeMenuTranslations &
 		FileTreeTranslations;
 	declare readonly settings: {
@@ -169,6 +172,7 @@ export default class Bootstrap {
 			optimizeRemote,
 		} = this.ctx;
 		const { maxMemoryConsumption, maxRequestConcurrency, minRequestInterval } = this.settings;
+		noteUpdate(this.ctx);
 
 		const getMaxMemory = () =>
 			maxMemoryConsumption.enabled ? maxMemoryConsumption.value : Infinity;

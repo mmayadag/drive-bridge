@@ -203,9 +203,9 @@ const en: Translations = {
 	none: 'None',
 	notAnExport: 'This is not a Drive Bridge settings export.',
 	nothingLost: 'Nothing lost',
-	noticeStatusOnMobile: 'Notice sync status on mobile',
+	noticeStatusOnMobile: 'Sync notices',
 	noticeStatusOnMobileDescription:
-		'Show sync progress as a notice on mobile, where there is no status bar.',
+		'Show sync progress as a notice on phones, where there is no status bar, and a notice when Sync this file ends. Failures, skipped files and a nearly full Drive always show.',
 	open: 'Open',
 	openLastExport: (path) => `Open ${path}`,
 	or: 'or',
@@ -309,6 +309,11 @@ const en: Translations = {
 	undoRemoveLocal: 'Undo: keep it and upload it to Drive again',
 	undoRemoveRemote: 'Undo: keep it and download it from Drive again',
 	undoUpload: 'Undo: keep the Drive version and download it',
+	updatedTo: ({ version, url }) =>
+		createFragment((frag) => {
+			frag.appendText(`Drive Bridge updated to ${version} · `);
+			frag.createEl('a', { attr: { href: url, rel: 'noopener' }, text: "What's new" });
+		}),
 	upload: 'Upload',
 	walkingRemote: 'Discovering remote files',
 	webhookOnFinish: 'After a sync',
@@ -320,6 +325,7 @@ const en: Translations = {
 	webhookOnlyWhenChangedDescription: 'Skip both webhooks when there was nothing to sync.',
 	webhookPlaceholder: 'https://example.com/hook',
 	webhooks: 'Webhooks',
+	whatsNew: "What's new",
 	wrongPassphrase: 'Wrong passphrase, or the export was changed.',
 	xConfigured: (count) => `${count} configured`,
 	xOfYOn: ({ on, total }) => `${on} of ${total} on`,
