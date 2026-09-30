@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.5.4 - 2026-09-30
+
+Pre-release for testing on devices.
+
 ## v0.5.3 - 2026-09-29
 
 The 0.5.2 release build stopped on a CHANGELOG format check; 0.5.3 ships its
