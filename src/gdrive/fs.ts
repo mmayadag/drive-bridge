@@ -9,6 +9,7 @@ import createRangeReadStream from '@/shared/read-stream';
 import { chunkSize, concurrency } from '@/utils/pipe';
 import type { DriveFile, DriveFileList } from './api';
 import type { RemoteScan, SnapshotDB } from './changes';
+import type { RequestOrThrow } from './vault-tag';
 import {
 	DRIVE_API,
 	DRIVE_UPLOAD_API,
@@ -21,6 +22,7 @@ import {
 } from './api';
 import { applyChanges, fullScanReason, getStartToken, snapshotStore } from './changes';
 import { guessMimeType, resumableUpload, singleUpload } from './upload';
+import { findFolderByTag, reconcileTag, tagCreatedFolder } from './vault-tag';
 
 export type GdriveFsOptions = {
 	userId: string;
@@ -53,14 +55,23 @@ export default class GdriveFs implements RootFs {
 	private readonly ids: StoreSync<string>;
 	private readonly snapshots: ReturnType<typeof snapshotStore>;
 	private readonly log: (line: string) => void;
+	private readonly persistentDB?: SnapshotDB;
+	/** The vault's base folder key; only this key gets the vault-id tag (#78). */
+	private readonly rootKey?: string;
 
 	constructor(
 		private readonly request: Request,
 		private readonly options: GdriveFsOptions,
 		memoryDB: GdriveDB,
-		{ persistentDB, log }: { persistentDB?: SnapshotDB; log?: (line: string) => void } = {},
+		{
+			persistentDB,
+			log,
+			rootKey,
+		}: { persistentDB?: SnapshotDB; log?: (line: string) => void; rootKey?: string } = {},
 	) {
 		this.snapshots = snapshotStore(persistentDB);
+		this.persistentDB = persistentDB;
+		this.rootKey = rootKey;
 		this.log = log ?? (() => {});
 		this.ids = memoryDB.getStore('gdriveIds');
 		if (memoryDB.getMeta('gdriveIdsMarker') !== this.getUid()) {
@@ -124,6 +135,34 @@ export default class GdriveFs implements RootFs {
 			prefix = childKey;
 		}
 		return parentId;
+	}
+
+	/**
+	 * Resolves the vault's base folder: by its path first, then by its id tag if the path
+	 * moved (that tag is device-local, written here once this device has adopted or chosen
+	 * one). Only called for `rootKey`; any other key keeps the plain path lookup.
+	 */
+	private async resolveRoot(key: string): Promise<string | undefined> {
+		const byPath = this.resolveId(key) ?? (await this.resolveIdFresh(key));
+		if (!this.persistentDB) return byPath;
+		const localId = await this.persistentDB.getMeta('gdriveVaultId');
+		const requestOrThrow: RequestOrThrow = (url, params) => this.requestOrThrow(url, params);
+		if (byPath !== undefined) {
+			await reconcileTag(requestOrThrow, byPath, localId, {
+				log: this.log,
+				persistentDB: this.persistentDB,
+			});
+			return byPath;
+		}
+		if (localId === undefined) return undefined;
+		const found = await findFolderByTag(requestOrThrow, localId);
+		if (found?.trashed)
+			throw new Error(
+				'This vault’s Drive folder is in the trash; restore it or pick another.',
+			);
+		if (!found) return undefined;
+		this.ids.set(key, found.id);
+		return found.id;
 	}
 
 	/** Upload target for `key`, updating the existing file when present. */
@@ -276,6 +315,18 @@ export default class GdriveFs implements RootFs {
 		const created = response.json<DriveFile>();
 		if (!created.id) throw new Error('Google Drive did not return an id for a created folder!');
 		this.ids.set(key, created.id);
+		if (key === this.rootKey && this.persistentDB) {
+			const localId = await this.persistentDB.getMeta('gdriveVaultId');
+			await this.persistentDB.setMeta(
+				'gdriveVaultId',
+				await tagCreatedFolder(
+					(url, params) => this.requestOrThrow(url, params),
+					created.id,
+					localId,
+					this.log,
+				),
+			);
+		}
 	}
 
 	async stat(key: string): Promise<Stat> {
@@ -295,6 +346,7 @@ export default class GdriveFs implements RootFs {
 
 	// When Drive Bridge calls `exists()`, the only possibility is that something is unexpected, don't trust cache here
 	async exists(key: string): Promise<boolean> {
+		if (key === this.rootKey) return (await this.resolveRoot(key)) !== undefined;
 		return (await this.resolveIdFresh(key)) !== undefined;
 	}
 
@@ -351,7 +403,10 @@ export default class GdriveFs implements RootFs {
 	 * under the requested key so the reporter can steer traversal.
 	 */
 	async list(key: string, reporter: ListReporter): Promise<Array<Stat>> {
-		const startId = this.resolveId(key) ?? (await this.resolveIdFresh(key));
+		const startId =
+			key === this.rootKey
+				? await this.resolveRoot(key)
+				: (this.resolveId(key) ?? (await this.resolveIdFresh(key)));
 		if (startId === undefined) throw notFoundError(key);
 		const all = await this.listEverything();
 

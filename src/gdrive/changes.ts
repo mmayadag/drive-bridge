@@ -14,6 +14,9 @@ export type Snapshot = {
 
 export type SnapshotDB = {
 	getStore: (name: 'gdriveSnapshot') => StoreAsync<Snapshot>;
+	/** This device's id for the vault, tagged onto the base folder's Drive `properties`. */
+	getMeta: (key: 'gdriveVaultId') => Promise<string | undefined>;
+	setMeta: (key: 'gdriveVaultId', value: string) => Promise<void>;
 };
 
 type Change = {

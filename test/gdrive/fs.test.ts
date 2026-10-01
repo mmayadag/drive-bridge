@@ -345,11 +345,14 @@ test('a Drive error carries its status and message', async () => {
 test('changes only lists everything once, then asks only what changed', async () => {
 	const saved = new Map<string, unknown>();
 	const persistentDB = {
+		// oxlint-disable-next-line unicorn/no-useless-undefined : needs the SnapshotDB return type
+		getMeta: () => Promise.resolve<string | undefined>(undefined),
 		getStore: () =>
 			({
 				get: (key: string) => Promise.resolve(saved.get(key)),
 				set: (key: string, value: unknown) => Promise.resolve(void saved.set(key, value)),
 			}) as never,
+		setMeta: () => Promise.resolve(),
 	};
 	let changesFail = false;
 	const harness = request((url) => {
@@ -396,4 +399,207 @@ test('changes only lists everything once, then asks only what changed', async ()
 		'Drive scan: full scan (changes could not be read).',
 		'Drive scan: full scan (setting).',
 	]);
+});
+
+/** A `persistentDB` whose `gdriveVaultId` meta can be seeded and read back. */
+function fakeVaultDB(initial?: string) {
+	let vaultId = initial;
+	return {
+		getMeta: () => Promise.resolve(vaultId),
+		getStore: () => ({ get: () => Promise.resolve(), set: () => Promise.resolve() }) as never,
+		setMeta: (_key: 'gdriveVaultId', value: string) => {
+			vaultId = value;
+			return Promise.resolve();
+		},
+		vaultId: () => vaultId,
+	};
+}
+
+const ROOT_KEY = 'MyVault/';
+const byPathQuery = "'root' in parents and name = 'MyVault'";
+const tagQuery = (vaultId: string, trashed: boolean) =>
+	`properties has { key='driveBridgeVaultId' and value='${vaultId}' } and mimeType = '${FOLDER_MIME}' and trashed = ${trashed}`;
+
+test('a brand-new vault creates its folder and tags it with a fresh id', async () => {
+	const persistentDB = fakeVaultDB();
+	const logs: Array<string> = [];
+	const harness = request((url, params) => {
+		if (params.method === 'GET') return response({ files: [] });
+		if (params.method === 'POST') return response({ id: 'folder-1' });
+		return response({ id: 'folder-1' }); // the tag PATCH
+	});
+	const fs = new GdriveFs(harness.request, { useTrash: true, userId: 'user-1' }, db, {
+		log: (line) => logs.push(line),
+		persistentDB,
+		rootKey: ROOT_KEY,
+	});
+	expect((await failure(fs.list(ROOT_KEY, () => 'advance')))?.status).toBe(404);
+	await fs.mkdir(ROOT_KEY, true);
+	const vaultId = persistentDB.vaultId();
+	expect(vaultId).toMatch(/^[\da-f-]{36}$/u);
+	const tagCall = harness.calls.find((call) => call.method === 'PATCH');
+	expect(new TextDecoder().decode(tagCall?.body as Binary)).toContain(vaultId ?? '');
+});
+
+test('a folder found by path with no tag gets tagged with the established local id', async () => {
+	const persistentDB = fakeVaultDB('vault-1');
+	const harness = request((url, params) => {
+		const query = new URL(url).searchParams.get('q') ?? '';
+		if (query.includes(byPathQuery)) return response({ files: [{ id: 'folder-1' }] });
+		if (params.method === 'GET') return response({}); // no properties yet
+		return response({ id: 'folder-1' });
+	});
+	const fs = new GdriveFs(harness.request, { useTrash: true, userId: 'user-1' }, db, {
+		persistentDB,
+		rootKey: ROOT_KEY,
+	});
+	expect(await fs.exists(ROOT_KEY)).toBe(true);
+	const tagCall = harness.calls.find((call) => call.method === 'PATCH');
+	expect(new TextDecoder().decode(tagCall?.body as Binary)).toContain('vault-1');
+});
+
+test('a folder already tagged with this device’s id needs no write', async () => {
+	const persistentDB = fakeVaultDB('vault-1');
+	const harness = request((url, params) => {
+		const query = new URL(url).searchParams.get('q') ?? '';
+		if (query.includes(byPathQuery)) return response({ files: [{ id: 'folder-1' }] });
+		if (params.method === 'GET')
+			return response({ properties: { driveBridgeVaultId: 'vault-1' } });
+		throw new Error(`Unexpected ${params.method} ${url}`);
+	});
+	const fs = new GdriveFs(harness.request, { useTrash: true, userId: 'user-1' }, db, {
+		persistentDB,
+		rootKey: ROOT_KEY,
+	});
+	expect(await fs.exists(ROOT_KEY)).toBe(true);
+	expect(harness.calls.some((call) => call.method === 'PATCH')).toBe(false);
+});
+
+test('a second device of the same vault adopts the folder’s existing tag', async () => {
+	const persistentDB = fakeVaultDB();
+	const harness = request((url, params) => {
+		const query = new URL(url).searchParams.get('q') ?? '';
+		if (query.includes(byPathQuery)) return response({ files: [{ id: 'folder-1' }] });
+		if (params.method === 'GET')
+			return response({ properties: { driveBridgeVaultId: 'vault-1' } });
+		throw new Error(`Unexpected ${params.method} ${url}`);
+	});
+	const fs = new GdriveFs(harness.request, { useTrash: true, userId: 'user-1' }, db, {
+		persistentDB,
+		rootKey: ROOT_KEY,
+	});
+	expect(await fs.exists(ROOT_KEY)).toBe(true);
+	expect(persistentDB.vaultId()).toBe('vault-1');
+	expect(harness.calls.some((call) => call.method === 'PATCH')).toBe(false);
+});
+
+test('a folder tagged for a different vault is left alone, with a clear error', async () => {
+	const persistentDB = fakeVaultDB('vault-1');
+	const harness = request((url, params) => {
+		const query = new URL(url).searchParams.get('q') ?? '';
+		if (query.includes(byPathQuery)) return response({ files: [{ id: 'folder-1' }] });
+		if (params.method === 'GET')
+			return response({ properties: { driveBridgeVaultId: 'vault-2' } });
+		throw new Error(`Unexpected ${params.method} ${url}`);
+	});
+	const fs = new GdriveFs(harness.request, { useTrash: true, userId: 'user-1' }, db, {
+		persistentDB,
+		rootKey: ROOT_KEY,
+	});
+	expect((await failure(fs.exists(ROOT_KEY)))?.message).toContain('different vault');
+});
+
+test('a folder moved elsewhere is found again by its tag, instead of a fresh one', async () => {
+	const persistentDB = fakeVaultDB('vault-1');
+	const harness = request((url, params) => {
+		const query = new URL(url).searchParams.get('q') ?? '';
+		if (query.includes(byPathQuery)) return response({ files: [] });
+		if (query === tagQuery('vault-1', false)) return response({ files: [{ id: 'moved-1' }] });
+		if (params.method === 'GET') return response({ files: [] });
+		throw new Error(`Unexpected ${params.method} ${url}`);
+	});
+	const fs = new GdriveFs(harness.request, { useTrash: true, userId: 'user-1' }, db, {
+		persistentDB,
+		rootKey: ROOT_KEY,
+	});
+	expect(await fs.exists(ROOT_KEY)).toBe(true);
+	expect(harness.calls.some((call) => call.method === 'POST')).toBe(false);
+});
+
+test('a moved folder is found by its tag through the normal list, not just exists', async () => {
+	const persistentDB = fakeVaultDB('vault-1');
+	const harness = request((url, params) => {
+		const query = new URL(url).searchParams.get('q') ?? '';
+		if (query.includes(byPathQuery)) return response({ files: [] });
+		if (query === tagQuery('vault-1', false)) return response({ files: [{ id: 'moved-1' }] });
+		if (query === 'trashed = false') return response({ files: [] });
+		if (params.method === 'GET') return response({ files: [] });
+		throw new Error(`Unexpected ${params.method} ${url}`);
+	});
+	const fs = new GdriveFs(harness.request, { useTrash: true, userId: 'user-1' }, db, {
+		persistentDB,
+		rootKey: ROOT_KEY,
+	});
+	expect(await fs.list(ROOT_KEY, () => 'advance')).toStrictEqual([]);
+	expect(harness.calls.some((call) => call.method === 'POST')).toBe(false);
+});
+
+test('a folder gone for good is recreated and tagged with the established local id', async () => {
+	const persistentDB = fakeVaultDB('vault-1');
+	const harness = request((url, params) => {
+		const query = new URL(url).searchParams.get('q') ?? '';
+		if (query.includes(byPathQuery)) return response({ files: [] });
+		if (query === tagQuery('vault-1', false)) return response({ files: [] });
+		if (query === tagQuery('vault-1', true)) return response({ files: [] });
+		if (params.method === 'POST') return response({ id: 'folder-2' });
+		if (params.method === 'GET') return response({ files: [] });
+		return response({ id: 'folder-2' }); // the tag PATCH
+	});
+	const fs = new GdriveFs(harness.request, { useTrash: true, userId: 'user-1' }, db, {
+		persistentDB,
+		rootKey: ROOT_KEY,
+	});
+	expect(await fs.exists(ROOT_KEY)).toBe(false);
+	await fs.mkdir(ROOT_KEY, true);
+	expect(persistentDB.vaultId()).toBe('vault-1');
+	const tagCall = harness.calls.find((call) => call.method === 'PATCH');
+	expect(new TextDecoder().decode(tagCall?.body as Binary)).toContain('vault-1');
+});
+
+test('a folder found only in the trash raises a clear error instead of recreating', async () => {
+	const persistentDB = fakeVaultDB('vault-1');
+	const harness = request((url, params) => {
+		const query = new URL(url).searchParams.get('q') ?? '';
+		if (query.includes(byPathQuery)) return response({ files: [] });
+		if (query === tagQuery('vault-1', false)) return response({ files: [] });
+		if (query === tagQuery('vault-1', true)) return response({ files: [{ id: 'trashed-1' }] });
+		throw new Error(`Unexpected ${params.method} ${url}`);
+	});
+	const fs = new GdriveFs(harness.request, { useTrash: true, userId: 'user-1' }, db, {
+		persistentDB,
+		rootKey: ROOT_KEY,
+	});
+	expect((await failure(fs.exists(ROOT_KEY)))?.message).toContain('trash');
+});
+
+test('a tag write a viewer cannot make is logged, not a sync failure', async () => {
+	const persistentDB = fakeVaultDB();
+	const logs: Array<string> = [];
+	const harness = request((url, params) => {
+		const query = new URL(url).searchParams.get('q') ?? '';
+		if (query.includes(byPathQuery)) return response({ files: [{ id: 'folder-1' }] });
+		if (params.method === 'GET') return response({});
+		return response(
+			{ error: { message: 'The user does not have sufficient permissions' } },
+			403,
+		);
+	});
+	const fs = new GdriveFs(harness.request, { useTrash: true, userId: 'user-1' }, db, {
+		log: (line) => logs.push(line),
+		persistentDB,
+		rootKey: ROOT_KEY,
+	});
+	expect(await fs.exists(ROOT_KEY)).toBe(true);
+	expect(persistentDB.vaultId()).toMatch(/^[\da-f-]{36}$/u);
+	expect(logs.some((line) => line.includes('Could not tag the vault folder'))).toBe(true);
 });
