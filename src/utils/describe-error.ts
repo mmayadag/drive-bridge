@@ -12,6 +12,8 @@ export type ErrorTranslations = {
 	errorWindowsCharacter: Snippet<string>;
 	errorNoBackend: string;
 	errorSecretHeader: Snippet<string>;
+	errorStorageFull: string;
+	errorStorageInterrupted: string;
 };
 
 type WithCount = 'errorTasksFailed';
@@ -32,6 +34,9 @@ const TOO_LARGE_ON_DEVICE = /too large to sync on this device/u;
 const WINDOWS_CHARACTER = /Windows forbids character "(?<name>.)"/u;
 const NO_BACKEND = /Please (?:set|install) a backend!|Backend ".*" is not installed!/u;
 const SECRET_HEADER = /Custom secret header not found: "(?<name>.*)"/u;
+// IndexedDB, where sync keeps its records and Drive snapshot (see shared/indexed-db).
+const STORAGE_FULL = /QuotaExceededError/u;
+const STORAGE_INTERRUPTED = /IndexedDB (?:request|transaction) (?:aborted|failed)/u;
 
 /** Recognises common sync errors; undefined for anything to show as it is. */
 export function classifyError(raw: string): Known | undefined {
@@ -41,6 +46,8 @@ export function classifyError(raw: string): Known | undefined {
 	if (ANDROID_WRITE.test(raw)) return { key: 'errorAndroidWrite' };
 	if (TOO_LARGE_ON_DEVICE.test(raw)) return { key: 'errorTooLargeOnDevice' };
 	if (NO_BACKEND.test(raw)) return { key: 'errorNoBackend' };
+	if (STORAGE_FULL.test(raw)) return { key: 'errorStorageFull' };
+	if (STORAGE_INTERRUPTED.test(raw)) return { key: 'errorStorageInterrupted' };
 	const character = WINDOWS_CHARACTER.exec(raw)?.groups?.name;
 	if (character) return { key: 'errorWindowsCharacter', name: character };
 	const header = SECRET_HEADER.exec(raw)?.groups?.name;
