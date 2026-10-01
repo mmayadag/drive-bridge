@@ -4,7 +4,9 @@
 // oxlint-disable-next-line import/no-unassigned-import
 import 'fake-indexeddb/auto';
 import { expect, test } from 'bun:test';
+import { getMessage } from '@/shared/error';
 import { completion, openDatabase, settle, single } from '@/shared/indexed-db';
+import { classifyError } from '@/utils/describe-error';
 
 const ignore = () => {};
 
@@ -67,7 +69,7 @@ test('completion rejects on an abort, even without an error', async () => {
 	const transaction = fakeRequest();
 	const promise = completion(transaction as unknown as IDBTransaction);
 	transaction.dispatchEvent(new Event('abort'));
-	expect(await caught(promise)).toContain('Transaction aborted');
+	expect(await caught(promise)).toContain('IndexedDB transaction aborted');
 });
 
 test('completion reports the error behind an abort', async () => {
@@ -75,7 +77,15 @@ test('completion reports the error behind an abort', async () => {
 	transaction.error = new DOMException('out of space', 'QuotaExceededError');
 	const promise = completion(transaction as unknown as IDBTransaction);
 	transaction.dispatchEvent(new Event('abort'));
-	expect(await caught(promise)).toContain('out of space');
+	expect(await caught(promise)).toContain('QuotaExceededError: out of space');
+});
+
+test('completion names the stores of a failed transaction', async () => {
+	const transaction = fakeRequest() as Fake & { objectStoreNames?: Array<string> };
+	transaction.objectStoreNames = ['records', 'snapshot'];
+	const promise = completion(transaction as unknown as IDBTransaction);
+	transaction.dispatchEvent(new Event('abort'));
+	expect(await caught(promise)).toContain('IndexedDB transaction aborted on records, snapshot');
 });
 
 test('openDatabase reports a version that is older than the stored one', async () => {
@@ -102,5 +112,28 @@ test('single runs one request inside its own transaction', async () => {
 
 	await single(db, 'notes', 'readwrite', (store) => store.put('written', 'a.md'));
 	expect(await single(db, 'notes', 'readonly', (store) => store.get('a.md'))).toBe('written');
+	db.close();
+});
+
+test('an abort with a write pending reads as interrupted storage', async () => {
+	const name = `idb-abort-${Date.now()}`;
+	const db = await openDatabase(name, 1, {
+		closed: ignore,
+		upgrade: (connection) => void connection.createObjectStore('notes'),
+		versionChange: ignore,
+	});
+
+	let message = 'no error';
+	try {
+		await single(db, 'notes', 'readwrite', (store) => {
+			const request = store.put('written', 'a.md');
+			store.transaction.abort();
+			return request;
+		});
+	} catch (error) {
+		message = getMessage(error);
+	}
+	expect(message).toContain('IndexedDB request failed on notes: AbortError');
+	expect(classifyError(message)).toStrictEqual({ key: 'errorStorageInterrupted' });
 	db.close();
 });

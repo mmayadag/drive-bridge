@@ -84,6 +84,9 @@ const en: Translations = {
 		`The secret for the custom header "${name}" is missing on this device.`,
 	errorServer: 'Google Drive had a problem. Try again later.',
 	errorSignIn: 'Google no longer accepts the sign-in. Connect the account again.',
+	errorStorageFull: 'This device is out of space for sync data. Free up space, then sync again.',
+	errorStorageInterrupted:
+		'Saving sync data on this device was interrupted. Sync again with Obsidian open.',
 	errorTasksFailed: (count) => `${count} ${p(count, 'file', 'files')} could not be synced.`,
 	errorTooLargeOnDevice: 'A file is too large to sync on this device. Sync it from a computer.',
 	errorWindowsCharacter: (character) =>
