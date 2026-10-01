@@ -50,6 +50,9 @@ test('errors thrown in English by the plugin core are worded for the reader', ()
 			translate,
 		),
 	).toBe('errorTooLargeOnDevice');
+	expect(describeError('Name "şşş…" is longer than 255 bytes!', translate)).toBe(
+		'errorNameTooLong',
+	);
 	expect(describeError('Please set a backend!', translate)).toBe('errorNoBackend');
 	expect(describeError('Please install a backend!', translate)).toBe('errorNoBackend');
 	expect(describeError('Backend "s3" is not installed!', translate)).toBe('errorNoBackend');

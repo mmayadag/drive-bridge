@@ -10,6 +10,7 @@ export type ErrorTranslations = {
 	errorAndroidWrite: string;
 	errorTooLargeOnDevice: string;
 	errorWindowsCharacter: Snippet<string>;
+	errorNameTooLong: string;
 	errorNoBackend: string;
 	errorSecretHeader: Snippet<string>;
 };
@@ -30,6 +31,7 @@ const OFFLINE =
 const ANDROID_WRITE = /known Android bug/u;
 const TOO_LARGE_ON_DEVICE = /too large to sync on this device/u;
 const WINDOWS_CHARACTER = /Windows forbids character "(?<name>.)"/u;
+const NAME_TOO_LONG = /is longer than \d+ bytes!/u;
 const NO_BACKEND = /Please (?:set|install) a backend!|Backend ".*" is not installed!/u;
 const SECRET_HEADER = /Custom secret header not found: "(?<name>.*)"/u;
 
@@ -40,6 +42,7 @@ export function classifyError(raw: string): Known | undefined {
 	if (tasks) return { count: Number(tasks), key: 'errorTasksFailed' };
 	if (ANDROID_WRITE.test(raw)) return { key: 'errorAndroidWrite' };
 	if (TOO_LARGE_ON_DEVICE.test(raw)) return { key: 'errorTooLargeOnDevice' };
+	if (NAME_TOO_LONG.test(raw)) return { key: 'errorNameTooLong' };
 	if (NO_BACKEND.test(raw)) return { key: 'errorNoBackend' };
 	const character = WINDOWS_CHARACTER.exec(raw)?.groups?.name;
 	if (character) return { key: 'errorWindowsCharacter', name: character };
