@@ -515,7 +515,14 @@ trust; the payload carries the vault name, not its contents.
   edits. _Stop_ (or closing the dialog) ends the sync without changing
   anything. A first sync, which copies everything, is never asked.
 - **Layout:** one vault maps to one Drive folder (`baseDirectory`). Listing is
-  parent-based, so the real folder structure is mirrored.
+  parent-based, so the real folder structure is mirrored. The folder carries a
+  `driveBridgeVaultId` Drive `properties` tag: a random id this device keeps
+  (IndexedDB, never exported with settings), written the first time it syncs.
+  If the folder is later moved or renamed, the next sync finds it again by
+  that tag instead of creating a fresh one. A second device of the same vault
+  adopts the tag it finds; a folder already tagged for a different vault, or
+  found only in the trash, fails the sync with a clear message rather than
+  being taken over or recreated.
 - **Drive scan:** _Full scan_ lists every visible Drive file each sync.
   _Changes only_ keeps that list on the device (IndexedDB, with a Drive
   changes token) and asks Drive only what changed since. A folder new to the

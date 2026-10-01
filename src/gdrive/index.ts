@@ -13,6 +13,7 @@ import type { SettingEntry } from '@/modules/setting';
 import digOriginal from '@/fs/dig-original';
 import prefixWrapper from '@/fs/wrappers/prefix';
 import { getMessage } from '@/shared/error';
+import { normalizeBaseDir } from '@/shared/path';
 import type { RemoteScan, SnapshotDB } from './changes';
 import type { GdriveDB } from './fs';
 import type { Quota } from './quota';
@@ -150,6 +151,7 @@ export default class Gdrive {
 					new GdriveFs(request, this.moduleSettings, memoryDB, {
 						log: (line) => dispatch('logSync', line),
 						persistentDB: indexedDB,
+						rootKey: normalizeBaseDir(this.moduleSettings.baseDirectory),
 					}),
 				prettyName: () => translate('gdrive'),
 			}),
