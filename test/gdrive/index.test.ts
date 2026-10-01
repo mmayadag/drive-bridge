@@ -225,6 +225,16 @@ test("on start, a vault never connected does not take another vault's sign-in", 
 	gdrive.dispose();
 });
 
+test('the Drive backend names the account and folder once connected', () => {
+	const { gdrive, remoteFs } = setup();
+	gdrive.start();
+	const entry = remoteFs.get('gdrive');
+	expect(entry?.destination?.()).toBeUndefined();
+	gdrive.moduleSettings.accountEmail = 'me@test';
+	expect(entry?.destination?.()).toBe('me@test · My vault/');
+	gdrive.dispose();
+});
+
 test('start registers the Drive backend, its folder wrapper, the bearer token and the settings', () => {
 	const { gdrive, remoteFs, wrappers, middlewares, settingEntries } = setup();
 	gdrive.start();

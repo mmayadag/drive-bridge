@@ -142,6 +142,10 @@ export default class Gdrive {
 		this.cleanup.push(
 			registerRemoteFs('gdrive', {
 				checkConnection,
+				destination: () => {
+					const { accountEmail, baseDirectory } = this.moduleSettings;
+					if (accountEmail) return `${accountEmail} · ${baseDirectory}`;
+				},
 				instantiate: (request) =>
 					new GdriveFs(request, this.moduleSettings, memoryDB, {
 						log: (line) => dispatch('logSync', line),

@@ -61,6 +61,7 @@ function fakeExtraButton() {
 function lastSyncSetting() {
 	const icon = fakeIcon();
 	const descAttrs: Record<string, string> = {};
+	const descLines: Array<{ cls: string; text: string }> = [];
 	const setting = {
 		addButton: (cb: (b: ReturnType<typeof fakeButton>) => void) => {
 			cb(startButton);
@@ -72,8 +73,15 @@ function lastSyncSetting() {
 		},
 		controlEl: { createSpan: () => icon },
 		descAttrs,
-		descEl: { setAttr: (name: string, value: string) => void (descAttrs[name] = value) },
-		setDesc: () => setting,
+		descEl: {
+			createDiv: (line: { cls: string; text: string }) => void descLines.push(line),
+			setAttr: (name: string, value: string) => void (descAttrs[name] = value),
+		},
+		descLines,
+		setDesc: () => {
+			descLines.length = 0;
+			return setting;
+		},
 	};
 	const startButton = fakeButton();
 	const historyButton = fakeExtraButton();
@@ -150,6 +158,23 @@ test('the row redraws itself when a sync terminates', () => {
 	ctx.settings.lastSync = { at: 1, result: 'completed' };
 	ctx.trigger('syncTerminated');
 	expect(icon.className).toBe('drive-bridge-status-ok');
+});
+
+test('the backend says where this vault syncs, under the last sync', () => {
+	const backend: { where?: string } = {};
+	const ctx = baseCtx({
+		remoteFsRegistry: new Map([['gdrive', { destination: () => backend.where }]]),
+		settings: { lastSync: undefined, remoteFs: 'gdrive' },
+	});
+	const { setting } = lastSyncSetting();
+	tree(ctx)[15]?.().render?.(setting as never);
+	expect(setting.descLines).toStrictEqual([]);
+
+	backend.where = 'me@test · My vault/';
+	ctx.trigger('syncTerminated');
+	expect(setting.descLines).toStrictEqual([
+		{ cls: 'drive-bridge-destination', text: 'me@test · My vault/' },
+	]);
 });
 
 test('the start-sync button triggers a manual sync only while idle, and the history button works', () => {

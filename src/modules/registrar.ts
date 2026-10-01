@@ -21,6 +21,8 @@ export type RemoteFsEntry = {
 	instantiate: (request: Request) => RootFs;
 	prettyName: () => string;
 	checkConnection: (request: Request) => MaybePromise<CheckConnectionResult>;
+	/** Where this vault syncs, such as the account and folder; shown under Last sync. */
+	destination?: () => string | undefined;
 };
 /** Shown on the strategy pages. A lower `order` comes first. */
 type StrategyInfo = {
