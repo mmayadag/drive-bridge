@@ -6,15 +6,26 @@ export const SKIP_AFTER = 3;
 /** Device-local: failures in a row per key, and the keys being skipped. */
 export type SkipState = { failures: Record<string, number>; skipped: Array<string> };
 
-/** Counts a task's outcome; returns true when this failure puts the file on the skip list. */
-export function countOutcome(state: SkipState, key: string, succeeded: boolean): boolean {
+/**
+ * Counts a task's outcome; returns true when this failure puts the file on the skip list.
+ * `immediate` skips straight to the list, for a failure that retrying cannot fix.
+ */
+export function countOutcome(
+	state: SkipState,
+	key: string,
+	succeeded: boolean,
+	immediate = false,
+): boolean {
 	if (succeeded) {
 		delete state.failures[key];
 		return false;
 	}
-	const failures = (state.failures[key] ?? 0) + 1;
-	state.failures[key] = failures;
-	if (failures < SKIP_AFTER || state.skipped.includes(key)) return false;
+	if (state.skipped.includes(key)) return false;
+	if (!immediate) {
+		const failures = (state.failures[key] ?? 0) + 1;
+		state.failures[key] = failures;
+		if (failures < SKIP_AFTER) return false;
+	}
 	state.skipped.push(key);
 	delete state.failures[key];
 	return true;
