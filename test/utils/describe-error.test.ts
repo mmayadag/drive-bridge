@@ -60,3 +60,15 @@ test('errors thrown in English by the plugin core are worded for the reader', ()
 		'errorSecretHeader:X-Key',
 	);
 });
+
+test('IndexedDB failures read as storage problems', () => {
+	expect(classifyError('IndexedDB transaction aborted')).toStrictEqual({
+		key: 'errorStorageInterrupted',
+	});
+	expect(classifyError('IndexedDB request failed on records: AbortError: aborted')).toStrictEqual(
+		{ key: 'errorStorageInterrupted' },
+	);
+	expect(
+		classifyError('IndexedDB transaction aborted on records: QuotaExceededError: out of space'),
+	).toStrictEqual({ key: 'errorStorageFull' });
+});
