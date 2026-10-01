@@ -35,6 +35,7 @@ import {
 	syncCancelledError,
 	taskMap,
 } from '@/sync';
+import { leaveOutCaseCollisions } from '@/sync/case-collisions';
 import { hideKeptOnRemote, keepOnRemote } from '@/sync/keep-on-remote';
 import { findMassChange, findMassDeletion, keepDeletedFiles } from '@/sync/mass-delete';
 import { narrowTo } from '@/sync/narrow';
@@ -129,6 +130,7 @@ export default class Sync {
 		retrySkippedFiles: string;
 		skippedFilesCleared: string;
 		fileSkipped: Snippet<string>;
+		caseCollision: Snippet<string>;
 		syncThisFile: string;
 		fileSynced: string;
 	};
@@ -267,6 +269,8 @@ export default class Sync {
 			if (hideKeptOnRemote(kept, localStats, remoteStats) && !preview)
 				void ctx.saveSettings();
 			if (options.only) narrowTo(options.only, { localStats, records, remoteStats });
+			for (const names of leaveOutCaseCollisions({ localStats, records, remoteStats }))
+				new Notice(translate('caseCollision', names.join(', ')), 15_000);
 			dispatch(
 				'logSync',
 				`Local ${localStats.size} item(s), remote ${remoteStats.size} item(s), record ${records.size} item(s).`,

@@ -27,6 +27,8 @@ const en: Translations = {
 	buyMeACoffee: 'Buy me a coffee',
 	cancel: 'Cancel',
 	cancelled: 'Cancelled',
+	caseCollision: (names) =>
+		`Drive Bridge: ${names} differ only in letter case or accent form, so one would overwrite the other in this vault. They are left out of sync until one is renamed in Google Drive.`,
 	caseSensitive: 'Case sensitive',
 	checkConnection: 'Check connection',
 	checkConnectionFailed: 'Check connection failed',

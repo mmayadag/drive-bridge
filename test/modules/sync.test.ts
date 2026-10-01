@@ -200,6 +200,18 @@ test('exclusion rules keep matching files out of the sync', async () => {
 	expect([...s.remoteFs.files.keys()]).toStrictEqual(['a.md']);
 });
 
+test('Drive names that differ only in case are left alone everywhere, with a notice', async () => {
+	const s = setup({ remote: { 'note.md': 'theirs' }, synced: { 'Note.md': 'mine' } });
+
+	// Without this, note.md would be downloaded over Note.md on a case-insensitive vault.
+	expect(await s.run()).toStrictEqual({ result: 'noop' });
+	expect(s.localFs.text('Note.md')).toBe('mine');
+	expect(s.localFs.files.has('note.md')).toBe(false);
+	expect([...s.remoteFs.files.keys()].toSorted()).toStrictEqual(['Note.md', 'note.md']);
+	expect([...s.records.keys()]).toStrictEqual(['Note.md']);
+	expect(notices).toStrictEqual(['caseCollision Note.md, note.md']);
+});
+
 test('a moved file is moved on the other side instead of copied again', async () => {
 	const s = setup({ synced: { 'old.md': 'text' } });
 	s.localFs.rename('old.md', 'new.md');
