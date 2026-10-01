@@ -243,7 +243,7 @@ test('start registers the Drive backend, its folder wrapper, the bearer token an
 	expect(typeof entry?.checkConnection).toBe('function');
 	expect(wrappers.map((wrapper) => wrapper.priority)).toEqual([5998]);
 	expect(middlewares.map((middleware) => middleware.priority)).toEqual([305]);
-	expect(settingEntries.map((setting) => setting.priority)).toEqual([683]);
+	expect(settingEntries.map((setting) => setting.priority)).toEqual([683, 684]);
 	gdrive.dispose();
 });
 
@@ -299,9 +299,9 @@ test('dispose removes everything start registered, once', () => {
 	const { gdrive, removed } = setup();
 	gdrive.start();
 	gdrive.dispose();
-	expect(removed.toSorted()).toEqual(['middleware', 'remoteFs', 'setting', 'wrapper']);
+	expect(removed.toSorted()).toEqual(['middleware', 'remoteFs', 'setting', 'setting', 'wrapper']);
 	gdrive.dispose();
-	expect(removed).toHaveLength(4);
+	expect(removed).toHaveLength(5);
 });
 
 const GB = 1024 ** 3;

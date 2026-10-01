@@ -22,6 +22,7 @@ import type { GdriveTranslations } from './translations';
 import { TokenManager, bearerMiddleware } from './auth';
 import checkConnection from './check-connection';
 import { connectWithToken } from './connect';
+import forgetVaultTagSetting from './forget-vault-tag-setting';
 import GdriveFs from './fs';
 import en from './i18n';
 import { QUOTA_CHECK_INTERVAL, fetchQuota, formatBytes, isNearlyFull } from './quota';
@@ -177,6 +178,10 @@ export default class Gdrive {
 					() => this.quota,
 				),
 				priority: 683,
+			}),
+			registerSetting({
+				apply: forgetVaultTagSetting({ app: this.ctx.app, indexedDB, translate }),
+				priority: 684,
 			}),
 		);
 		this.ctx.app.workspace.onLayoutReady(() => void this.checkQuota());
