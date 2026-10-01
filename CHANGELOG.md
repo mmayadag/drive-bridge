@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.5.4 - 2026-10-01
+
+- One **Sync notices** switch covers all informational notices: sync
+  progress/finished on mobile and now also _Synced \<file\>_ after **Sync this
+  file**. Failures, skipped files and a nearly full Drive always show (#199).
+- The footer links to the release notes (_Drive Bridge X.Y.Z · What's new_),
+  and a one-time notice with the same link shows after an update, once per
+  vault and device (#164).
+- The Last sync row shows the connected account and Drive folder as a second
+  line, redrawn after each sync (#173).
+- `bun audit` no longer fails CI on moment's path traversal advisory; a
+  patched moment is forced via `package.json` overrides (#224).
+
 ## v0.5.3 - 2026-09-29
 
 The 0.5.2 release build stopped on a CHANGELOG format check; 0.5.3 ships its
