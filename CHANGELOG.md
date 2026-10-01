@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.5.6 - 2026-10-01
+
+- The vault's Drive folder is tagged with a device-local id in Drive
+  `properties`, so a moved or renamed folder is found again instead of
+  starting a fresh one. A folder already tagged for a different vault, or
+  found only in the trash, fails the sync with a clear message rather than
+  being taken over or recreated (#78).
+- **Forget this device's folder tag**, next to Clear records in Advanced →
+  Development: forgets the tag above, so the next sync adopts whatever the
+  folder currently carries, or writes a new one (#228).
+
 ## v0.5.5 - 2026-10-01
 
 - A name with a forbidden Windows character, a byte order mark, or over 255
