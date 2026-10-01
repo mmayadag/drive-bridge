@@ -5,7 +5,7 @@ import { App, Platform, TFile, TFolder } from 'obsidian';
 import type { RootFs, VaultRequest } from '@/fs';
 import type { Binary, MaybePromise } from '@/types';
 import { createVaultRequest, VaultFs } from '@/fs';
-import { MOBILE_READ_LIMIT } from '@/fs/vault/request';
+import { MOBILE_READ_LIMIT, UnusableNameError } from '@/fs/vault/request';
 import { OS } from '@/modules/event-bus';
 
 const { stream, bytes, file } = testKit;
@@ -486,6 +486,27 @@ test('a name over 255 bytes gets a clear error when the write fails', async () =
 			(await failure(request(`${'ş'.repeat(126)}.md`, { method: 'PUT', value: bytes('x') })))
 				?.message,
 		).toContain('ENAMETOOLONG');
+	});
+});
+
+test('a name with a byte order mark is rejected before writing, as an unusable name', async () => {
+	const writeBinary = (): never => {
+		throw new Error('should not be called');
+	};
+	const { request } = bareRequest({ mkdir: writeBinary, rename: writeBinary, writeBinary });
+	const name = `﻿note.md`;
+	const error = await failure(request(name, { method: 'PUT', value: bytes('x') }));
+	expect(error).toBeInstanceOf(UnusableNameError);
+	expect(error?.message).toContain('byte order mark');
+});
+
+test('a forbidden character or an over-long name is an unusable name, not a plain error', async () => {
+	const failing = () => Promise.reject(new Error('EINVAL'));
+	const { request } = bareRequest({ writeBinary: failing });
+	await withOS({ Windows: true }, async () => {
+		expect(
+			await failure(request('a:b.md', { method: 'PUT', value: bytes('x') })),
+		).toBeInstanceOf(UnusableNameError);
 	});
 });
 

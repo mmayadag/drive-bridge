@@ -157,24 +157,37 @@ export default function createVaultRequest(app: App): VaultRequest {
 // Most file systems cap a name (one path segment) at 255 bytes; Drive allows longer ones.
 const NAME_BYTES = 255;
 
-// A write that fails on a name the OS rejects gets an error saying why.
+// A name the OS will never accept, however many times the write is retried.
+export class UnusableNameError extends Error {
+	override readonly name = 'UnusableNameError';
+}
+
+// A write that fails on a name the OS rejects gets an error saying why, and is marked so the
+// caller can skip the file immediately instead of retrying a name that will never work.
 async function withNameCheck<T>(key: string, action: () => MaybePromise<T>): Promise<T> {
+	const name = basename(key);
+	if (/﻿/u.test(name))
+		throw new UnusableNameError(`Name "${name}" starts with a byte order mark!`);
 	try {
 		return await action();
 	} catch (error: unknown) {
 		if (OS.Windows) {
-			const match = /[<>:"/\\|?*]/u.exec(basename(key));
+			const match = /[<>:"/\\|?*]/u.exec(name);
 			if (match)
-				throw new Error(`Windows forbids character "${match[0]}" in file names!`, {
-					cause: error,
-				});
+				throw new UnusableNameError(
+					`Windows forbids character "${match[0]}" in file names!`,
+					{
+						cause: error,
+					},
+				);
 		}
 		const encoder = new TextEncoder();
-		const long = key.split('/').find((name) => encoder.encode(name).length > NAME_BYTES);
+		const long = key.split('/').find((segment) => encoder.encode(segment).length > NAME_BYTES);
 		if (long)
-			throw new Error(`Name "${long.slice(0, 40)}…" is longer than ${NAME_BYTES} bytes!`, {
-				cause: error,
-			});
+			throw new UnusableNameError(
+				`Name "${long.slice(0, 40)}…" is longer than ${NAME_BYTES} bytes!`,
+				{ cause: error },
+			);
 		throw error;
 	}
 }

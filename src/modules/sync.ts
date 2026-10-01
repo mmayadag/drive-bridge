@@ -22,6 +22,7 @@ import type {
 	TogglableValue,
 } from '@/types';
 import type { GlobMatchResult } from '@/utils/glob-match';
+import { UnusableNameError } from '@/fs/vault/request';
 import { getMessage } from '@/shared/error';
 import { ref } from '@/shared/reactive';
 import {
@@ -396,7 +397,8 @@ export default class Sync {
 					} catch (error) {
 						if (isCancelled()) return;
 						failedCount++;
-						if (countOutcome(skipState, task.key, false)) {
+						const unusable = error instanceof UnusableNameError;
+						if (countOutcome(skipState, task.key, false, unusable)) {
 							dispatch('logSync', `Moved \`${task.key}\` to the skip list.`);
 							new Notice(translate('fileSkipped', task.key));
 						}

@@ -27,6 +27,13 @@ test(`a file is skipped after ${SKIP_AFTER} failures in a row`, () => {
 	expect(state).toStrictEqual({ failures: {}, skipped: ['bad.md'] });
 });
 
+test('an immediate failure is skipped on the first try, without counting', () => {
+	const state: SkipState = { failures: {}, skipped: [] };
+	expect(countOutcome(state, 'unusable.md', false, true)).toBe(true);
+	expect(state).toStrictEqual({ failures: {}, skipped: ['unusable.md'] });
+	expect(countOutcome(state, 'unusable.md', false, true)).toBe(false);
+});
+
 test('a success in between resets the count', () => {
 	const state: SkipState = { failures: {}, skipped: [] };
 	countOutcome(state, 'flaky.md', false);
