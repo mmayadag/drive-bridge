@@ -326,6 +326,11 @@ input[type='password'].drive-bridge-invalid-input {
 }
 
 /* Status */
+.drive-bridge-destination {
+	color: var(--text-faint);
+	overflow-wrap: anywhere;
+}
+
 .drive-bridge-status-text {
 	max-width: 250px;
 	margin-left: 0.25rem;

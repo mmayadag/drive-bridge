@@ -107,6 +107,12 @@ export default function headSettings(
 					setting.setDesc(describeLastSync(lastSync, translate));
 					// The sentence replaces the raw error; keep the original one step away.
 					setting.descEl.setAttr('title', lastSync?.error ?? '');
+					const destination = remoteFsRegistry.get(settings.remoteFs)?.destination?.();
+					if (destination)
+						setting.descEl.createDiv({
+							cls: 'drive-bridge-destination',
+							text: destination,
+						});
 					if (!lastSync) return icon.hide();
 					const failed = lastSync.result === 'failed';
 					icon.className = failed
