@@ -103,6 +103,7 @@ function setup({ local = {}, remote = {}, synced = {}, settings = {} }: Setup = 
 		keptOnRemote: {},
 		maxFileSize: { enabled: false, value: 0 },
 		neverDeleteRemote: false,
+		noticeStatusOnMobile: true,
 		skipState: { failures: {}, skipped: [] },
 		...settings,
 	} as {
