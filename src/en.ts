@@ -77,6 +77,7 @@ const en: Translations = {
 	edit: 'Edit',
 	errorAndroidWrite: 'Android kept writing the file empty. Sync will try again.',
 	errorForbidden: 'Google Drive refused the request, often because of a rate or storage limit.',
+	errorNameTooLong: 'A file or folder name is too long for this device. Shorten it to sync it.',
 	errorNoBackend: 'No sync backend is set. Choose one in the settings.',
 	errorOffline: "Can't reach Google. Check the internet connection.",
 	errorRateLimited: 'Too many requests. Sync will work again shortly.',

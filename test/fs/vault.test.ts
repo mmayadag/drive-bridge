@@ -466,6 +466,29 @@ test('on Windows, a forbidden character in a name gets a clear error', async () 
 	});
 });
 
+test('a name over 255 bytes gets a clear error when the write fails', async () => {
+	const failing = () => Promise.reject(new Error('ENAMETOOLONG'));
+	const { request } = bareRequest({ mkdir: failing, rename: failing, writeBinary: failing });
+	// 128 two-byte letters: 128 characters but 256 bytes; 126 of them and ".md" fit in 255.
+	const long = 'ş'.repeat(128);
+	await withOS({ Windows: false }, async () => {
+		expect(
+			(await failure(request(`${long}/a.md`, { method: 'PUT', value: bytes('x') })))?.message,
+		).toContain('is longer than 255 bytes');
+		expect((await failure(request(`${long}/`, { method: 'MKDIR' })))?.message).toContain(
+			'is longer than 255 bytes',
+		);
+		expect(
+			(await failure(request('a.md', { destination: `${long}.md`, method: 'MOVE' })))
+				?.message,
+		).toContain('is longer than 255 bytes');
+		expect(
+			(await failure(request(`${'ş'.repeat(126)}.md`, { method: 'PUT', value: bytes('x') })))
+				?.message,
+		).toContain('ENAMETOOLONG');
+	});
+});
+
 test('STAT of a file that is gone fails with its path', async () => {
 	const { request } = bareRequest({ stat: () => Promise.resolve() });
 	expect((await failure(request('gone.md', { method: 'STAT' })))?.message).toContain(

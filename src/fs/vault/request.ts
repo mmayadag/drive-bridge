@@ -94,11 +94,11 @@ export default function createVaultRequest(app: App): VaultRequest {
 			) as never;
 		}
 		if (method === 'PUT')
-			return withCheckChars(key, () =>
+			return withNameCheck(key, () =>
 				adapter.writeBinary(path, toArrayBuffer(params.value), params),
 			) as never;
 		if (method === 'APPEND')
-			return withCheckChars(key, () =>
+			return withNameCheck(key, () =>
 				adapter.appendBinary(path, toArrayBuffer(params.value), params),
 			) as never;
 		if (method === 'DELETE') {
@@ -109,10 +109,12 @@ export default function createVaultRequest(app: App): VaultRequest {
 			return undefined as never;
 		}
 		if (method === 'MOVE')
-			return adapter.rename(path, toVaultPath(params.destination)) as never;
+			return withNameCheck(params.destination, () =>
+				adapter.rename(path, toVaultPath(params.destination)),
+			) as never;
 		if (method === 'MKDIR')
 			return (
-				key === '/' ? undefined : withCheckChars(key, () => adapter.mkdir(path))
+				key === '/' ? undefined : withNameCheck(key, () => adapter.mkdir(path))
 			) as never;
 		if (method === 'EXISTS') {
 			if (vault.getAbstractFileByPath(path)) return true as never;
@@ -152,7 +154,11 @@ export default function createVaultRequest(app: App): VaultRequest {
 	};
 }
 
-async function withCheckChars<T>(key: string, action: () => MaybePromise<T>): Promise<T> {
+// Most file systems cap a name (one path segment) at 255 bytes; Drive allows longer ones.
+const NAME_BYTES = 255;
+
+// A write that fails on a name the OS rejects gets an error saying why.
+async function withNameCheck<T>(key: string, action: () => MaybePromise<T>): Promise<T> {
 	try {
 		return await action();
 	} catch (error: unknown) {
@@ -163,6 +169,12 @@ async function withCheckChars<T>(key: string, action: () => MaybePromise<T>): Pr
 					cause: error,
 				});
 		}
+		const encoder = new TextEncoder();
+		const long = key.split('/').find((name) => encoder.encode(name).length > NAME_BYTES);
+		if (long)
+			throw new Error(`Name "${long.slice(0, 40)}…" is longer than ${NAME_BYTES} bytes!`, {
+				cause: error,
+			});
 		throw error;
 	}
 }
