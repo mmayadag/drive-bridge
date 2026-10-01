@@ -163,11 +163,14 @@ test('a multi-page changes list is followed to its end token', async () => {
 
 test('storage errors only cost a full scan', async () => {
 	const failing = {
+		// oxlint-disable-next-line unicorn/no-useless-undefined : needs the SnapshotDB return type
+		getMeta: () => Promise.resolve<string | undefined>(undefined),
 		getStore: () =>
 			({
 				get: () => Promise.reject(new Error('quota')),
 				set: () => Promise.reject(new Error('quota')),
 			}) as never,
+		setMeta: () => Promise.resolve(),
 	};
 	const store = snapshotStore(failing);
 	expect(await store.load()).toBeUndefined();

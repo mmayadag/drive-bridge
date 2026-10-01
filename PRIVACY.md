@@ -25,6 +25,9 @@ file names, folder names or Google account.
   (`oauth2.googleapis.com`), with your client; no other server sees it.
 - The plugin downloads no code at runtime; what ships in the release is all
   that runs.
+- The Drive folder it syncs to carries one custom `properties` entry, a random
+  id so the folder is found again if moved or renamed. It identifies the
+  folder to this device, not you, and is never exported with settings.
 
 ## Network requests
 
