@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.5.5 - 2026-10-01
+
+- A name with a forbidden Windows character, a byte order mark, or over 255
+  bytes skips that one file, with a clear notice, instead of failing the
+  whole sync (#76).
+- An IndexedDB failure names the store and the cause, worded for the reader
+  instead of the raw browser error (#168).
+
 ## v0.5.4 - 2026-10-01
 
 - One **Sync notices** switch covers all informational notices: sync
