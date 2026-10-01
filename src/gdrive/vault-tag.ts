@@ -116,7 +116,9 @@ export async function reconcileTag(
 	if (remoteId !== localId)
 		throw new Error(
 			'This Drive folder is tagged for a different vault, so Drive Bridge will not use it. ' +
-				'Point the base directory at a different folder.',
+				'If this device should take over this folder, use Forget this device’s folder ' +
+				'tag under Advanced → Development; otherwise point the base directory at a ' +
+				'different folder.',
 		);
 }
 
