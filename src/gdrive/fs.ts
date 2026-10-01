@@ -22,7 +22,7 @@ import {
 } from './api';
 import { applyChanges, fullScanReason, getStartToken, snapshotStore } from './changes';
 import { guessMimeType, resumableUpload, singleUpload } from './upload';
-import { findFolderByTag, reconcileTag, tagCreatedFolder } from './vault-tag';
+import { findFolderByTag, getLocalVaultId, reconcileTag, tagCreatedFolder } from './vault-tag';
 
 export type GdriveFsOptions = {
 	userId: string;
@@ -145,7 +145,7 @@ export default class GdriveFs implements RootFs {
 	private async resolveRoot(key: string): Promise<string | undefined> {
 		const byPath = this.resolveId(key) ?? (await this.resolveIdFresh(key));
 		if (!this.persistentDB) return byPath;
-		const localId = await this.persistentDB.getMeta('gdriveVaultId');
+		const localId = await getLocalVaultId(this.persistentDB);
 		const requestOrThrow: RequestOrThrow = (url, params) => this.requestOrThrow(url, params);
 		if (byPath !== undefined) {
 			await reconcileTag(requestOrThrow, byPath, localId, {
@@ -316,7 +316,7 @@ export default class GdriveFs implements RootFs {
 		if (!created.id) throw new Error('Google Drive did not return an id for a created folder!');
 		this.ids.set(key, created.id);
 		if (key === this.rootKey && this.persistentDB) {
-			const localId = await this.persistentDB.getMeta('gdriveVaultId');
+			const localId = await getLocalVaultId(this.persistentDB);
 			await this.persistentDB.setMeta(
 				'gdriveVaultId',
 				await tagCreatedFolder(

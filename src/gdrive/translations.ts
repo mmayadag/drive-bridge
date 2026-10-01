@@ -3,6 +3,7 @@ import type { CheckConnectionTranslations } from '@/settings/check-connection';
 import type { AuthTranslations } from './auth';
 import type { BaseDirectoryTranslations } from './base-directory-setting';
 import type { ConnectedRowsTranslations } from './connected-rows';
+import type { ForgetVaultTagTranslations } from './forget-vault-tag-setting';
 import type { RemoteScanTranslations } from './remote-scan-setting';
 import type { SetupPageTranslations } from './setup-page';
 
@@ -10,6 +11,7 @@ export type GdriveTranslations = AuthTranslations &
 	BaseDirectoryTranslations &
 	RemoteScanTranslations &
 	SetupPageTranslations &
+	ForgetVaultTagTranslations &
 	Omit<ConnectedRowsTranslations, keyof CheckConnectionTranslations | 'exportSettings'> & {
 		gdrive: string;
 		connectAccount: string;

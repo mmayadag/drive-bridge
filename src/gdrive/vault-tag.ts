@@ -14,6 +14,20 @@ const VAULT_TAG_KEY = 'driveBridgeVaultId';
 
 export type RequestOrThrow = (url: string, params?: RequestParam) => Promise<RequestResponse>;
 
+/** This device's vault id, or `undefined` once forgotten (an empty meta value, #228). */
+export async function getLocalVaultId(persistentDB: SnapshotDB): Promise<string | undefined> {
+	return (await persistentDB.getMeta('gdriveVaultId')) || undefined;
+}
+
+/**
+ * Forgets this device's vault id, so the next sync adopts whatever the folder currently
+ * carries, or starts a fresh one. For the rare case where a different vault's id ended up
+ * tagged on this device's folder, or the matching device is no longer around (#78).
+ */
+export async function forgetVaultTag(persistentDB: SnapshotDB): Promise<void> {
+	await persistentDB.setMeta('gdriveVaultId', '');
+}
+
 async function getFolderTag(
 	requestOrThrow: RequestOrThrow,
 	folderId: string,

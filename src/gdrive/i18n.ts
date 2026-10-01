@@ -70,6 +70,11 @@ const en: GdriveTranslations = {
 	folderCreateFailed: 'Could not create the Drive folder',
 	folderListFailed: 'Could not read Drive folders',
 	folderNameSlash: 'A folder name cannot contain a slash.',
+	forgetVaultTag: 'Forget this device’s folder tag',
+	forgetVaultTagConfirm:
+		'The next sync will adopt whatever id the Drive folder already carries, or write a new one. Only do this if a sync is failing because the folder is tagged for another vault.',
+	forgetVaultTagDescription:
+		'Drive Bridge tags the vault folder so it is found again if moved; this forgets this device’s copy of that tag.',
 	gdrive: 'Google Drive',
 	googleAccount: 'Google account',
 	guide: 'Guide',
@@ -137,6 +142,7 @@ const en: GdriveTranslations = {
 	useThisFolder: 'Use this folder',
 	useTrash: 'Delete to trash',
 	useTrashDescription: "Deleted files go to Drive's trash for 30 days instead of being removed.",
+	vaultTagForgotten: 'Folder tag forgotten',
 };
 
 export default en;
