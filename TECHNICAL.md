@@ -539,6 +539,15 @@ trust; the payload carries the vault name, not its contents.
   it out, and Last sync adds _1 file skipped_. **Retry** under Advanced →
   Development → Skipped files, or the _Retry skipped files_ command, clears
   the list.
+- **File names:** a name this device can never write (a character Windows
+  forbids, a byte order mark, or more than 255 bytes) goes on the skip list
+  on its first failure, with the same notice. Two Drive names in one folder
+  that differ only in letter case or Unicode form (`Note.md` and `note.md`, an
+  NFC and an NFD `café.md`) would overwrite each other in a case-insensitive
+  vault, so both, and everything under them if they are folders, are left out
+  of the sync on both sides with a notice naming them, until one is renamed in
+  Drive. Their records are kept. The comparison upper-cases the NFC name, so
+  `I`, `i` and `ı` count as the same letter.
 - **One file:** _Sync this file_ (command palette, the button in a note's
   header, or the file menu) syncs only that file and the folders above it,
   with the usual strategies. Other files and their records are left as they
