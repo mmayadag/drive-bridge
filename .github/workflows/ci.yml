@@ -13,6 +13,36 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Its own job, so branch protection can require it by name.
+  attribution:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+
+      # Title and description arrive through env, never inside the script text, so a PR
+      # description cannot inject commands.
+      - name: Check for AI tool attribution
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" = pull_request ]; then mode=pr; else mode=push; fi
+          bun scripts/check-attribution.ts "$mode"
+
   ci:
     runs-on: ubuntu-latest
     permissions:

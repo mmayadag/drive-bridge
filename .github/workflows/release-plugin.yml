@@ -26,6 +26,10 @@ jobs:
       - name: Set up Bun
         uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
 
+      # Release commits are pushed straight to main, not through a PR, so check before publishing.
+      - name: Check the tagged commit for AI tool attribution
+        run: bun scripts/check-attribution.ts commit HEAD
+
       - name: Check the tag matches the release files
         run: bun ver --check "${{ github.ref_name }}"
 
