@@ -204,6 +204,8 @@ Google account dedicated to your vault, not your personal one.
 | Exports sealed                | A settings export carries the client secret and token only encrypted with your passphrase, or not at all. |
 | Secrets off disk              | Client secret and refresh token live in Obsidian's secret storage, not in `data.json`.                    |
 
+To report a vulnerability, or if a token leaks, see [SECURITY.md](SECURITY.md).
+
 `data.json` holds settings and the client ID, no secrets. The default
 exclusion rules skip the whole config folder (`.obsidian/`), so plugin
 settings and the device-specific workspace files never sync. If you keep the
