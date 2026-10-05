@@ -11,13 +11,13 @@
 </p>
 
 <p align="left">
-<a href="https://github.com/mmayadag/drive-bridge/search?q=topic%3Agoogle-drive&type=repositories"><img alt="Topic: google-drive" src="https://img.shields.io/badge/-google--drive-eee?logo=googledrive&logoColor=4285F4"></a>
-<a href="https://github.com/mmayadag/drive-bridge/search?q=topic%3Aobsidian&type=repositories"><img alt="Topic: obsidian" src="https://img.shields.io/badge/-obsidian-eee?logo=obsidian&logoColor=7c3aed"></a>
-<a href="https://github.com/mmayadag/drive-bridge/search?q=topic%3Async&type=repositories"><img alt="Topic: sync" src="https://img.shields.io/badge/-sync-eee"></a>
-<a href="https://github.com/mmayadag/drive-bridge/search?q=topic%3Agoogle-drive-api&type=repositories"><img alt="Topic: google-drive-api" src="https://img.shields.io/badge/-google--drive--api-eee"></a>
-<a href="https://github.com/mmayadag/drive-bridge/search?q=topic%3Aobsidian-plugins&type=repositories"><img alt="Topic: obsidian-plugins" src="https://img.shields.io/badge/-obsidian--plugins-eee"></a>
-<a href="https://github.com/mmayadag/drive-bridge/search?q=topic%3Atypescript&type=repositories"><img alt="Topic: typescript" src="https://img.shields.io/badge/-typescript-eee?logo=typescript&logoColor=3178c6"></a>
-<a href="https://github.com/mmayadag/drive-bridge/search?q=topic%3Aobsidian-md&type=repositories"><img alt="Topic: obsidian-md" src="https://img.shields.io/badge/-obsidian--md-eee"></a>
+<a href="https://github.com/topics/google-drive"><img alt="Topic: google-drive" src="https://img.shields.io/badge/-google--drive-eee?logo=googledrive&logoColor=4285F4"></a>
+<a href="https://github.com/topics/obsidian"><img alt="Topic: obsidian" src="https://img.shields.io/badge/-obsidian-eee?logo=obsidian&logoColor=7c3aed"></a>
+<a href="https://github.com/topics/sync"><img alt="Topic: sync" src="https://img.shields.io/badge/-sync-eee"></a>
+<a href="https://github.com/topics/google-drive-api"><img alt="Topic: google-drive-api" src="https://img.shields.io/badge/-google--drive--api-eee"></a>
+<a href="https://github.com/topics/obsidian-plugins"><img alt="Topic: obsidian-plugins" src="https://img.shields.io/badge/-obsidian--plugins-eee"></a>
+<a href="https://github.com/topics/typescript"><img alt="Topic: typescript" src="https://img.shields.io/badge/-typescript-eee?logo=typescript&logoColor=3178c6"></a>
+<a href="https://github.com/topics/obsidian-md"><img alt="Topic: obsidian-md" src="https://img.shields.io/badge/-obsidian--md-eee"></a>
 </p>
 
 Two-way sync between your Obsidian vault and a Google Drive folder, on desktop
