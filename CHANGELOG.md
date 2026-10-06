@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## v0.5.7 - 2026-10-06
+
+- Drive names that differ only in case or Unicode form (`Note.md` vs.
+  `note.md`, or an NFC vs. an NFD `café.md`) are left out of the sync instead
+  of silently overwriting one another; a notice names each colliding group and
+  says to rename one in Google Drive (#76).
+- The mismatch error for a folder tagged to a different vault now points at
+  **Forget this device's folder tag** as the way to adopt it on purpose,
+  keeping "point elsewhere" as the fallback for a genuine mix-up (#228).
+- Added a security policy and enabled private vulnerability reporting (#234).
+- CI now blocks AI tool attribution and watermarks in PRs, pushes and
+  releases (#233).
+
 ## v0.5.6 - 2026-10-01
 
 - The vault's Drive folder is tagged with a device-local id in Drive
